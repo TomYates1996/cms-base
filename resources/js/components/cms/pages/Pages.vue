@@ -21,7 +21,7 @@
 <script>
 import axios from 'axios';
 import EditPage from './EditPage.vue';
-import NewPage from './newPage.vue';
+import NewPage from './NewPage.vue';
 
 export default {
     components: {

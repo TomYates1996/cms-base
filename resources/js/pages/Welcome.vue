@@ -3,18 +3,21 @@
     <Head title="Welcome">
     </Head>
 
-    <hamburgerHeader :pages="this.pages"/>
+    <HamburgerHeader :pages="this.pages"/>
+    <!-- <Cards4/> -->
 
 </template>
 
 <script>
 import { Head, Link } from '@inertiajs/vue3';
 import axios from 'axios';
-import hamburgerHeader from '@/components/nav/hamburgerHeader.vue';
+import HamburgerHeader from '@/components/nav/HamburgerHeader.vue';
+import Cards4 from '@/components/cms/pages/collections/cards/Cards4.vue';
 
 export default {
     components: {
-        hamburgerHeader,
+        HamburgerHeader,
+        Cards4,
     },
     data() {
         return {

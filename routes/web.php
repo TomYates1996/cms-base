@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SlideController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -22,8 +23,14 @@ require __DIR__.'/auth.php';
 Route::get('api/pages', [PageController::class, 'index']);
 Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
 
-// CMS Page Actions
+// CMS Actions
 Route::middleware('auth')->group(function () {
     Route::put('/pages/update/{page}', [PageController::class, 'update'])->name('api.pages.update');
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
+    Route::get('/api/slides', [SlideController::class, 'index'])->name('api.slides.index');
+    Route::post('/api/slides', [SlideController::class, 'store'])->name('api.slides.store');
+    Route::get('/cms/slides', [SlideController::class, 'load'])->name('slides.load');
+    Route::get('api/slides', [SlideController::class, 'index']);
+
+
 });
