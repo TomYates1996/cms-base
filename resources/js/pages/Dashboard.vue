@@ -1,13 +1,33 @@
 <template>
-  <Pages/>
+    <Link 
+        v-if="$page.props.auth.user"
+        href="/cms/pages"
+        method="get"
+        class="option"
+    >
+        Pages
+    </Link>
+    <Link 
+        v-if="$page.props.auth.user"
+        href="/cms/slides"
+        method="get"
+        class="option"
+    >
+        Slides
+    </Link>
 </template>
 
 <script>
-import Pages from '@/components/cms/pages/Pages.vue';
+import { Head, Link } from '@inertiajs/vue3';
+import Pages from './cms/pages/Pages.vue';
+import Slides from './cms/Slides.vue';
+
 
 export default {
     components: {
-        Pages
+      Link,
+      Pages,
+      Slides
     },
 }
 </script>

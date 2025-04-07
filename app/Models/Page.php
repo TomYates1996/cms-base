@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Widget;
 
 class Page extends Model
 {
@@ -12,4 +13,8 @@ class Page extends Model
         'created_by',
         'show_in_nav', 
     ];
+    public function widgets()
+    {
+        return $this->hasMany(Widget::class);
+    }
 }

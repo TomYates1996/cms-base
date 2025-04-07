@@ -13,4 +13,10 @@ class Slide extends Model
         'description', 
         'link'
     ];
+
+    public function widgets()
+    {
+        return $this->belongsToMany(Widget::class, 'widget_slide');
+    }
+    
 }

@@ -8,7 +8,46 @@ use Inertia\Inertia;
 
 class PageController extends Controller
 {
+    // Load the CMS Page Page
+    public function load()
+    {
+
+        $pages = Page::all();
+
+        return Inertia::render('cms/pages/Pages', [
+            'pages' => $pages,
+        ]);
+    }
+    // Load the CMS Page edit Page
+    public function load_edit(Request $request, $id)
+    {
+        $page = Page::findOrFail($id); 
+
+        return Inertia::render('cms/pages/Edit', [
+            'page' => $page,
+        ]);
+    }
+    // Load the CMS Page Edit Content Page
+    public function load_edit_content(Request $request, $id)
+    {
+        $page = Page::where('id', $id)->with('widgets.slides')->firstOrFail(); 
+
+        return Inertia::render('cms/pages/EditContent', [
+            'page' => $page,
+            'widgets' => $page->widgets,
+        ]);
+    }
+
     // Grab all the pages that exist on the database
+    public function index_all()
+    {
+        $pages = Page::all();
+
+        return response()->json([
+            'pages' => $pages,
+        ]);
+    }
+    // Grab all the pages that have show on nav
     public function index()
     {
         $pages = Page::where('show_in_nav', true)->get();
@@ -46,7 +85,8 @@ class PageController extends Controller
 
         $page->update($validated);
 
-        return;
+        return Inertia::render('cms/pages/Pages', [
+        ]);
     }
 
     // Create a new page

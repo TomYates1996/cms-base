@@ -45,7 +45,10 @@ html {
         --sidebar-ring: 217.2 91.2% 59.8%;
 
         /* Custom */
+        /* Colours */
         --black: #000000;
+        /* Widths */
+        --width-base: 1050px;
     }
 
     .dark {
