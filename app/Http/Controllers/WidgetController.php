@@ -40,8 +40,10 @@ class WidgetController extends Controller
             'title' => $validated['title'],
             'type' => $validated['type'],
         ]);
-        
-        $widget->slides()->attach($validated['slide_ids']);  
+
+        $widget->slides()->attach($validated['slide_ids']);
+
+        $widget->load('slides');
 
         return response()->json([
             'message' => 'Widget added successfully!',

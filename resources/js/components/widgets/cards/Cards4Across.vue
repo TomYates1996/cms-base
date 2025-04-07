@@ -1,5 +1,5 @@
 <template>
-    <div class="cards-2-across">
+    <div class="cards-4-across">
         <div class="widget-header">
             <h1>{{ widget.title }}</h1>
         </div>
@@ -25,12 +25,13 @@ export default {
         widget: Object,
     },
     created() {
+        console.log(this.widget);
     }
 }
 </script>
 
 <style scoped>
-.cards-2-across {
+.cards-4-across {
     margin: 0px auto;
     max-width: var(--width-base);
     padding: 20px;

@@ -1,5 +1,5 @@
 <template>
-    <div class="cards-2-across">
+    <div class="cards-3-across">
         <div class="widget-header">
             <h1>{{ widget.title }}</h1>
         </div>
@@ -30,7 +30,7 @@ export default {
 </script>
 
 <style scoped>
-.cards-2-across {
+.cards-3-across {
     margin: 0px auto;
     max-width: var(--width-base);
     padding: 20px;
