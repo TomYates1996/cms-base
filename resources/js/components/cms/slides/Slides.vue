@@ -20,7 +20,8 @@
       },
       data() {
           return {
-              slides: []
+              slides: [],
+              images: [],
           }
       },
       mounted() {
@@ -35,6 +36,13 @@
               })
               .catch((error) => {
                   console.error('Error fetching slides:', error);
+              });
+              axios.get('/api/images/all')
+              .then((response) => {
+                  this.images = response.data.images; 
+              })
+              .catch((error) => {
+                  console.error('Error fetching images:', error);
               });
            }
       }

@@ -19,23 +19,44 @@ class SlideController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_alt' => 'required|string|max:255',
             'description' => 'required|string',
+            'link' => 'nullable|url',
+            'image_id' => 'nullable|integer',
+        ]);
+
+        $slide = Slide::create([
+            'title' => $request->title,
+            'image_id' => $request->image_id,
+            'description' => $request->description,
+            'link' => $request->link,
+        ]);
+
+        return;
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_alt' => 'nullable|string|max:255',
+            'description' => 'nullable |string',
             'link' => 'nullable|url',
         ]);
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('slides', 'public');
         }
-         // Create the slide
-         $slide = Slide::create([
-            'title' => $request->title,
-            'image_path' => $imagePath,
-            'image_alt' => $request->image_alt,
-            'description' => $request->description,
-            'link' => $request->link,
-        ]);
+
+        $slide = Slide::find($request->id);
+
+        $slide->title = $request->title;
+        $slide->image_path = $request->image;
+        $slide->image_alt = $request->image_alt;
+        $slide->description = $request->description;
+        $slide->link = $request->link;
+
+        $slide->save();
 
         return;
     }

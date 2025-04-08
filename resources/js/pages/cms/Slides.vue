@@ -7,20 +7,24 @@
             <img :src="slide.image" :alt="slide.image_alt">
         </li>
     </ul>
-    <Newslide/>
+    <Newslide :images="images"/>
+    <NewImage/>
 </template>
   
 <script>
+import NewImage from '@/components/cms/slides/images/NewImage.vue';
 import Newslide from '@/components/cms/slides/NewSlide.vue';
 import axios from 'axios';
   
 export default {
     components: {
-        Newslide
+        Newslide,
+        NewImage,
     },
     data() {
         return {
-            slides: []
+            slides: [],
+            images: [],
         }
     },
     mounted() {
@@ -35,6 +39,13 @@ export default {
             })
             .catch((error) => {
                 console.error('Error fetching slides:', error);
+            });
+            axios.get('/api/images/all')
+            .then((response) => {
+                this.images = response.data.images; 
+            })
+            .catch((error) => {
+                console.error('Error fetching images:', error);
             });
         }
     }

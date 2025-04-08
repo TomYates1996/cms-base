@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Widget;
 use App\Models\Slide;
+use App\Models\Page;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Redirect;
 
 
 class WidgetController extends Controller

@@ -25,7 +25,6 @@ export default {
         widget: Object,
     },
     created() {
-        console.log(this.widget);
     }
 }
 </script>

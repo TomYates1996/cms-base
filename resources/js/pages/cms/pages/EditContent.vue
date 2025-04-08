@@ -1,16 +1,16 @@
 <template>
-    <div class="page-wrapper">
-        <div class="page-left detail">
-            
+  <div class="page-wrapper">
+    <div class="page-left detail">
+      <button @click="savePage()" class="save-page">Save Page</button>
+      
             <div v-for="(widget, index) in localWidgets" :key="index" class="widget-options">
                 <p>{{ widget.type }}</p>
-                
                 <button @click="editWidget(index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
                 <button @click="orderUp(index)" :disabled="index === 0" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-up']" /></button>
                 <button @click="orderDown(index)" :disabled="index === localWidgets.length - 1" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-down']" /></button>
                 <button @click="deleteWidget(widget.id)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
             </div>
-            <button @click="openAddWidgetModal">Add Widget to Page</button>
+            <button @click="openAddWidgetModal">Add a new widget</button>
             <div v-if="showModal" class="modal">
               <div class="modal-content">
                 <h3>Select Widget Type</h3>
@@ -30,15 +30,17 @@
                     <input type="checkbox" v-model="slide.selected">
                     <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
                     <p>{{ slide.title }}</p>
+                    <button class="edit-slide" @click="editSlide(slide)">Edit slide</button>
                   </li>
                 </ul>
-
+                
                 <h3>Select Slides</h3>
                 <ul class="slide-list">
                   <li v-for="slide in slides.filter(slide => !slide.selected)" :key="slide.id">
                     <input type="checkbox" v-model="slide.selected">
                     <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
                     <p>{{ slide.title }}</p>
+                    <button class="edit-slide" @click="editSlide(slide)">Edit slide</button>
                   </li>
                 </ul>
         
@@ -46,7 +48,7 @@
                 <button @click="closeModal">Cancel</button>
               </div>
             </div>
-            <button @click="savePage()" class="save-page">Save Page</button>
+            <EditSlide v-if="showEditSlide" :slide="slideToEdit"/>
         </div>
         <div class="page-right">
               <div class="edit-widget" v-if="showEditWidget">
@@ -93,14 +95,30 @@
   
 <script>
 import { defineAsyncComponent } from 'vue';
+import { router } from '@inertiajs/vue3'
 import axios from 'axios';
+import { useForm } from '@inertiajs/vue3';
+import EditSlide from '@/components/cms/slides/EditSlide.vue';
 
 export default {
+    setup(){
+        const formSlide = useForm({
+            'title' : '',
+            'image_path' : '',
+            'image_alt' : '',
+            'description' : '',
+            'link' : '',
+        });
+
+        return { formSlide } 
+    },
     props: {
         page: Object,
         widgets: Array,
     },
     components: {
+      useForm,
+      EditSlide,
         defineAsyncComponent,
         cards_2_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards2Across.vue')),
         cards_3_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards3Across.vue')),
@@ -118,6 +136,8 @@ export default {
         showEditWidget : false,
         widgetInfo: {},
         editIndex: {},
+        showEditSlide: false,
+        slideToEdit: {},
       };
     },
     created() {
@@ -130,6 +150,10 @@ export default {
         },
     },
     methods: {
+      editSlide(slide) {
+        this.showEditSlide = true;
+        this.slideToEdit = slide;
+      },
         orderUp(index) {
             if (index > 0) {
                 [this.localWidgets[index], this.localWidgets[index - 1]] = [this.localWidgets[index - 1], this.localWidgets[index]];
@@ -233,10 +257,12 @@ export default {
         // }
       },
       savePage() {
-        axios.post(`/cms/pages/save`, {
-            widgets: this.localWidgets,  
-            page_id: this.page.id,
-          });
+        router.post(`/cms/pages/save`, { widgets: this.localWidgets, page_id: this.page.id }, {
+            onSuccess: () => {
+              router.get('/cms/pages');
+            }
+          }
+        );
       },
     },
   };
@@ -276,6 +302,17 @@ export default {
           width: 70px;
         }
       }
+    }
+    .edit-slide-form {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--white);
     }
   </style>
   

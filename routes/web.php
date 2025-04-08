@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\WidgetController;
+use App\Http\Controllers\ImageController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -31,11 +32,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
     Route::get('/api/slides', [SlideController::class, 'index'])->name('api.slides.index');
     Route::post('/api/slides', [SlideController::class, 'store'])->name('api.slides.store');
+    Route::put('/api/slides', [SlideController::class, 'update'])->name('api.slides.update');
     Route::get('/cms/slides', [SlideController::class, 'load'])->name('slides.load');
     Route::get('/cms/pages', [PageController::class, 'load'])->name('pages.load');
     Route::get('/cms/pages/edit/{page_id}', [PageController::class, 'load_edit'])->name('pages.load.edit');
     Route::get('/cms/pages/edit-content/{page_id}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
     Route::get('api/slides', [SlideController::class, 'index']);
+    Route::post('/create/new-image', [ImageController::class, 'store'])->name('cms.image.store');
+    Route::get('/api/images/all', [ImageController::class, 'index'])->name('cms.image.index');
     
     Route::prefix('cms')->group(function () {
         // Display all widgets for a page
