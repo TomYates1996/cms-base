@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Widget;
 use App\Models\Slide;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 
 class WidgetController extends Controller
@@ -98,4 +99,38 @@ class WidgetController extends Controller
 
         return;
     }
+
+    public function save(Request $request)
+    {
+
+        $request->validate([
+            'page_id' => 'required|integer',
+            'widgets' => 'required|array',
+            'widgets.*.title' => 'string',
+            'widgets.*.type' => 'required|string',
+            'widgets.*.slides' => 'nullable|array', 
+            'widgets.*.slides.*.id' => 'integer|exists:slides,id',
+        ]);
+
+        $widgets = $request->input('widgets');
+        $page_id = $request->input('page_id');
+
+        Widget::where('page_id', $page_id)->delete();
+
+        foreach ($widgets as $widget) {
+            $widget['page_id'] = $page_id; 
+
+            if (!isset($widget['created_at'])) {
+                $widget['created_at'] = Carbon::now();  
+            }
+
+            $new_widget = Widget::create($widget);
+            if (isset($widget['slides']) && is_array($widget['slides'])) {
+                $new_widget->slides()->attach(array_column($widget['slides'], 'id'));
+            }
+        }
+
+        return;
+    }
+
 }

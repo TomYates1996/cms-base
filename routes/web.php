@@ -50,11 +50,8 @@ Route::middleware('auth')->group(function () {
         // Show form to edit a widget
         Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
         
-        // Update an existing widget
-        Route::put('/widgets/{id}', [WidgetController::class, 'update'])->name('widgets.update');
-        
-        // Delete a widget
-        Route::delete('/pages/{pageId}/widgets/{id}/delete', [WidgetController::class, 'destroy'])->name('widgets.destroy');
+        Route::post('/pages/save', [WidgetController::class, 'save'])->name('page.save');
+
     });
 
 });

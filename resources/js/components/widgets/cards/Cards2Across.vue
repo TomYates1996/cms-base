@@ -4,7 +4,7 @@
             <h1>{{ widget.title }}</h1>
         </div>
         <div class="content">
-            <div class="item" v-for="slide in widget.slides" :key="slide.id">
+            <div class="item" v-for="(slide, index) in widget.slides" :key="index">
                 <div class="image-section">
                     <img :src="'/' + slide.image_path" :alt="slide.image_alt">
                 </div>

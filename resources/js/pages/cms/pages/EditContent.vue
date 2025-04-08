@@ -1,25 +1,5 @@
 <template>
     <div class="page-wrapper">
-        <div class="edit-widget" v-if="showEditWidget">
-            Edit Widget
-            <select v-model="widgetInfo.type" >
-                <option v-for="widget in widgetOptions" :key="widget.id" :value="widget.name">{{ widget.label }}</option>
-            </select>
-  
-            <div class="edit-title">
-                <label for="edit-title">Widget Title</label>
-                <input id="edit-title" name="edit-title" type="text" v-model="widgetInfo.title" />
-            </div>
-        
-            <h3>Select Slides</h3>
-            <select v-model="widgetInfo.slides" multiple>
-                <option v-for="slide in slides" :key="slide.id" :value="slide.id">
-                {{ slide.title }}
-                </option>
-            </select>
-            <button @click="saveEdit()">Save Changes</button>
-            <button @click="cancelEdit()">Cancel</button>
-        </div>
         <div class="page-left detail">
             
             <div v-for="(widget, index) in localWidgets" :key="index" class="widget-options">
@@ -44,21 +24,65 @@
                   <input id="widget-title" name="widget-title" type="text" v-model="widgetTitle" />
               </div>
         
+              <h3>Selected Slides</h3>
+                <ul class="slide-list">
+                  <li v-for="slide in slides.filter(slide => slide.selected)" :key="slide.id">
+                    <input type="checkbox" v-model="slide.selected">
+                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <p>{{ slide.title }}</p>
+                  </li>
+                </ul>
+
                 <h3>Select Slides</h3>
-                <select v-model="selectedSlides" multiple>
-                  <option v-for="slide in slides" :key="slide.id" :value="slide.id">
-                    {{ slide.title }}
-                  </option>
-                </select>
+                <ul class="slide-list">
+                  <li v-for="slide in slides.filter(slide => !slide.selected)" :key="slide.id">
+                    <input type="checkbox" v-model="slide.selected">
+                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <p>{{ slide.title }}</p>
+                  </li>
+                </ul>
         
                 <button @click="addWidget">Add Widget</button>
                 <button @click="closeModal">Cancel</button>
               </div>
             </div>
+            <button @click="savePage()" class="save-page">Save Page</button>
         </div>
         <div class="page-right">
-            <div v-for="widget in localWidgets" :key="widget.id" class="widget-container">
-                <component
+              <div class="edit-widget" v-if="showEditWidget">
+                Edit Widget
+                <select v-model="widgetInfo.type" >
+                    <option v-for="widget in widgetOptions" :key="widget.id" :value="widget.name">{{ widget.label }}</option>
+                </select>
+      
+                <div class="edit-title">
+                    <label for="edit-title">Widget Title</label>
+                    <input id="edit-title" name="edit-title" type="text" v-model="widgetInfo.title" />
+                </div>
+            
+                <h3>Selected Slides</h3>
+                <ul class="slide-list">
+                  <li v-for="slide in slides.filter(slide => slide.selected)" :key="slide.id">
+                    <input type="checkbox" v-model="slide.selected">
+                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <p>{{ slide.title }}</p>
+                  </li>
+                </ul>
+
+                <h3>Select Slides</h3>
+                <ul class="slide-list">
+                  <li v-for="slide in slides.filter(slide => !slide.selected)" :key="slide.id">
+                    <input type="checkbox" v-model="slide.selected">
+                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <p>{{ slide.title }}</p>
+                  </li>
+                </ul>
+
+                <button @click="saveEdit()">Save Changes</button>
+                <button @click="cancelEdit()">Cancel</button>
+            </div>
+            <div v-if="!showEditWidget" class="widget-container">
+                <component v-for="widget in localWidgets" :key="widget.id" 
                 :is="widget.type"
                 :widget="widget"
                 />
@@ -119,16 +143,28 @@ export default {
         editWidget(index) {
             this.showEditWidget = true;
             this.widgetInfo = Object.assign({}, this.localWidgets[index]);
+            this.slides.forEach (slide => {
+              if (this.widgetInfo.slides.some(infoSlide => infoSlide.id === slide.id)) {
+                slide.selected = true;
+              }
+            })
             this.editIndex = index;
         },
         saveEdit() {
-            this.widgetInfo.slides = this.widgetInfo.slides.map(index => this.slides[index-1]);
+            this.selectedSlides = this.slides.filter(slide => slide.selected);
+            this.widgetInfo.slides = this.selectedSlides;
             this.localWidgets[this.editIndex] = this.widgetInfo;
             this.showEditWidget = false;
+            this.slides.forEach(slide => {
+              slide.selected = false; 
+            });
         },
         cancelEdit() {
             this.widgetInfo = this.localWidgets[this.editIndex];
             this.showEditWidget = false;
+            this.slides.forEach(slide => {
+              slide.selected = false; 
+            });
         },
         deleteWidget(widgetId) {
             if (confirm('Are you sure you want to delete this widget?')) {
@@ -149,6 +185,12 @@ export default {
       },
       closeModal() {
         this.showModal = false;
+        this.slides.forEach(slide => {
+            slide.selected = false; 
+        });
+        this.widgetTitle = ''
+        this.selectedWidgetType = ''
+        this.selectedSlides = []
       },
       async fetchSlides() {
         try {
@@ -160,18 +202,24 @@ export default {
       },
       addWidget() {
         // try {
-            const pageId = this.page.id; 
+          const pageId = this.page.id; 
+          
+          this.selectedSlides = this.slides.filter(slide => slide.selected);
 
-            const newSlideArray = this.selectedSlides.map(index => this.slides[index-1]);
+          this.widgetInfo = {
+              page_id: pageId,
+              title: this.widgetTitle,
+              type: this.selectedWidgetType,
+              slides: this.selectedSlides,
+          }
+            this.localWidgets.push(this.widgetInfo);
 
-            let newWidget = {
-                page_id: pageId,
-                slides: newSlideArray,
-                title: this.widgetTitle,
-                type: this.selectedWidgetType,
-            }
-            
-            this.localWidgets.push(newWidget);
+            this.slides.forEach(slide => {
+              slide.selected = false; 
+            });
+            this.widgetTitle = ''
+            this.selectedWidgetType = ''
+            this.selectedSlides = []
         
             // this.localWidgets.push(response.data.widget);
         //   const response = await axios.post(`/cms/pages/${pageId}/widgets`, {
@@ -183,6 +231,12 @@ export default {
         // } catch (error) {
         //   console.error('Error adding widget:', error);
         // }
+      },
+      savePage() {
+        axios.post(`/cms/pages/save`, {
+            widgets: this.localWidgets,  
+            page_id: this.page.id,
+          });
       },
     },
   };
@@ -208,6 +262,20 @@ export default {
             flex-direction: column;
             width: 75%;
         }
+    }
+    .slide-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        .slide-list-img {
+          aspect-ratio: 1/1;
+          width: 70px;
+        }
+      }
     }
   </style>
   
