@@ -1,5 +1,6 @@
 <template>
-    <form class="new-image" @submit.prevent="createImage()">
+    <button class="new-image-toggle" @click="newImageToggle()">New Image</button>
+    <form v-if="showNewImage" class="new-image" @submit.prevent="createImage()">
          <div class="slide-title">
              <label for="title">Image Title</label>
              <input id="title" autofocus type="text" required v-model="form.title" >
@@ -22,6 +23,7 @@
              <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
              Create Image
          </button>
+        <button @click="closeNewImage()" class="cancel-new-image">Cancel</button>
      </form>
    </template>
    
@@ -45,10 +47,19 @@
      },
      data() {
          return {
-             imagePreview: null, 
+             imagePreview: null,
+             showNewImage: false, 
          };
      },
+    emits: ['refreshImages'],
      methods: {
+        newImageToggle() {
+            this.showNewImage = true;
+        },
+        closeNewImage() {
+            this.showNewImage = false;
+            this.form.reset();
+        },
          uploadImage(event) {
              this.form.image = event.target.files[0];
              this.updatePreview(this.form.image);
@@ -56,8 +67,9 @@
          },
          createImage () {
              this.form.post(route('cms.image.store'), {
-             onSuccess: () => {
-                 this.$inertia.visit('/cms/slides');  
+             onSuccess: (response) => {
+                 this.showNewImage = false;
+                this.$emit('refreshImages');                
              },
              onError: (errors) => {
                  console.log('Form submission error:', errors); 
@@ -80,5 +92,13 @@
    </script>
    
    <style scoped>
- 
+ .new-image {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    background-color: var(--white);
+    overflow: scroll;
+ }
    </style>

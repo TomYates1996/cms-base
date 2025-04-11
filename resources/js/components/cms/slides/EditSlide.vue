@@ -12,20 +12,16 @@
             <label for="link">Link</label>
             <input id="link" required type="text" v-model="form.link" >
         </div>
-        <div>
-            <input type="file" ref="photo" @input="uploadImage($event);"  accept="image/*" >
-            <div v-if="imagePreview" class="image-preview-con">
-                <img :src="imagePreview" alt="Image Preview" class="preview-image" />
-            </div>
-        </div>
-        <div class="slide-image_alt">
-            <label for="image_alt">Image alt text</label>
-            <input id="image_alt" required type="text" v-model="form.image_alt" >
+        <button @click="imageList()" class="add-img">Select Image</button>
+        <div v-if="showImageGrid" class="image-grid">
+            <img class="new-slide-img-option" @click="addImageToSlide(image)" v-for="image in images" :key="image.id" :src="'/' + image.image_path" alt="">
+            <NewImage @refreshImages="refreshImages()"/>
         </div>
         <button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
             <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
             Create Slide
         </button>
+        <button @click="closeNewSlide()" class="cancel-new-slide">Cancel</button>
     </form>
   </template>
   

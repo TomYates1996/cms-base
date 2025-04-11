@@ -1,5 +1,6 @@
 <template>
-   <form class="new-slide" @submit.prevent="createSlide()">
+    <button class="new-slide-toggle" @click="newSlide()">New Slide</button>
+   <form v-if="showNewSlide" class="new-slide" @submit.prevent="createSlide()">
         <div class="slide-title">
             <label for="title">Title</label>
             <input id="title" autofocus type="text" required v-model="form.title" >
@@ -12,27 +13,23 @@
             <label for="link">Link</label>
             <input id="link" required type="text" v-model="form.link" >
         </div>
-        <img @click="addImageToSlide(image)" v-for="image in images" :key="image.id" :src="'/' + image.image_path" alt="">
-        <!-- <div>
-            <input type="file" ref="photo" @input="uploadImage($event);"  accept="image/*" >
-            <div v-if="imagePreview" class="image-preview-con">
-                <img :src="imagePreview" alt="Image Preview" class="preview-image" />
-            </div>
+        <button @click="imageList()" class="add-img">Select Image</button>
+        <div v-if="showImageGrid" class="image-grid">
+            <img class="new-slide-img-option" @click="addImageToSlide(image)" v-for="image in images" :key="image.id" :src="'/' + image.image_path" alt="">
+            <NewImage @refreshImages="refreshImages()"/>
         </div>
-        <div class="slide-image_alt">
-            <label for="image_alt">Image alt text</label>
-            <input id="image_alt" required type="text" v-model="form.image_alt" >
-        </div> -->
         <button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
             <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
             Create Slide
         </button>
+        <button @click="closeNewSlide()" class="cancel-new-slide">Cancel</button>
     </form>
   </template>
   
   <script>
   import { useForm } from '@inertiajs/vue3';
   import { LoaderCircle } from 'lucide-vue-next';
+import NewImage from './images/NewImage.vue';
   
   export default {
     setup(){
@@ -47,6 +44,7 @@
     },
     components: {
         LoaderCircle,
+        NewImage,
     },
     props: {
         images: Array,
@@ -54,11 +52,28 @@
     data() {
         return {
             imagePreview: null, 
+            showImageGrid: false,
+            showNewSlide: false,
         };
     },
+    emits: ['refreshImages'],
     methods: {
+        refreshImages() {
+            this.$emit('refreshImages');
+        },
+        newSlide() {
+            this.showNewSlide = true
+        },
+        closeNewSlide() {
+            this.showNewSlide = false;
+            this.form.reset();
+        },
+        imageList() {
+            this.showImageGrid = true;
+        },
         addImageToSlide(image) {
-            this.form.image_id = image.id
+            this.form.image_id = image.id;
+            this.showImageGrid = false;
         },
         uploadImage(event) {
             this.form.image = event.target.files[0];
@@ -90,6 +105,31 @@
   }
   </script>
   
-  <style scoped>
-
-  </style>
+<style scoped>
+    .image-grid {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        background-color: var(--white);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 20px;
+        overflow: scroll;
+    }
+    .new-slide-img-option {
+        width: 100%;
+        object-fit: cover;
+        aspect-ratio: 1/1;
+    }
+    .new-slide {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        background-color: var(--white);
+    }
+</style>

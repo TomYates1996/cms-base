@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/slides', [SlideController::class, 'index'])->name('api.slides.index');
     Route::post('/api/slides', [SlideController::class, 'store'])->name('api.slides.store');
     Route::put('/api/slides', [SlideController::class, 'update'])->name('api.slides.update');
+    Route::get('/cms/slides/edit/{slide_id}', [SlideController::class, 'load_edit'])->name('api.slides.load.edit');
     Route::get('/cms/slides', [SlideController::class, 'load'])->name('slides.load');
     Route::get('/cms/pages', [PageController::class, 'load'])->name('pages.load');
     Route::get('/cms/pages/edit/{page_id}', [PageController::class, 'load_edit'])->name('pages.load.edit');

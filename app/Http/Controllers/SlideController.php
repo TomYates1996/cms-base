@@ -14,12 +14,20 @@ class SlideController extends Controller
         return Inertia::render('cms/Slides', [
         ]);
     }
+    public function load_edit($slide_id)
+    {
+        $slide = Slide::find($slide_id);
+
+        return Inertia::render('cms/slides/EditSlide', [
+            'slide' => $slide,
+        ]);
+    }
 
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'link' => 'nullable|url',
             'image_id' => 'nullable|integer',
         ]);
@@ -36,23 +44,18 @@ class SlideController extends Controller
 
     public function update(Request $request)
     {
+
         $request->validate([
             'title' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'image_alt' => 'nullable|string|max:255',
-            'description' => 'nullable |string',
+            'description' => 'nullable|string',
             'link' => 'nullable|url',
+            'image_id' => 'nullable|integer',
         ]);
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('slides', 'public');
-        }
 
         $slide = Slide::find($request->id);
 
         $slide->title = $request->title;
-        $slide->image_path = $request->image;
-        $slide->image_alt = $request->image_alt;
+        $slide->image_id = $request->image_id;
         $slide->description = $request->description;
         $slide->link = $request->link;
 
