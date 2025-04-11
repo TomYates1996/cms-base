@@ -104,11 +104,11 @@ class WidgetController extends Controller
 
     public function save(Request $request)
     {
-
+        
         $request->validate([
             'page_id' => 'required|integer',
             'widgets' => 'required|array',
-            'widgets.*.title' => 'string',
+            'widgets.*.title' => 'nullable|string',
             'widgets.*.type' => 'required|string',
             'widgets.*.slides' => 'nullable|array', 
             'widgets.*.slides.*.id' => 'integer|exists:slides,id',
@@ -118,6 +118,7 @@ class WidgetController extends Controller
         $page_id = $request->input('page_id');
 
         Widget::where('page_id', $page_id)->delete();
+
 
         foreach ($widgets as $widget) {
             $widget['page_id'] = $page_id; 

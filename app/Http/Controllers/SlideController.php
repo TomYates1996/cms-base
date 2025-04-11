@@ -69,7 +69,7 @@ class SlideController extends Controller
     public function index()
     {
         return response()->json([
-            'slides' => Slide::all(),
+            'slides' => Slide::with('image')->get(),
         ]);
     }
 }

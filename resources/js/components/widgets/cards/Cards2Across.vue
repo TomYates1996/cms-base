@@ -6,7 +6,7 @@
         <div class="content">
             <div class="item" v-for="(slide, index) in widget.slides" :key="index">
                 <div class="image-section">
-                    <img :src="slide.image_path" :alt="slide.image_alt">
+                    <img :src="'/' + slide.image.image_path" :alt="slide.image.image_alt">
                 </div>
                 <div class="text-section">
                     <h3 v-if="slide.link" class="slide-title"><a :href="slide.link">{{ slide.title }}</a></h3>

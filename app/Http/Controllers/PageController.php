@@ -30,7 +30,7 @@ class PageController extends Controller
     // Load the CMS Page Edit Content Page
     public function load_edit_content(Request $request, $id)
     {
-        $page = Page::where('id', $id)->with('widgets.slides')->firstOrFail(); 
+        $page = Page::where('id', $id)->with('widgets.slides.image')->firstOrFail(); 
 
         return Inertia::render('cms/pages/EditContent', [
             'page' => $page,
@@ -61,13 +61,14 @@ class PageController extends Controller
     public function show($slug)
     {
         $slug = '/' . ltrim($slug, '/');
-        $page = Page::where('slug', $slug)->firstOrFail();
+        $page = Page::where('slug', $slug)->with('widgets.slides.image')->firstOrFail();
         $pages = Page::where('show_in_nav', true)->get();
 
 
         return Inertia::render('Welcome', [
             'page' => $page,
             'pages' => $pages,
+            'widgets' => $page->widgets,
         ]);
     }
 
