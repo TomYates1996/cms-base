@@ -48,7 +48,7 @@ class SlideController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'link' => 'nullable|url',
+            'link' => ['nullable', 'regex:/^(\/|https?:\/\/)/i'],
             'image_id' => 'nullable|integer',
         ]);
 

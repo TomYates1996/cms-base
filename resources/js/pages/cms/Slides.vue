@@ -18,6 +18,14 @@
         <div class="page-right">
             <Newslide :images="images" @refreshImages="getImages"/>
             <NewImage @refreshImages="getImages"/>
+            <Link 
+                v-if="$page.props.auth.user"
+                href="/cms"
+                method="get"
+                class="option"
+            >
+                Dashboard
+            </Link>
         </div>
     </div>
 </template>
@@ -26,11 +34,14 @@
 import NewImage from '@/components/cms/slides/images/NewImage.vue';
 import Newslide from '@/components/cms/slides/NewSlide.vue';
 import axios from 'axios';
+import { Link } from '@inertiajs/vue3';
+
   
 export default {
     components: {
         Newslide,
         NewImage,
+        Link,
     },
     data() {
         return {
@@ -113,6 +124,9 @@ export default {
         width: 20%;
         border-left: 2px solid var(--black);
         padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 }
 </style>

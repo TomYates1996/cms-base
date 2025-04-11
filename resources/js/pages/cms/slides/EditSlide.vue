@@ -9,8 +9,10 @@
             <input id="description" required type="text" v-model="form.description" >
         </div>
         <div class="slide-link">
-            <label for="link">Link</label>
-            <input id="link" required type="text" v-model="form.link" >
+            Link: 
+            <select name="link" id="slide-link">
+                <option v-for="page in pages" :key="page.id" :value="page.slug" @click="setLink(page.slug)">{{ page.slug }}</option>
+            </select>
         </div>
         <img class="current-image" :src="slideImage" alt="">
         <button @click.prevent="imageList()" class="add-img">Select Image</button>
@@ -67,6 +69,7 @@ export default {
             showImageGrid: false,
             images: [],
             slideImage: null,
+            pages: [],
         }
     },
     created() {
@@ -77,6 +80,7 @@ export default {
         this.form.id = this.slide.id;
         this.getImages();
         this.imagePath();
+        this.getPages()
     },
     methods: { 
         imagePath() {
@@ -92,6 +96,15 @@ export default {
             .then((response) => {
                 this.images = response.data.images;    
             })
+        },
+        getPages() {
+            axios.get('/api/pages/all')
+            .then((response) => {
+                this.pages = response.data.pages;    
+            })
+        },
+        setLink(slug) {
+            this.form.link = slug;
         },
         updateSlide () {
             this.form.put(route('api.slides.update'), {

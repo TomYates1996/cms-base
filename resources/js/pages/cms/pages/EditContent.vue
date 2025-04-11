@@ -28,7 +28,7 @@
                 <ul class="slide-list">
                   <li v-for="slide in slides.filter(slide => slide.selected)" :key="slide.id">
                     <input type="checkbox" v-model="slide.selected">
-                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <img class="slide-list-img" :src="slide.image_path" :alt="slide.image_alt">
                     <p>{{ slide.title }}</p>
                     <button class="edit-slide" @click="editSlide(slide)">Edit slide</button>
                   </li>
@@ -38,7 +38,7 @@
                 <ul class="slide-list">
                   <li v-for="slide in slides.filter(slide => !slide.selected)" :key="slide.id">
                     <input type="checkbox" v-model="slide.selected">
-                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <img class="slide-list-img" :src="slide.image_path" :alt="slide.image_alt">
                     <p>{{ slide.title }}</p>
                     <button class="edit-slide" @click="editSlide(slide)">Edit slide</button>
                   </li>
@@ -66,7 +66,7 @@
                 <ul class="slide-list">
                   <li v-for="slide in slides.filter(slide => slide.selected)" :key="slide.id">
                     <input type="checkbox" v-model="slide.selected">
-                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <img class="slide-list-img" :src="slide.image_path" :alt="slide.image_alt">
                     <p>{{ slide.title }}</p>
                   </li>
                 </ul>
@@ -75,7 +75,7 @@
                 <ul class="slide-list">
                   <li v-for="slide in slides.filter(slide => !slide.selected)" :key="slide.id">
                     <input type="checkbox" v-model="slide.selected">
-                    <img class="slide-list-img" :src="'/' + slide.image_path" :alt="slide.image_alt">
+                    <img class="slide-list-img" :src="slide.image_path" :alt="slide.image_alt">
                     <p>{{ slide.title }}</p>
                   </li>
                 </ul>
@@ -138,11 +138,12 @@ export default {
         editIndex: {},
         showEditSlide: false,
         slideToEdit: {},
+        images: [],
       };
     },
     created() {
         this.localWidgets = this.widgets;
-        this.fetchSlides();
+        this.getImages();
     },
     computed: {
         widgetOptions() {
@@ -150,6 +151,13 @@ export default {
         },
     },
     methods: {
+      getImages() {
+            axios.get('/api/images/all')
+            .then((response) => {
+                this.images = response.data.images; 
+                this.fetchSlides();   
+            })
+        },
       editSlide(slide) {
         this.showEditSlide = true;
         this.slideToEdit = slide;
@@ -192,15 +200,7 @@ export default {
         },
         deleteWidget(widgetId) {
             if (confirm('Are you sure you want to delete this widget?')) {
-        // axios
-        //   .delete(`/cms/pages/${this.page.id}/widgets/${widgetId}/delete`)
-        //   .then(response => {
-            this.localWidgets = this.localWidgets.filter(widget => widget.id !== widgetId);
-        //     alert('Widget deleted');
-        //   })
-        //   .catch(error => {
-        //     alert('Failed to delete widget');
-        //   });
+              this.localWidgets = this.localWidgets.filter(widget => widget.id !== widgetId);
             }
         },
       openAddWidgetModal() {
@@ -216,13 +216,30 @@ export default {
         this.selectedWidgetType = ''
         this.selectedSlides = []
       },
-      async fetchSlides() {
-        try {
-          const response = await axios.get('/api/slides');
-          this.slides = response.data.slides;
-        } catch (error) {
-          console.error('Error fetching slides:', error);
-        }
+      fetchSlides() {
+        axios.get('/api/slides')
+            .then((response) => {
+                this.slides = response.data.slides; 
+                this.slides.forEach(slide => {
+                    if (slide.image_id) {
+                        let image = this.images.find(image => image.id === slide.image_id)
+                        slide.image_path = '/' + image.image_path;
+                        slide.image_alt = image.image_alt;
+                    }
+                })
+                this.localWidgets.forEach(widget => {
+                  widget.slides.forEach(slide => {
+                    if (slide.image_id) {
+                        let image = this.images.find(image => image.id === slide.image_id)
+                        slide.image_path = '/' + image.image_path;
+                        slide.image_alt = image.image_alt;
+                    }
+                  })
+                })
+            })
+            .catch((error) => {
+                console.error('Error fetching slides:', error);
+            });
       },
       addWidget() {
         // try {

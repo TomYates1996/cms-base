@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('api/slides', [SlideController::class, 'index']);
     Route::post('/create/new-image', [ImageController::class, 'store'])->name('cms.image.store');
     Route::get('/api/images/all', [ImageController::class, 'index'])->name('cms.image.index');
+    Route::get('/api/pages/all', [PageController::class, 'index_all'])->name('cms.page.index');
     
     Route::prefix('cms')->group(function () {
         // Display all widgets for a page
