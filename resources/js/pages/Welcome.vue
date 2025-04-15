@@ -3,7 +3,7 @@
     <Head title="Welcome">
     </Head>
 
-    <HamburgerHeader :pages="this.pages"/>
+    <HamburgerHeader v-for="header in headers" :key="header.id" :pages="header.pages" :logo="header.logo"/>
     <component v-for="widget in widgets" :key="widget.id" 
         :is="widget.type"
         :widget="widget"
@@ -30,10 +30,12 @@ export default {
     },
     props: {
         widgets: Array,
+        headers: Array,
         pages: Array,
     },
     data() {
         return {
+            
         }
     },
     mounted() {

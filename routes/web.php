@@ -28,20 +28,25 @@ Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
 
 // CMS Actions
 Route::middleware('auth')->group(function () {
-    Route::put('/pages/update/{page}', [PageController::class, 'update'])->name('api.pages.update');
+    Route::put('/pages/update/{slug}', [PageController::class, 'update'])->name('api.pages.update');
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
     Route::get('/api/slides', [SlideController::class, 'index'])->name('api.slides.index');
     Route::post('/api/slides', [SlideController::class, 'store'])->name('api.slides.store');
     Route::put('/api/slides', [SlideController::class, 'update'])->name('api.slides.update');
-    Route::get('/cms/slides/edit/{slide_id}', [SlideController::class, 'load_edit'])->name('api.slides.load.edit');
+    Route::get('/cms/slides/edit/{slide_slug}', [SlideController::class, 'load_edit'])->name('api.slides.load.edit');
     Route::get('/cms/slides', [SlideController::class, 'load'])->name('slides.load');
     Route::get('/cms/pages', [PageController::class, 'load'])->name('pages.load');
-    Route::get('/cms/pages/edit/{page_id}', [PageController::class, 'load_edit'])->name('pages.load.edit');
-    Route::get('/cms/pages/edit-content/{page_id}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
+    Route::delete('/cms/pages/delete/{page_id}', [PageController::class, 'destroy'])->name('pages.delete');
+    Route::get('/cms/pages/children/{page_slug}', [PageController::class, 'children'])->name('pages.children');
+    Route::get('/cms/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
+    Route::get('/cms/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
     Route::get('api/slides', [SlideController::class, 'index']);
     Route::post('/create/new-image', [ImageController::class, 'store'])->name('cms.image.store');
     Route::get('/api/images/all', [ImageController::class, 'index'])->name('cms.image.index');
     Route::get('/api/pages/all', [PageController::class, 'index_all'])->name('cms.page.index');
+    Route::put('/widgets/{widget}/save', [WidgetController::class, 'save_widget'])->name('widgets.save');
+    Route::put('/headers/{header}/save', [WidgetController::class, 'save_header'])->name('header.save');
+    Route::put('/footers/{footer}/save', [WidgetController::class, 'save_footer'])->name('footer.save');
     
     Route::prefix('cms')->group(function () {
         // Display all widgets for a page

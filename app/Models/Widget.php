@@ -11,6 +11,8 @@ class Widget extends Model
         'title', 
         'page_id', 
         'type', 
+        'is_saved',
+        'name',
     ];
     public function slides()
     {

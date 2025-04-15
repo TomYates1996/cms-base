@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Widget;
 use App\Models\Slide;
 use App\Models\Page;
+use App\Models\Header;
+use App\Models\Footer;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redirect;
@@ -112,12 +114,26 @@ class WidgetController extends Controller
             'widgets.*.type' => 'required|string',
             'widgets.*.slides' => 'nullable|array', 
             'widgets.*.slides.*.id' => 'integer|exists:slides,id',
+
+            'headers' => 'nullable|array',
+            'headers.*.logo.id' => 'nullable|exists:images,id',
+            'headers.*.link' => 'nullable|string',
+            'headers.*.section' => 'required|in:primary,secondary,footer',
+            
+            'footers' => 'nullable|array',
+            'footers.*.logo.id' => 'nullable|exists:images,id',
+            'footers.*.section' => 'required|in:primary,secondary,footer',
         ]);
 
+
         $widgets = $request->input('widgets');
+        $headers = $request->input('headers');
+        $footers = $request->input('footers');
         $page_id = $request->input('page_id');
 
         Widget::where('page_id', $page_id)->delete();
+        Header::where('page_id', $page_id)->delete();
+        Footer::where('page_id', $page_id)->delete();
 
 
         foreach ($widgets as $widget) {
@@ -132,6 +148,65 @@ class WidgetController extends Controller
                 $new_widget->slides()->attach(array_column($widget['slides'], 'id'));
             }
         }
+
+        foreach ($headers as $header) {
+            Header::create([
+                'page_id' => $page_id,
+                'logo_image_id' => $header['logo']['id'] ?? null,
+                'link' => $header['link'] ?? null,
+                'section' =>$header['section'],
+            ]);
+        }
+        foreach ($footers as $footer) {
+            Footer::create([
+                'page_id' => $page_id,
+                'logo_id' => $footer['logo']['id'] ?? null,
+                'section' =>$footer['section'],
+            ]);
+        }
+
+        return;
+    }
+
+    public function save_widget(Request $request, Widget $widget)
+    {
+        $request->validate([
+            'is_saved' => 'required|boolean',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $widget->update([
+            'is_saved' => $request->is_saved,
+            'name' => $request->name,
+        ]);
+
+        return;
+    }
+    public function save_header(Request $request, Header $header)
+    {
+        $request->validate([
+            'is_saved' => 'required|boolean',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $header->update([
+            'is_saved' => $request->is_saved,
+            'name' => $request->name,
+        ]);
+
+        return;
+    }
+    public function save_footer(Request $request, Footer $footer)
+    {
+        $request->validate([
+            'is_saved' => 'required|boolean',
+            'name' => 'nullable|string|max:255',
+        ]);
+
+        $footer->update([
+            'is_saved' => $request->is_saved,
+            'name' => $request->name,
+        ]);
 
         return;
     }

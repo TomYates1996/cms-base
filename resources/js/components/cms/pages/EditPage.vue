@@ -22,6 +22,8 @@
 <script>
 import { useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { router } from '@inertiajs/vue3'
+
 
 export default {
     setup(){
@@ -48,8 +50,9 @@ export default {
     },
     methods: {
         updatePage (form) {
-            form.put(route('api.pages.update', this.page.id), {
+            form.put(route('api.pages.update', this.page.slug), {
             onSuccess: () => {
+                router.get('/cms/pages');
             },
             onError: (errors) => {
             console.log('Form submission error:', errors);

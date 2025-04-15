@@ -31,18 +31,23 @@ export default {
           'slug' : '',
           'show_in_nav' : true,
           'created_by' : '',
+          'parent' : {},
       });
 
       return { form } 
+  },
+  props: {
+    parent: Object,
   },
   components: {
       LoaderCircle,
   },
   methods: {
       createPage () {
+        this.form.parent = this.parent;
         this.form.post(route('api.pages.store'), {
         onSuccess: () => {
-          this.$inertia.visit('/dashboard');  
+          // this.$inertia.visit('/dashboard');  
         },
         onError: (errors) => {
           console.log('Form submission error:', errors); 
