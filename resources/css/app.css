@@ -46,8 +46,15 @@ html {
 
         /* Custom */
         /* Colours */
-        --black: #000000;
+        --black: #0d0d0c;
         --white: #ffffff;
+        --yellow: #fcba03;
+        --purple: #341857;
+        --deep-pink: #4f1036;
+        --deep-red: #570a0a;
+        --sea-green: #0a5749;
+        --dull-green: #32570a;
+        --pale-green: #afd18a;
         /* Widths */
         --width-base: 1050px;
     }
@@ -95,5 +102,24 @@ html {
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* Global styles */
+
+.btn-default {
+    border: 1px solid var(--black);
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: var(--white);
+    color: var(--black);
+    transition: 0.2s ease;
+    text-align: center;
+}
+@media (hover:hover) {
+    .btn-default:hover {
+        background-color: var(--sea-green);
+        border-color: var(--white);
+        color: var(--white);
     }
 }

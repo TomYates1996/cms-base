@@ -49,7 +49,8 @@ createInertiaApp({
             .use(ZiggyVue)
             .component("font-awesome-icon", FontAwesomeIcon)
             
-        app.config.globalProperties.$widgetOptions = widgetOptions;   
+        app.config.globalProperties.$widgetOptions = widgetOptions; 
+        app.config.globalProperties.$appName = appName;  
         app.mount(el);
     },
     progress: {

@@ -13,6 +13,8 @@ class Widget extends Model
         'type', 
         'is_saved',
         'name',
+        'template_id',
+        'order',
     ];
     public function slides()
     {

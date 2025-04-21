@@ -16,6 +16,8 @@ class Header extends Model
         'section',
         'is_saved',
         'name',
+        'template_id',
+        'order',
     ];
 
     public function logo()

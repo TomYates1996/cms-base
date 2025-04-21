@@ -13,7 +13,8 @@
             <button @click="saveWidget(header, 'headers', index)" class="save-btn"><font-awesome-icon :icon="header.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
         </div>
       </div>
-      <button @click="openAddHeader" v-if="localContent.headers && localContent.headers.length < 1">Add Navigation</button>
+      <button @click="openAddSaved('headers')" v-if="localContent.headers.length < 1">Add a saved header</button>
+      <button @click="openAddItem('headers')" v-if="localContent.headers && localContent.headers.length < 1">Add Navigation</button>
       <!-- Widgets Sidebar -->
       <div class="sidebar-option sidebar-widgets">
         <h5>Widgets</h5>
@@ -24,9 +25,11 @@
             <button @click="orderDown(index)" :disabled="index === localContent.widgets.length - 1" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-down']" /></button>
             <button @click="deleteElement('widgets', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
             <button @click="saveWidget(widget, 'widgets', index)" class="save-btn"><font-awesome-icon :icon="widget.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
+            <button @click="cloneWidget(widget, 'widgets', index)" class="save-btn"><font-awesome-icon :icon="['fas', 'clone']" /></button>
           </div>
           
-          <button @click="openAddWidgetModal">Add a new widget</button>
+          <button @click="openAddItem('widgets')">Add a new widget</button>
+          <button @click="openAddSaved('widgets')">Add a saved widget</button>
         </div>
         <!-- Footer Sidebar -->
         <div class="sidebar-option sidebar-footer">
@@ -37,20 +40,31 @@
             <button @click="deleteElement('footers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
             <button @click="saveWidget(footer, 'footers', index)" class="save-btn"><font-awesome-icon :icon="footer.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
         </div>
-
-        <button @click="openAddFooter" v-if="localContent.footers && localContent.footers.length < 1">Add Footer</button>
+        <button @click="openAddSaved('footers')" v-if="localContent.footers.length < 1">Add a saved footer</button>
+        <button @click="openAddItem('footers')" v-if="localContent.footers && localContent.footers.length < 1">Add Footer</button>
       </div>
             <!-- <EditSlide v-if="showEditSlide" :slide="slideToEdit"/> -->
           </div>
           <div class="page-right">
-              <HamburgerHeader :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
-              <NewHeader v-if="showHeaderEdit" @cancelAdd="cancelAddHeader" @addHeader="addHeader" @getImages="getImages" :images="images"/>
-              <NewWidget v-if="showModal.new.widget" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd" :page="page" />
-              <EditWidget v-if="showModal.edit.widgets" :widget="widgetInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit"/>
-              <EditHeader v-if="showModal.edit.headers" :header="headerInfo" :images="images" @saveEdit="saveEditHeader" @cancelEdit="cancelEditHeader"/>
-              <EditFooter v-if="showModal.edit.footers" :footer="footerInfo" :images="images" @saveEdit="saveEditFooter" @cancelEdit="cancelEditFooter"/>
-              <NewFooter v-if="showNewFooter" @getImages="getImages" @addFooter="addFooter" @cancelAdd="cancelAddFooter" :images="images"/>
-              <div v-if="!showEditWidget" class="widget-container">
+            <ul class="saved-item-list" v-if="showModal.saved[useType]">
+              <li v-for="(item, index) in localSaved[useType]" :key="index" class="saved-item">
+                <button type="button" class="add-saved-element" @click="addSaved(item, useType)" aria-label="Add saved {{ useType }} to page">
+                  <span class="visually-hidden">{{ useType }} -> {{ item.type }} - {{ item.name }}</span>
+                  <span aria-hidden="true"><font-awesome-icon :icon="['fas', 'plus']" /></span>
+                </button>
+                <button @click="deleteSavedElement(useType, index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
+              </li>
+            </ul>
+            <button @click="closeWhatsOpen" class="close-open" v-if="anyTrue">| Close |</button>
+
+              <HamburgerHeader v-if="!anyTrue" :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
+              <NewHeader v-if="showModal.new.headers" @cancelAdd="cancelAdd('headers')" @addHeader="addHeader" @getImages="getImages" :images="images"/>
+              <NewWidget v-if="showModal.new.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
+              <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit('widgets')" @cancelEdit="cancelEdit('widgets')"/>
+              <EditHeader v-if="showModal.edit.headers" :header="itemInfo" :images="images" @saveEdit="saveEdit('headers')" @cancelEdit="cancelEdit('headers')"/>
+              <EditFooter v-if="showModal.edit.footers" :footer="itemInfo" :images="images" @saveEdit="saveEdit('footers')" @cancelEdit="cancelEdit('footers')"/>
+              <NewFooter v-if="showModal.new.footers" @getImages="getImages" @addFooter="addFooter" @cancelAdd="cancelAdd('footers')" :images="images"/>
+              <div v-if="!anyTrue" class="widget-container">
                 <component v-for="widget in localContent.widgets" :key="widget.id" :is="widget.type" :widget="widget"/>
               </div>
         </div>
@@ -88,6 +102,10 @@ export default {
         page: Object,
         widgets: Array,
         headers: Array,
+        footers: Array,
+        savedWidgets: Array,
+        savedHeaders: Array,
+        savedFooters: Array,
     },
     components: {
       EditFooter,
@@ -110,14 +128,13 @@ export default {
         showModal: {
           edit : {},
           new: {},
+          saved: {},
         },
         showHeaderEdit: false,
         selectedWidgetType: '',  
         widgetTitle: '',
         selectedSlides: [],  
         slides: [],  
-        showEditWidget : false,
-        showEditHeader : false,
         widgetInfo: {},
         headerInfo: {},
         editIndex: {},
@@ -125,20 +142,32 @@ export default {
         slideToEdit: {},
         images: [],
         showNewFooter: false,
-        showEditFooter: false,
         footerInfo: {},
         localContent: [],
+        localSaved: [],
+        itemInfo: {},
+        useType: '',
       };
     },
     created() {
         this.localContent.widgets = this.widgets;
         this.localContent.headers =this.headers;
-        this.localContent.footers = this.page.footers || [];
+        this.localContent.footers = this.page.footers;
+
+        
+        this.localSaved.widgets = this.savedWidgets;
+        this.localSaved.headers = this.savedHeaders;
+        this.localSaved.footers = this.savedFooters;
         this.getImages();
     },
     computed: {
         widgetOptions() {
             return this.$widgetOptions;
+        },
+        anyTrue() {
+          return Object.values(this.showModal).some(section =>
+            Object.values(section).some(val => val === true)
+          );
         },
     },
     methods: {
@@ -150,7 +179,6 @@ export default {
             })
         },
       editSlide(slide) {
-        
         this.showEditSlide = true;
         this.slideToEdit = slide;
       },
@@ -165,86 +193,106 @@ export default {
         }
       },
       editElement(type, index) {
-        this.showModal.edit[type] = true;
-        this.itemInfo = Object.assign({}, this.localContent[type][index]);
-        if (type === "widgets") {
-          this.slides.forEach (slide => {
-            if (this.itemInfo.slides.some(infoSlide => infoSlide.id === slide.id)) {
-              slide.selected = true;
-                }
-          })
+        if (confirm('this is a saved element and editing will update all instances of the item thoughout the site')) {
+          Object.keys(this.showModal.edit).forEach(key => {
+            this.showModal.edit[key] = false;
+          });
+          this.showModal.edit[type] = true;
+          this.itemInfo = JSON.parse(JSON.stringify(this.localContent[type][index]));
+          if (type === "widgets") {
+            this.slides.forEach (slide => {
+              if (this.itemInfo.slides.some(infoSlide => infoSlide.id === slide.id)) {
+                slide.selected = true;
+                  }
+            })
+          }
+          this.editIndex = index;
         }
-        this.editIndex = index;
       },
-      editWidget(index) {
-        this.showEditWidget = true;
-        this.widgetInfo = Object.assign({}, this.localContent.widgets[index]);
-        this.slides.forEach (slide => {
-          if (this.widgetInfo.slides.some(infoSlide => infoSlide.id === slide.id)) {
-            slide.selected = true;
-              }
-        })
-        this.editIndex = index;
-      },
-      editHeader(index) {
-        this.showEditHeader = true;
-        this.headerInfo = Object.assign({}, this.localContent.headers[index]);
-        this.editIndex = index;
-      },
-      editFooter(index) {
-        this.showEditFooter = true;
-        this.footerInfo = Object.assign({}, this.localContent.footers[index]);
-        this.editIndex = index;
-      },
-      saveEdit() {
-            this.selectedSlides = this.slides.filter(slide => slide.selected);
-            this.widgetInfo.slides = this.selectedSlides;
-            this.localContent.widgets[this.editIndex] = this.widgetInfo;
-            this.showEditWidget = false;
-            this.slides.forEach(slide => {
+      saveEdit(type,) {
+        if (type === "widgets") {
+          this.selectedSlides = this.slides.filter(slide => slide.selected);
+          this.itemInfo.slides = this.selectedSlides;
+        } else if (type === "footers" || type === "headers") {
+          this.itemInfo.pages = this.pages[this.itemInfo.section];
+        }
+        this.localContent[type][this.editIndex] = this.itemInfo;
+        this.showModal.edit[type] = false;
+
+        if (type === "widgets") {
+        this.slides.forEach(slide => {
               slide.selected = false; 
             });
-          },
-          cancelEdit() {
-            this.widgetInfo = this.localContent.widgets[this.editIndex];
-            this.showEditWidget = false;
-            this.slides.forEach(slide => {
-              slide.selected = false; 
+        }
+        console.log(this.itemInfo.is_saved);
+        
+        if (this.itemInfo.is_saved) {
+          console.log('its saved');
+              axios.post(`/item/update-save`, {
+              template_id: this.itemInfo.template_id,
+              type: type,
+              item: this.itemInfo,
+            })
+            .then(() => {
+                const itemToUpdate = this.localSaved[type].find(item => item.template_id === this.itemInfo.template_id);
+                if (itemToUpdate) {
+                  Object.assign(itemToUpdate, this.itemInfo);
+                }
+                this.localContent[type] = this.localContent[type].map(item => {
+                if (item.template_id === this.itemInfo.template_id) {
+                    return { ...item, ...this.itemInfo };
+                  }
+                  return item;
+                });       
+            })
+            .catch(error => {
+              console.error('Failed:', error);
             });
+        }
+      },
+        deleteSavedElement(type, index) {
+          if (confirm(`This is a saved item and deleting will remove from all pages it is present on.`)) {
+              let item = this.localSaved[type][index];
+              axios.post(`/item/delete-save`, {
+              template_id: item.template_id,
+              type: type,
+            })
+            .then((response) => {
+                this.deleteItems(type, this.localSaved[type][index].template_id); 
+                this.localSaved[type].splice(index, 1);         
+            })
+            .catch(error => {
+              console.error('Failed:', error);
+            });
+          }
         },
-      saveEditHeader() {
-            this.headerInfo.pages = this.pages[this.headerInfo.section];
-            this.localContent.headers[this.editIndex] = this.headerInfo;
-            
-            this.showEditHeader = false;
-          },
-          cancelEditHeader() {
-            this.headerInfo = this.headerInfo[this.editIndex];
-            this.showEditHeader = false;
-          },
-          openAddWidgetModal() {
-        this.showModal = true;
-        // this.fetchSlides();  
-      },
+        deleteItems(type, templateId) {
+          this.localContent[type] = this.localContent[type].filter(item => item.template_id !== templateId);
+        },
+        cancelEdit(type) {
+            this.itemInfo = this.localContent[type][this.editIndex];
+            this.showModal.edit[type] = false;
+            if (type === "widgets") {
+              this.slides.forEach(slide => {
+                slide.selected = false; 
+              });
+            }
+        },
           deleteElement(type, index) {
             if (confirm(`Are you sure you want to delete this ${type}?`)) {
               this.localContent[type].splice(index, 1);
             }
           },
-      openAddHeader() {
-        this.showHeaderEdit = true;
-      },
-      cancelAdd() {
-        this.showModal = false;
-        this.slides.forEach(slide => {
-            slide.selected = false; 
-        });
-        this.widgetTitle = ''
-        this.selectedWidgetType = ''
-        this.selectedSlides = []
-      },
-      cancelAddHeader() {
-        this.showHeaderEdit = false;
+      cancelAdd(type) {
+        this.showModal.new[type] = false;
+        if (type === "widgets") {
+          this.slides.forEach(slide => {
+              slide.selected = false; 
+          });
+          this.widgetTitle = ''
+          this.selectedWidgetType = ''
+          this.selectedSlides = []
+        }
       },
       fetchSlides() {
         axios.get('/api/slides')
@@ -255,6 +303,16 @@ export default {
                 console.error('Error fetching slides:', error);
             });
       },
+      openAddSaved(type) {
+        this.showModal.saved[type] = true;
+        this.useType = type;
+      },
+      addSaved(item, type) {
+        console.log(item);
+        
+        this.localContent[type].push(item);
+        this.showModal.saved[type] = false;
+      },
       addWidget(newWidget) {
             this.localContent.widgets.push(newWidget);
             
@@ -262,13 +320,12 @@ export default {
             this.slides.filter(slide => slide.selected).forEach(slide => {
               slide.selected = false;
             })
-          this.cancelAdd();
+          this.cancelAdd('widgets');
         },
         addHeader(newHeader) {
-        this.localContent.headers.push(newHeader);
-        this.cancelAddHeader();
-        console.log(this.localContent.headers);
-        
+          newHeader.pages = this.pages[newHeader.section];
+          this.localContent.headers.push(newHeader);
+          this.cancelAdd('headers');
       },
       savePage() {
         router.post(`/cms/pages/save`, { 
@@ -278,17 +335,17 @@ export default {
           footers: this.localContent.footers,
           }, {
             onSuccess: () => {
-              router.get('/cms/pages');
+              router.get(`/cms/pages/${this.page.section}`);
             }
           }
         );
       },
-      openAddFooter() {
-        this.showNewFooter = true;
+      openAddItem(type) {
+        this.showModal.new[type] = true;
       },
 
       cancelAddFooter() {
-        this.showNewFooter = false;
+        this.showModal.new.footers = false;
       },
 
       addFooter(newFooter) {
@@ -296,31 +353,66 @@ export default {
         this.cancelAddFooter();
       },
 
-      saveEditFooter() {
-            this.footerInfo.pages = this.pages[this.footerInfo.section];
-            this.localContent.footers[this.editIndex] = this.footerInfo;
-            
-            this.showEditFooter = false;
-          },
-          cancelEditFooter() {
-            this.footerInfo = this.footerInfo[this.editIndex];
-            this.showEditFooter = false;
-          },
-     
       saveWidget(item, type, index) {
+        let name = '';
         if (!item.is_saved) {
-          const name = window.prompt("Enter a name for this saved item:", item.name || "");
-          if (name === null) return;
+          name = window.prompt("Enter a name for this saved item:", item.name || "");
+          if (name === null);
         }
+
+        if (!item.is_saved && !item.id) {
+          item.is_saved = true;
+          item.name = name;
+            axios.post(`/${type}/create-save`, {
+            item: item,
+          })
+          .then((response) => {
+            console.log(response);
+            
+            const templateId = response.data.template_id;
+            this.localContent[type][index].is_saved = true;
+            this.localContent[type][index].name = name;
+            this.localContent[type][index].template_id = templateId;
+            this.localSaved[type].push(this.localContent[type][index]);
+            console.log(this.localSaved[type]);
+            
+            
+          })
+          .catch(error => {
+            console.error('Failed:', error);
+          });
+        }
+
+        if (!this[type].find(el => el.id === item.id) || item.id === undefined) {
+          item.is_saved = !item.is_saved;
+          name = name || null;
+          console.log('this path', item);
+          return;
+        } 
         
-        router.put(`/${type}/${item.id}/save`, {
+        axios.put(`/${type}/${item.id}/save`, {
           is_saved: !item.is_saved,
           name: name || null,
-        }, {
-        onSuccess: () => {
-            this.localContent[type][index].is_saved = !this.localContent[type][index].is_saved;
-          }
+        })
+        .then(() => {
+          this.localContent[type][index].is_saved = !this.localContent[type][index].is_saved;
+          this.localContent[type][index].name = name;
+        })
+        .catch(error => {
+          console.error('Failed:', error);
         });
+      },
+      closeWhatsOpen() {
+        for (const section in this.showModal) {
+          for (const key in this.showModal[section]) {
+            this.showModal[section][key] = false;
+          }
+        }
+      },
+      cloneWidget(item, type, index) {
+        const targetItem = JSON.parse(JSON.stringify(this.localContent[type][index]));
+        const clonedItem = JSON.parse(JSON.stringify(targetItem));
+        this.localContent[type].splice(index + 1, 0, clonedItem);
       },
     },
   };
@@ -374,6 +466,18 @@ export default {
     }
     .sidebar-option h5 {
       border-bottom: 1px solid var(--black);
+    }
+    .saved-item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      .saved-item {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        p {
+          cursor: pointer;
+        }
+      }
     }
   </style>
   

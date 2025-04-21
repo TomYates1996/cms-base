@@ -47,8 +47,23 @@ Route::middleware('auth')->group(function () {
     Route::put('/widgets/{widget}/save', [WidgetController::class, 'save_widget'])->name('widgets.save');
     Route::put('/headers/{header}/save', [WidgetController::class, 'save_header'])->name('header.save');
     Route::put('/footers/{footer}/save', [WidgetController::class, 'save_footer'])->name('footer.save');
+    Route::post('/item/delete-save', [WidgetController::class, 'delete_save_item'])->name('widgets.delete-save');
+    Route::post('/item/update-save', [WidgetController::class, 'update_save_item'])->name('widgets.update-save');
+    Route::post('/widgets/create-save', [WidgetController::class, 'create_save_widget'])->name('widgets.create-save');
+    Route::post('/headers/create-save', [WidgetController::class, 'create_save_header'])->name('header.create-save');
+    Route::post('/footers/create-save', [WidgetController::class, 'create_save_footer'])->name('footer.create-save');
     
     Route::prefix('cms')->group(function () {
+        Route::get('/pages/primary', [PageController::class, 'load_primary'])->name('pages.load.primary');
+        Route::get('/pages/secondary', [PageController::class, 'load_secondary'])->name('pages.load.secondary');
+        Route::get('/pages/footer', [PageController::class, 'load_footer'])->name('pages.load.footer');
+        Route::get('/images', [ImageController::class, 'load'])->name('images.load');
+        Route::get('/images/edit', [ImageController::class, 'load_edit'])->name('images.load.edit');
+        Route::post('/images/update', [ImageController::class, 'update'])->name('images.update');
+        Route::get('/slides/new', [SlideController::class, 'load_create'])->name('slides.load.create');
+        Route::delete('/slides/delete/{id}', [SlideController::class, 'delete'])->name('slides.delete');
+
+
         // Display all widgets for a page
         Route::get('/pages/{pageId}/widgets', [WidgetController::class, 'index'])->name('widgets.index');
         

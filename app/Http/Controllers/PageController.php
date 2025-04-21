@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Page;
+use App\Models\Widget;
+use App\Models\Header;
+use App\Models\Footer;
 use Inertia\Inertia;
 
 class PageController extends Controller
@@ -14,11 +17,50 @@ class PageController extends Controller
 
         $pages = Page::where('level', 1)->get();
 
+        return Inertia::render('cms/pages/PageSections', [
+        ]);
+    }
+    // Load the CMS Primary Page
+    public function load_primary()
+    {
+
+        $pages = Page::where('level', 1)->where('section', 'primary')->get();
+
         return Inertia::render('cms/pages/Pages', [
             'pages' => $pages,
             'parent' => null,
+            'section' => 'primary',
         ]);
     }
+    // Load the CMS Secondary Page
+    public function load_secondary()
+    {
+
+        $pages = Page::where('level', 1)->where('section', 'secondary')->get();
+
+        return Inertia::render('cms/pages/Pages', [
+            'pages' => $pages,
+            'parent' => null,
+            'section' => 'secondary',
+        ]);
+    }
+    // Load the CMS Footer Page
+    public function load_footer()
+    {
+
+        $pages = Page::where('level', 1)->where('section', 'footer')->get();
+
+        return Inertia::render('cms/pages/Pages', [
+            'pages' => $pages,
+            'parent' => null,
+            'section' => 'footer',
+        ]);
+    }
+
+
+
+
+
     // Load the CMS Page Children page page
     public function children(Request $request, $slug)
     {
@@ -53,10 +95,27 @@ class PageController extends Controller
 
         $footers = $page->footers;
 
+        $savedWidgets = Widget::with('slides.image')->where('is_saved', true)->whereNull('page_id')->get();
+        $savedHeaders = Header::with('logo')->where('is_saved', true)->whereNull('page_id')->get()->map(function ($header) use ($pages) {
+            $header->pages = $pages[$header->section] ?? collect();
+            return $header;
+        });;
+        $savedFooters = Footer::with('logo')
+            ->where('is_saved', true)
+            ->whereNull('page_id')
+            ->get()
+            ->map(function ($footer) use ($pages) {
+                $footer->pages = $pages[$footer->section] ?? collect();
+                return $footer;
+            });
+
         return Inertia::render('cms/pages/EditContent', [
             'pages' => $pages,
             'page' => $page,
             'widgets' => $page->widgets,
+            'savedWidgets' => $savedWidgets,
+            'savedHeaders' => $savedHeaders,
+            'savedFooters' => $savedFooters,
             'headers' => $headers,
             'footers' => $footers,
         ]);
@@ -132,7 +191,8 @@ class PageController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string',
             'show_in_nav' => 'boolean',
-            'parent' => 'nullable|array'
+            'parent' => 'nullable|array',
+            'section' => 'required|in:primary,secondary,footer',
         ]);
         
         $parent = $validated['parent'] ?? null;

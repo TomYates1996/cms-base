@@ -1,30 +1,57 @@
 <template>
-    <button class="new-slide-toggle" @click="newSlide()">New Slide</button>
-   <form v-if="showNewSlide" class="new-slide" @submit.prevent="createSlide()">
-        <div class="slide-title">
+  <form class="edit-page-info form" @submit.prevent="createSlide()" aria-label="Create a new slide">
+    <fieldset class="form-inner">
+        <legend class="form-title">Create Slide</legend>
+
+        <div class="form-slide-title form-field">
             <label for="title">Title</label>
-            <input id="title" autofocus type="text" required v-model="form.title" >
+            <input id="title" name="title" type="text" required v-model="form.title" autofocus aria-required="true" />
         </div>
-        <div class="slide-description">
-            <label for="description">Description</label>
-            <input id="description" required type="text" v-model="form.description" >
+
+        <div class="form-slide-description form-field">
+        <label for="description">Description</label>
+        <input id="description" name="description" type="text" required v-model="form.description" aria-required="true" />
         </div>
-        <div class="slide-link">
-            <label for="link">Link</label>
-            <input id="link" required type="text" v-model="form.link" >
+
+        <div class="form-slide-link form-field">
+        <label for="link">Link</label>
+        <input id="link" name="link" type="text" required v-model="form.link" aria-required="true" />
         </div>
-        <button @click="imageList()" class="add-img">Select Image</button>
-        <div v-if="showImageGrid" class="image-grid">
-            <img class="new-slide-img-option" @click="addImageToSlide(image)" v-for="image in images" :key="image.id" :src="'/' + image.image_path" alt="">
-            <NewImage @refreshImages="refreshImages()"/>
-        </div>
-        <button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
-            <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-            Create Slide
+
+        <div class="form-slide-image form-field">
+        <button type="button" class="btn-default add-img" @click="imageList()"
+                aria-controls="image-grid" aria-expanded="showImageGrid.toString()">
+            Select Image
         </button>
-        <button @click="closeNewSlide()" class="cancel-new-slide">Cancel</button>
+        </div>
+
+        <div v-if="showImageGrid" id="image-grid" class="image-grid" role="region" aria-label="Image selection">
+        <img v-for="image in images" :key="image.id" class="new-slide-img-option"
+            @click="addImageToSlide(image)" :src="'/' + image.image_path"
+            :alt="image.image_alt || 'Slide image option'" role="button" tabindex="0" />
+        <NewImage @refreshImages="refreshImages()" />
+        </div>
+
+        <div v-if="imagePreview" class="image-preview form-field" role="region" aria-label="Selected image preview">
+        <p class="sr-only">Preview Image</p>
+        <img :src="imagePreview" alt="Preview of selected slide image" />
+        </div>
+
+        <button type="submit" class="btn-default" tabindex="5"
+                :disabled="form.processing" :aria-busy="form.processing.toString()">
+        <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
+        Create Slide
+        </button>
+
+        <button type="button" class="btn-default cancel-new-slide"
+                @click="cancelNew()" aria-label="Cancel slide creation">
+        Cancel
+        </button>
+    </fieldset>
     </form>
-  </template>
+</template>
+  
+
   
   <script>
   import { useForm } from '@inertiajs/vue3';
@@ -64,15 +91,15 @@ import NewImage from './images/NewImage.vue';
         newSlide() {
             this.showNewSlide = true
         },
-        closeNewSlide() {
-            this.showNewSlide = false;
-            this.form.reset();
+        cancelNew() {
+            this.$emit('cancelNew');
         },
         imageList() {
             this.showImageGrid = true;
         },
         addImageToSlide(image) {
             this.form.image_id = image.id;
+            this.imagePreview = '/' + image.image_path;
             this.showImageGrid = false;
         },
         uploadImage(event) {
@@ -106,30 +133,60 @@ import NewImage from './images/NewImage.vue';
   </script>
   
 <style scoped>
-    .image-grid {
-        position: fixed;
-        top: 0px;
-        left: 0px;
-        height: 100%;
-        width: 100%;
-        background-color: var(--white);
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        padding: 20px;
-        overflow: scroll;
+.image-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: var(--white);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    padding: 20px;
+    overflow: scroll;
+}
+
+.new-slide-img-option {
+    width: 100%;
+    object-fit: cover;
+    aspect-ratio: 1/1;
+}
+
+.image-preview {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.image-preview img {
+    max-width: 200px;
+    object-fit: contain;
+}
+
+.form-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 20px 0px;
+    .form-title {
+        font-size: 22px;
+        font-weight: 600;
     }
-    .new-slide-img-option {
-        width: 100%;
-        object-fit: cover;
-        aspect-ratio: 1/1;
+    .form-field {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        label {
+            font-size: 18px;
+        }
     }
-    .new-slide {
-        position: fixed;
-        top: 0px;
-        left: 0px;
-        height: 100%;
-        width: 100%;
-        background-color: var(--white);
+    input {
+        border: 1px solid var(--black);
+        padding: 4px;
+        border-radius: 2px;
     }
+}
 </style>

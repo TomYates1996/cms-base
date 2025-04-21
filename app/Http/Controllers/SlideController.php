@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Slide;
+use App\Models\Image;
 use Inertia\Inertia;
 
 
@@ -20,6 +21,14 @@ class SlideController extends Controller
 
         return Inertia::render('cms/slides/EditSlide', [
             'slide' => $slide,
+        ]);
+    }
+    public function load_create()
+    {
+        $images = Image::all();
+
+        return Inertia::render('cms/slides/NewSlide', [
+            'images' => $images,
         ]);
     }
 
@@ -72,4 +81,10 @@ class SlideController extends Controller
             'slides' => Slide::with('image')->get(),
         ]);
     }
+
+    public function delete($id) {
+        Slide::findOrFail($id)->delete();
+        return response()->json(['message' => 'Slide deleted']);
+    }
+
 }

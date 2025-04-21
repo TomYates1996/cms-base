@@ -1,39 +1,57 @@
 <template>
-    <form class="new-slide" @submit.prevent="updateSlide()">
-        <div class="slide-title">
-            <label for="title">Title</label>
-            <input id="title" autofocus type="text" required v-model="form.title" >
+    <form class="edit-page-info form" @submit.prevent="updateSlide()" aria-label="Edit Slide">
+    <fieldset class="form-inner">
+        <legend class="form-title">Edit Slide</legend>
+
+        <div class="form-slide-title form-field">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text" required v-model="form.title" autofocus aria-required="true" />
         </div>
-        <div class="slide-description">
-            <label for="description">Description</label>
-            <input id="description" required type="text" v-model="form.description" >
+
+        <div class="form-slide-description form-field">
+        <label for="description">Description</label>
+        <input id="description" name="description" type="text" required v-model="form.description" aria-required="true" />
         </div>
-        <div class="slide-link">
-            Link: 
-            <select name="link" id="slide-link">
-                <option v-for="page in pages" :key="page.id" :value="page.slug" @click="setLink(page.slug)">{{ page.slug }}</option>
-            </select>
+
+        <div class="form-slide-link form-field">
+        <label for="slide-link">Link</label>
+        <select id="slide-link" name="link" v-model="form.link" aria-required="true">
+            <option v-for="page in pages" :key="page.id" :value="page.slug">{{ page.slug }}</option>
+        </select>
         </div>
-        <img class="current-image" :src="slideImage" alt="">
-        <button @click.prevent="imageList()" class="add-img">Select Image</button>
-        <div v-if="showImageGrid" class="image-grid">
-            <img class="new-slide-img-option" @click.prevent="addImageToSlide(image)" v-for="image in images" :key="image.id" :src="'/' + image.image_path" alt="">
-            <NewImage @refreshImages="getImages()"/>
-        </div>
-        <button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
-            <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-            Save Changes
+
+        <div class="form-slide-image form-field">
+        <img class="current-image" :src="slideImage" alt="Current slide image" />
+        <button type="button" class="btn-default add-img" @click.prevent="imageList()" aria-expanded="showImageGrid.toString()" aria-controls="imageGrid">
+            Select Image
         </button>
-        <Link 
-            v-if="$page.props.auth.user"
-            href="/cms/slides"
-            method="get"
-            class="option"
-        >
-            Cancel Edit
+        </div>
+
+        <div v-if="showImageGrid" id="imageGrid" class="image-grid" aria-label="Image selection grid">
+        <img
+            v-for="image in images"
+            :key="image.id"
+            class="new-slide-img-option"
+            :src="'/' + image.image_path"
+            alt="Slide image option"
+            role="button"
+            tabindex="0"
+            @click.prevent="addImageToSlide(image)"
+        />
+        <NewImage @refreshImages="getImages()" />
+        </div>
+
+        <button type="submit" class="btn-default mt-2 w-full" tabindex="5" :disabled="form.processing" :aria-busy="form.processing">
+        <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
+        Save Changes
+        </button>
+
+        <Link v-if="$page.props.auth.user" href="/cms/slides" method="get" class="btn-default" aria-label="Cancel and return to slide list">
+        Cancel Edit
         </Link>
-     </form>
-   </template>
+    </fieldset>
+    </form>
+</template>
    
 <script>
 import NewImage from '@/components/cms/slides/images/NewImage.vue';

@@ -18,6 +18,8 @@ class Footer extends Model
         'logo_id',
         'is_saved',
         'name',
+        'template_id',
+        'order',
     ];
 
     protected $casts = [
