@@ -157,9 +157,9 @@ class WidgetController extends Controller
                 'link' => $header['link'] ?? null,
                 'section' =>$header['section'],
                 'order' => $index + 1,
-                'name' => $header['name'],
-                'is_saved' => $header['is_saved'],
-                'template_id' => $header['template_id'],
+                'name' => $header['name'] ?? null,
+                'is_saved' => $header['is_saved'] ?? false,
+                'template_id' => $header['template_id'] ?? null,
             ]);
         }
         foreach ($footers as $index => $footer) {

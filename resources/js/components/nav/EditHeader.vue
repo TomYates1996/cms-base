@@ -1,25 +1,35 @@
 <template>
-    <div class="edit-widget">
-          Edit Header
-          <div class="slide-link">
-            <label for="link">Link</label>
-            <input id="link" required type="text" v-model="header.link" >
+    <div class="edit-widget form tab-inners">
+      <fieldset class="form-inner">
+        <legend class="form-title">Edit Header</legend>
+        <div class="form-slide-link form-field">
+          <label for="header-link">Link</label>
+          <input id="header-link" name="header-link" type="text" v-model="header.link" required aria-required="true" />
         </div>
-        <button @click="imageList()" class="add-img">Logo</button>
-        <div v-if="showImageGrid" class="image-grid">
-            <img class="new-slide-img-option" @click="addImageToSlide(image, index)" v-for="(image, index) in images" :key="image.id" :src="'/' + image.image_path" alt="">
-            <NewImage @refreshImages="getImages()"/>
+        <div class="form-slide-image form-field">
+          <button type="button" @click="imageList()" class="btn-default add-img" aria-label="Select a logo image">Logo</button>
+          <div v-if="showImageGrid" class="image-grid" role="grid" aria-labelledby="image-grid-label">
+            <span id="image-grid-label" class="sr-only">Select an image</span>
+            <img v-for="(image, index) in images" :key="image.id" class="new-slide-img-option" @click="addImageToSlide(image, index)" :src="'/' + image.image_path" :alt="'Select ' + image.name" role="gridcell" />
+            <NewImage @refreshImages="getImages" />
+          </div>
         </div>
-        <select name="section" id="" v-model="header.section" required>
+        <div class="form-slide-link form-field">
+          <label for="section-select">Section</label>
+          <select id="section-select" name="section" v-model="header.section" required aria-label="Select section for the header" aria-required="true">
             <option value="primary">Primary</option>
             <option value="secondary">Secondary</option>
             <option value="footer">Footer</option>
-        </select>
-  
-          <button @click="saveEdit()">Save Changes</button>
-          <button @click="cancelEdit()">Cancel</button>
-      </div>
+          </select>
+        </div>
+        <div class="form-actions btn-row">
+          <button type="button" @click="saveEdit()" class="btn-default" aria-label="Save header changes">Save Changes</button>
+          <button type="button" @click="cancelEdit()" class="btn-default cancel-update-slide" aria-label="Cancel editing header">Cancel</button>
+        </div>
+      </fieldset>
+    </div>
   </template>
+  
   
   <script>
 import NewImage from '../cms/slides/images/NewImage.vue';
@@ -57,8 +67,11 @@ import NewImage from '../cms/slides/images/NewImage.vue';
         },
       },
   }
-  </script>
+</script>
   
-  <style>
+<style scoped>
+    .edit-widget {
+        padding: 20px;
+    }
     
-  </style>
+</style>

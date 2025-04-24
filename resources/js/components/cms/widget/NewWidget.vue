@@ -164,87 +164,108 @@ export default {
   border-radius: 6px;
   padding: 10px;
 }
-.slide-list li.slide-item {
+
+.slide-list {
+  li.slide-item {
     display: flex;
-   .slide-list-img {
+
+    .slide-list-img {
       height: 40px;
       width: 40px;
       border-radius: 5px;
-  }
-}
-.slide-item .slide-card {
-  display: flex;
-  gap: 10px;
-  .slide-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    .slide-actions {
+    }
+
+    .slide-card {
       display: flex;
       gap: 10px;
+
+      .slide-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .slide-actions {
+          display: flex;
+          gap: 10px;
+        }
+      }
     }
   }
 }
+
 .modal-content {
-  padding: 20px 20px
+  padding: 20px;
 }
+
 .tab-list {
   display: flex;
   padding-left: 20px;
   gap: 2px;
+
   button {
     border-bottom: 0px;
     border-bottom-right-radius: 0px;
     border-bottom-left-radius: 0px;
   }
 }
-.tab-inners{
+
+.tab-inners {
   border: 2px solid var(--black);
   border-radius: 6px;
   padding: 20px;
+
   .form-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 20px 0px 0px 0px;
+
+    .form-title {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .widget-type-select {
+      select {
+        padding: 4px 10px;
+      }
+    }
+
+    .form-field {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: flex-start;
       gap: 10px;
-      padding: 20px 0px 0px 0px;
-      .form-title {
-          font-size: 22px;
-          font-weight: 600;
+      align-items: center;
+
+      label {
+        font-size: 18px;
       }
-      .widget-type-select {
-        select {
-          padding: 4px 10px;
-        }
-      }
-      .form-field { 
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          label {
-              font-size: 18px;
-          }
-      }
-      input {
-          border: 1px solid var(--black);
-          padding: 4px;
-          border-radius: 2px;
-      }
-      .form-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-        width: 100%;
-        margin-top: 20px;
-      }
+    }
+
+    input {
+      border: 1px solid var(--black);
+      padding: 4px;
+      border-radius: 2px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      width: 100%;
+      margin-top: 20px;
+    }
   }
 }
+
 .slide-popup {
   padding: 20px 0px;
 }
+
 .slides-buttons {
   display: flex;
   gap: 10px;
 }
+
 </style>

@@ -70,7 +70,7 @@
               <HamburgerHeader v-if="!anyTrue" :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
               <NewHeader v-if="showModal.new.headers" :pages="pages" @cancelAdd="cancelAdd('headers')" @addHeader="addHeader" @getImages="getImages" @deleteSaved="deleteSavedElement" :savedHeaders="localSaved.headers" :images="images"/>
               <NewWidget v-if="showModal.new.widgets" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
-              <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit('widgets')" @cancelEdit="cancelEdit('widgets')"/>
+              <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit('widgets')"/>
               <EditHeader v-if="showModal.edit.headers" :header="itemInfo" :images="images" @saveEdit="saveEdit('headers')" @cancelEdit="cancelEdit('headers')"/>
               <EditFooter v-if="showModal.edit.footers" :footer="itemInfo" :images="images" @saveEdit="saveEdit('footers')" @cancelEdit="cancelEdit('footers')"/>
               <NewFooter v-if="showModal.new.footers" :savedFooters="localSaved.footers" @getImages="getImages" @addFooter="addFooter" @cancelAdd="cancelAdd('footers')" :images="images"/>
@@ -205,25 +205,31 @@ export default {
         }
       },
       editElement(type, index) {
-        if (confirm('this is a saved element and editing will update all instances of the item thoughout the site')) {
+        if (this.localContent[type][index].is_saved === true) {
+          if (confirm('this is a saved element and editing will update all instances of the item thoughout the site')) {
+          } else {
+            return;
+          }
+        }
           Object.keys(this.showModal.edit).forEach(key => {
             this.showModal.edit[key] = false;
           });
           this.showModal.edit[type] = true;
           this.itemInfo = JSON.parse(JSON.stringify(this.localContent[type][index]));
           if (type === "widgets") {
-            this.slides.forEach (slide => {
-              if (this.itemInfo.slides.some(infoSlide => infoSlide.id === slide.id)) {
-                slide.selected = true;
-                  }
-            })
+            // this.initialSlides.forEach (slide => {
+            //   if (this.itemInfo.slides.some(infoSlide => infoSlide.id === slide.id)) {
+            //     slide.selected = true;
+            //     }
+            // })
           }
           this.editIndex = index;
-        }
       },
-      saveEdit(type,) {
+      saveEdit(type, slides) {
         if (type === "widgets") {
-          this.selectedSlides = this.slides.filter(slide => slide.selected);
+          console.log(slides);
+          
+          this.selectedSlides = slides;
           this.itemInfo.slides = this.selectedSlides;
         } else if (type === "footers" || type === "headers") {
           this.itemInfo.pages = this.pages[this.itemInfo.section];

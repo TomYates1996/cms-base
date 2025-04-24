@@ -18,7 +18,7 @@
                 <legend id="form-header" class="form-title">Add a New Header</legend>
     
                 <div class="form-slide-link form-field">
-                    <label for="section">Link</label>
+                    <label for="section">Logo Link</label>
                     <select id="header-logo-link" name="header-logo-link" v-model="newHeader.link" aria-label="Select link for the header logo" aria-required="false">
                         <optgroup
                         v-for="(sectionPages, sectionName) in pages" :label="sectionName" :key="sectionName"
@@ -39,7 +39,7 @@
                 <div v-if="showImageGrid" class="image-grid" role="grid" aria-labelledby="image-grid-label">
                     <span id="image-grid-label" class="sr-only">Select an image</span>
                     <img class="new-slide-img-option" @click="addImageToSlide(image, index)" v-for="(image, index) in images" :key="image.id" :src="'/' + image.image_path" :alt="'Select ' + image.name" role="gridcell" />
-                    <NewImage @refreshImages="getImages" />
+                    <!-- <NewImage @refreshImages="getImages" /> -->
                 </div>
                 </div>
     

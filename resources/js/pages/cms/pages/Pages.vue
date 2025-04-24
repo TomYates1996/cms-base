@@ -34,7 +34,7 @@
             <button @click="toggleNew()" :aria-expanded="showModal.new.toString()" :aria-controls="'newPageForm'" class="btn-default">
                 {{ showModal.new ? 'Cancel' : 'New Page' }}
             </button>
-            <Link v-if="$page.props.auth.user && parent" :href="'/cms/pages/' + parent.section" method="get" role="button" class="btn-default" aria-label="Return to parent page">
+            <Link v-if="$page.props.auth.user && parent" :href="this.parentUrl" method="get" role="button" class="btn-default" aria-label="Return to parent page">
                 Parent
             </Link>
         </div>
@@ -70,6 +70,18 @@ export default {
             },
             showForm : false,
             currentPage: {},       
+        }
+    },
+    computed: {
+        parentUrl() {
+            let slug = '';
+            if (this.parent.level === 1) {
+                slug = `/cms/pages/${this.parent.section}`;
+                return slug;
+            } else {
+                slug = `/cms/pages/${this.parent.slug}`;
+                return slug;
+            }
         }
     },
     // mounted() {

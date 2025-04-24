@@ -63,9 +63,14 @@ export default {
       createPage () {
         this.form.parent = this.parent;
         this.form.section = this.section;
+        
         this.form.post(route('api.pages.store'), {
         onSuccess: () => {
-          this.$inertia.visit(`/cms/pages/${this.section}`);  
+          if (this.parent) {
+            this.$inertia.visit(`/cms/pages/children/${this.parent.slug}`);  
+          } else {
+            this.$inertia.visit(`/cms/pages/${this.section}`);  
+          }
         },
         onError: (errors) => {
           console.log('Form submission error:', errors); 

@@ -134,4 +134,8 @@ html {
         background-color: var(--white);
         color: var(--black);
     }
+    a:hover {
+        color: var(--sea-green);
+        text-decoration: underline;
+    }
 }

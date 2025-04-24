@@ -70,6 +70,7 @@ class PageController extends Controller
         return Inertia::render('cms/pages/Pages', [
             'pages' => $children,
             'parent' => $page,
+            'section' => $page['section'],
         ]);
     }
     // Load the CMS Page edit Page
