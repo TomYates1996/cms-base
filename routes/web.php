@@ -7,13 +7,17 @@ use App\Http\Controllers\SlideController;
 use App\Http\Controllers\WidgetController;
 use App\Http\Controllers\ImageController;
 
+
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('dashboard', function () {
+Route::redirect('/cms', 'cms/dashboard', 301);
+
+Route::get('cms/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified'])->name('cms.dashboard');
+
 
 ////////////// Routes for non authenticated users //////////////
 
@@ -25,6 +29,8 @@ require __DIR__.'/auth.php';
 Route::get('api/pages', [PageController::class, 'index']);
 Route::get('api/pages', [PageController::class, 'index']);
 Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
+
+Route::get('cms/dashboard', [PageController::class, 'load_dashboard'])->name('cms.dashboard');
 
 // CMS Actions
 Route::middleware('auth')->group(function () {

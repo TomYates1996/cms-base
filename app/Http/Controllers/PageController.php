@@ -153,6 +153,8 @@ class PageController extends Controller
             return $header;
         });
 
+        $page->increment('views');
+
         return Inertia::render('Welcome', [
             'page' => $page,
             'pages' => $navPages,
@@ -246,5 +248,20 @@ class PageController extends Controller
         } else {
             return;
         }
+    }
+
+     // Load CMS Dashboard
+    public function load_dashboard()
+    {
+        $totalViews = Page::sum('views');
+        
+        $topPages = \App\Models\Page::orderByDesc('views')
+            ->take(5)
+            ->get(['title', 'slug', 'views']);
+
+        return Inertia::render('Dashboard', [
+            'topPages' => $topPages,
+            'totalViews' => $totalViews,
+        ]);
     }
 }

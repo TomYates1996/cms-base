@@ -14,13 +14,13 @@
                 <tbody>
                     <tr v-for="page in pages" :key="page.id" class="page-item">
                         <td class="options-section" aria-label="Actions for page">
-                            <button v-if="$page.props.auth.user" class="option" @click="editDetails(page)" aria-label="Edit details for {{ page.title }} page"><font-awesome-icon :icon="['fas', 'keyboard']" /></button>
-                            <Link v-if="$page.props.auth.user" :href="`/cms/pages/edit-content/${page.slug}`" method="get" class="option" role="button" aria-label="Edit content for {{ page.title }}"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></Link>
-                            <Link v-if="$page.props.auth.user" :href="`/cms/pages/children/${page.slug}`" method="get" class="option" role="button" aria-label="View children for {{ page.title }}"><font-awesome-icon :icon="['fas', 'children']" /></Link>
-                            <button v-if="$page.props.auth.user" class="option" @click="deletePage(page.id)" aria-label="Delete {{ page.title }} page"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
+                            <button v-if="$page.props.auth.user" class="option" @click="editDetails(page)" title="Edit details" aria-label="Edit details for {{ page.title }} page"><font-awesome-icon :icon="['fas', 'keyboard']" /></button>
+                            <Link v-if="$page.props.auth.user" :href="`/cms/pages/edit-content/${page.slug}`" title="Edit content" method="get" class="option" role="button" aria-label="Edit content for {{ page.title }}"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></Link>
+                            <Link v-if="$page.props.auth.user" :href="`/cms/pages/children/${page.slug}`" method="get" title="View page children" class="option" role="button" aria-label="View children for {{ page.title }}"><font-awesome-icon :icon="['fas', 'children']" /></Link>
+                            <button v-if="$page.props.auth.user" class="option" @click="deletePage(page.id)" title="Delete page" aria-label="Delete {{ page.title }} page"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
                         </td>
-                        <td><a :href="'/' + page.slug" class="page-title" aria-label="Visit public page: {{ page.title }}">{{ page.title }}</a></td>
-                        <td><a :href="page.slug" class="page-slug" aria-label="Visit {{ page.title }}">{{ page.slug }}</a></td>
+                        <td><a :href="'/' + page.slug" class="page-title" title="Visit page" aria-label="Visit page: {{ page.title }}">{{ page.title }}</a></td>
+                        <td><a :href="'/' + page.slug" class="page-slug" title="Visit page" aria-label="Visit {{ page.title }}">{{ page.slug }}</a></td>
                         <td class="page-slug" aria-label="Show in nav">{{ page.show_in_nav ? 'Yes' : 'No' }}</td>
                         <td aria-label="Created by">{{ page.created_by }}</td>
                     </tr>
@@ -107,6 +107,14 @@ export default {
 <style scoped>
 .page-list {
     width: 100%;
+    tr, td {
+        text-align: left;
+    }
+    .options-section {
+        display: flex;
+        gap: 6px;
+    }
+
 }
 .table-head {
     border-bottom: 1px solid var(--black);

@@ -1,6 +1,6 @@
 <template>
   <nav>
-    <a href="/" class="app-name" aria-label="Go to homepage">{{ this.$appName }}</a>
+    <a href="/cms/dashboard" class="app-name" aria-label="Go to CMS dashboard">{{ this.$appName }}</a>
     <ul>
         <li>
             <button @click="toggle('pages')" :aria-expanded="this.expanded.pages" :aria-controls="'section-pages'" class="option accordion-toggle">
@@ -84,6 +84,11 @@ export default {
     nav {
         background-color: var(--pale-green);
         height: 100%;
+        .app-name {
+            padding: 10px 20px;
+            display: flex;
+            font-weight: 600;
+        }
         ul {
             li {
                 display: flex;
@@ -106,6 +111,9 @@ export default {
                 .accordion-toggle {
                     justify-content: space-between;
                 }
+            }
+            li:first-of-type {
+                border-top: 4px solid var(--black);
             }
         }
     }

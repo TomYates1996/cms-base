@@ -1,47 +1,57 @@
 <template>
   <div class="page-wrapper">
     <div class="page-left detail">
-      <button @click="savePage()" class="save-page">Save Page</button>
+      <div class="main-buttons">
+        <button @click="savePage()" class="btn-default">Save Page</button>
+        <Link 
+             v-if="$page.props.auth.user"
+             :href="`/cms/pages/${page.section}`"
+             method="get"
+             class="btn-default"
+          >
+              Cancel Changes
+          </Link>
+      </div>
       
       <!-- Header Sidebar -->
       <div class="sidebar-option sidebar-header">
         <h5>Header</h5>
-        <div v-for="(header, index) in localContent.headers" :key="index" class="widget-options">
+        <div v-for="(header, index) in localContent.headers" :key="index" class="widget-option">
             <p>Header - {{ header.section }}</p>
             <button @click="editElement('headers', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
             <button @click="deleteElement('headers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
             <button @click="saveWidget(header, 'headers', index)" class="save-btn"><font-awesome-icon :icon="header.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
         </div>
+        <button @click="openAddItem('headers')" class="btn-default" v-if="localContent.headers && localContent.headers.length < 1">Add Header</button>
       </div>
-      <button @click="openAddSaved('headers')" v-if="localContent.headers.length < 1">Add a saved header</button>
-      <button @click="openAddItem('headers')" v-if="localContent.headers && localContent.headers.length < 1">Add Navigation</button>
       <!-- Widgets Sidebar -->
       <div class="sidebar-option sidebar-widgets">
         <h5>Widgets</h5>
-        <div v-for="(widget, index) in localContent.widgets" :key="index" class="widget-options">
-            <p>{{ widget.type }}</p>
-            <button @click="editElement('widgets', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
-            <button @click="orderUp(index)" :disabled="index === 0" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-up']" /></button>
-            <button @click="orderDown(index)" :disabled="index === localContent.widgets.length - 1" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-down']" /></button>
-            <button @click="deleteElement('widgets', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
-            <button @click="saveWidget(widget, 'widgets', index)" class="save-btn"><font-awesome-icon :icon="widget.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
-            <button @click="cloneWidget(widget, 'widgets', index)" class="save-btn"><font-awesome-icon :icon="['fas', 'clone']" /></button>
+        <div class="widget-options">
+          <div v-for="(widget, index) in localContent.widgets" :key="index" class="widget-option">
+              <p>{{ widget.type }}</p>
+              <button @click="editElement('widgets', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
+              <div class="move-buttons">
+                <button @click="orderUp(index)" :disabled="index === 0" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-up']" /></button>
+                <button @click="orderDown(index)" :disabled="index === localContent.widgets.length - 1" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-down']" /></button>
+              </div>
+              <button @click="deleteElement('widgets', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
+              <button @click="saveWidget(widget, 'widgets', index)" class="save-btn"><font-awesome-icon :icon="widget.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
+              <button @click="cloneWidget(widget, 'widgets', index)" class="save-btn"><font-awesome-icon :icon="['fas', 'clone']" /></button>
           </div>
-          
-          <button @click="openAddItem('widgets')">Add a new widget</button>
-          <button @click="openAddSaved('widgets')">Add a saved widget</button>
         </div>
+        <button @click="openAddItem('widgets')" class="btn-default">Add Widget</button>
+      </div>
         <!-- Footer Sidebar -->
         <div class="sidebar-option sidebar-footer">
           <h5>Footer</h5>
-          <div v-for="(footer, index) in localContent.footers" :key="index" class="widget-options">
+          <div v-for="(footer, index) in localContent.footers" :key="index" class="widget-option">
             <p>Footer - {{ footer.section }}</p>
             <button @click="editElement('footers', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
             <button @click="deleteElement('footers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
             <button @click="saveWidget(footer, 'footers', index)" class="save-btn"><font-awesome-icon :icon="footer.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
         </div>
-        <button @click="openAddSaved('footers')" v-if="localContent.footers.length < 1">Add a saved footer</button>
-        <button @click="openAddItem('footers')" v-if="localContent.footers && localContent.footers.length < 1">Add Footer</button>
+        <button @click="openAddItem('footers')" class="btn-default" v-if="localContent.footers && localContent.footers.length < 1">Add Footer</button>
       </div>
             <!-- <EditSlide v-if="showEditSlide" :slide="slideToEdit"/> -->
           </div>
@@ -55,15 +65,15 @@
                 <button @click="deleteSavedElement(useType, index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
               </li>
             </ul>
-            <button @click="closeWhatsOpen" class="close-open" v-if="anyTrue">| Close |</button>
+            <!-- <button @click="closeWhatsOpen" class="close-open" v-if="anyTrue">| Close |</button> -->
 
               <HamburgerHeader v-if="!anyTrue" :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
-              <NewHeader v-if="showModal.new.headers" @cancelAdd="cancelAdd('headers')" @addHeader="addHeader" @getImages="getImages" :images="images"/>
-              <NewWidget v-if="showModal.new.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
+              <NewHeader v-if="showModal.new.headers" :pages="pages" @cancelAdd="cancelAdd('headers')" @addHeader="addHeader" @getImages="getImages" @deleteSaved="deleteSavedElement" :savedHeaders="localSaved.headers" :images="images"/>
+              <NewWidget v-if="showModal.new.widgets" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
               <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit('widgets')" @cancelEdit="cancelEdit('widgets')"/>
               <EditHeader v-if="showModal.edit.headers" :header="itemInfo" :images="images" @saveEdit="saveEdit('headers')" @cancelEdit="cancelEdit('headers')"/>
               <EditFooter v-if="showModal.edit.footers" :footer="itemInfo" :images="images" @saveEdit="saveEdit('footers')" @cancelEdit="cancelEdit('footers')"/>
-              <NewFooter v-if="showModal.new.footers" @getImages="getImages" @addFooter="addFooter" @cancelAdd="cancelAdd('footers')" :images="images"/>
+              <NewFooter v-if="showModal.new.footers" :savedFooters="localSaved.footers" @getImages="getImages" @addFooter="addFooter" @cancelAdd="cancelAdd('footers')" :images="images"/>
               <div v-if="!anyTrue" class="widget-container">
                 <component v-for="widget in localContent.widgets" :key="widget.id" :is="widget.type" :widget="widget"/>
               </div>
@@ -73,6 +83,7 @@
   
 <script>
 import { defineAsyncComponent } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3'
 import axios from 'axios';
 import { useForm } from '@inertiajs/vue3';
@@ -116,6 +127,7 @@ export default {
       NewWidget,
       EditWidget,
       useForm,
+      Link,
       EditSlide,
         defineAsyncComponent,
         cards_2_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards2Across.vue')),
@@ -224,10 +236,8 @@ export default {
               slide.selected = false; 
             });
         }
-        console.log(this.itemInfo.is_saved);
         
         if (this.itemInfo.is_saved) {
-          console.log('its saved');
               axios.post(`/item/update-save`, {
               template_id: this.itemInfo.template_id,
               type: type,
@@ -252,6 +262,8 @@ export default {
       },
         deleteSavedElement(type, index) {
           if (confirm(`This is a saved item and deleting will remove from all pages it is present on.`)) {
+            console.log(type, index);
+            
               let item = this.localSaved[type][index];
               axios.post(`/item/delete-save`, {
               template_id: item.template_id,
@@ -421,13 +433,27 @@ export default {
   <style scoped>
     .page-wrapper {
         display: flex;
-        gap: 20px;
         .page-left {
             display: flex;
             flex-direction: column;
             border-right: 2px solid var(--black);
             width: 25%;
             gap: 10px;
+            background-color: var(--pale-green);
+            .main-buttons {
+              padding-top: 20px;
+              display: flex;
+              justify-content: center;
+              gap: 10px;
+              border-bottom: 2px solid var(--white);
+              padding-bottom: 20px;
+              background-color: var(--dull-green);
+              @media (hover:hover) {
+                .btn-default:hover {
+                  border-color: var(--white)
+                }
+              }
+            }
             .widget-options {
                 display: flex;
                 gap: 8px;
@@ -464,8 +490,44 @@ export default {
       align-items: center;
       background-color: var(--white);
     }
-    .sidebar-option h5 {
-      border-bottom: 1px solid var(--black);
+    .sidebar-option {
+      display: flex;
+      gap: 20px;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 20px;
+      h5 {
+        border-bottom: 1px solid var(--black);
+        width: 100%;
+      }
+      .widget-options {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items:flex-start;
+        width: 100%;
+      }
+      .widget-option {
+        border: 2px solid var(--white);
+        border-radius: 6px;
+        padding: 4px 8px;
+        background-color: var(--sea-green);
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        .move-buttons {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          .edit-btn {
+            display: flex;
+          }
+        }
+      }
     }
     .saved-item-list {
       display: flex;

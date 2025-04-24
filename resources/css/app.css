@@ -107,8 +107,9 @@ html {
 
 /* Global styles */
 
-.btn-default {
-    border: 1px solid var(--black);
+.btn-default,
+.btn-alt {
+    border: 2px solid var(--black);
     padding: 4px 8px;
     border-radius: 6px;
     background-color: var(--white);
@@ -116,10 +117,21 @@ html {
     transition: 0.2s ease;
     text-align: center;
 }
+.btn-alt {
+    border-color: var(--sea-green);
+    color: var(--white);
+    background-color: var(--sea-green);
+}
+
 @media (hover:hover) {
     .btn-default:hover {
         background-color: var(--sea-green);
-        border-color: var(--white);
+        border-color: var(--sea-green);
         color: var(--white);
+    }
+    .btn-alt:not(.no-hover):hover {
+        border-color: var(--black);
+        background-color: var(--white);
+        color: var(--black);
     }
 }
