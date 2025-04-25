@@ -110,6 +110,21 @@ class PageController extends Controller
                 return $footer;
             });
 
+        $flatPages = Page::orderBy('level')->get();
+        $groupedFlatPages = $flatPages->groupBy('section');
+
+        
+        $pages = [];
+        
+        foreach ($groupedFlatPages as $section => $pagesInSection) {
+            $pages[$section] = $this->buildTree($pagesInSection->toArray());
+        }
+
+        $headers = $page->headers->map(function ($header) use ($pages) {
+            $header->pages = $pages[$header->section] ?? collect();
+            return $header;
+        });
+
         return Inertia::render('cms/pages/EditContent', [
             'pages' => $pages,
             'page' => $page,
@@ -121,12 +136,12 @@ class PageController extends Controller
             'footers' => $footers,
         ]);
     }
-
+    
     // Grab all the pages that exist on the database
     public function index_all()
     {
         $pages = Page::all();
-
+        
         return response()->json([
             'pages' => $pages,
         ]);
@@ -135,27 +150,27 @@ class PageController extends Controller
     public function index()
     {
         $pages = Page::where('show_in_nav', true)->get();
-
+        
         return response()->json([
             'pages' => $pages,
         ]);
     }
-
+    
     // Load a page
     public function show($slug)
     {
         $slug = ltrim($slug, '/');
         $page = Page::where('slug', $slug)->with('widgets.slides.image', 'headers.logo')->firstOrFail();
-
+        
         $navPages = Page::where('show_in_nav', true)->get()->groupBy('section');
-
+        
         $headers = $page->headers->map(function ($header) use ($navPages) {
             $header->pages = $navPages[$header->section] ?? collect();
             return $header;
         });
-
+        
         $page->increment('views');
-
+        
         return Inertia::render('Welcome', [
             'page' => $page,
             'pages' => $navPages,
@@ -163,33 +178,33 @@ class PageController extends Controller
             'headers' =>$headers,
         ]);
     }
-
+    
     // Update a page
     public function update(Request $request, $slug)
     {
-
+        
         $page = Page::where('slug', $slug)->firstOrFail();
-
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string',
             'show_in_nav' => 'boolean',
         ]);
-
+        
         $validated['slug'] = ltrim($validated['slug'], '/');
-
-
+        
+        
         $page->update($validated);
-
+        
         return Inertia::render('cms/pages/Pages', [
         ]);
     }
-
+    
     // Create a new page
     public function store(Request $request)
     {
         $user = auth()->user();
-
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'slug' => 'required|string',
@@ -202,7 +217,7 @@ class PageController extends Controller
         $validated['parent_id'] = $parent['id'] ?? null;
         
         $childSlug = trim($validated['slug'], '/');
-
+        
         if ($parent) {
             $parentSlug = $parent['slug'];
             $validated['slug'] = $parentSlug . '/' . $childSlug;
@@ -212,24 +227,24 @@ class PageController extends Controller
             $validated['slug'] = $childSlug;
             $validated['level'] = 1;
         }
-     
+        
         unset($validated['parent']);
-
+        
         $validated['created_by'] = $user->id;
         
         $page = Page::create($validated);
-
+        
         return;
     }
-
+    
     public function destroy(Request $request, $id) 
     {
         $user = auth()->user();
         if ($user) {
             $page = Page::findOrFail($id);
-           
+            
             $children = Page::where('parent_id', $page->id)->get();
-           
+            
             foreach ($children as $child) {
                 $grandchildren = Page::where('parent_id', $child->id)->get();
                 foreach ($grandchildren as $grandchild) {
@@ -241,28 +256,45 @@ class PageController extends Controller
                 $child->headers()->delete();
                 $child->delete();
             }
-
+            
             $page->widgets()->delete();
             $page->headers()->delete();
-        
+            
             $page->delete();
         } else {
             return;
         }
     }
-
-     // Load CMS Dashboard
+    
+    // Load CMS Dashboard
     public function load_dashboard()
     {
         $totalViews = Page::sum('views');
         
         $topPages = \App\Models\Page::orderByDesc('views')
-            ->take(5)
-            ->get(['title', 'slug', 'views']);
-
+        ->take(5)
+        ->get(['title', 'slug', 'views']);
+        
         return Inertia::render('Dashboard', [
             'topPages' => $topPages,
             'totalViews' => $totalViews,
         ]);
+    }
+    
+    private function buildTree($pages, $parentId = null) {
+        $branch = [];
+    
+        foreach ($pages as $page) {
+            // If parent_id is null or matches, treat as an array
+            if ($page['parent_id'] === $parentId) {
+                $children = $this->buildTree($pages, $page['id']);
+                if ($children) {
+                    $page['children'] = $children;
+                }
+                $branch[] = $page;
+            }
+        }
+    
+        return $branch;
     }
 }

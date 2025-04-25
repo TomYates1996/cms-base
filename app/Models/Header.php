@@ -18,6 +18,7 @@ class Header extends Model
         'name',
         'template_id',
         'order',
+        'menu_type',
     ];
 
     public function logo()

@@ -67,7 +67,7 @@
             </ul>
             <!-- <button @click="closeWhatsOpen" class="close-open" v-if="anyTrue">| Close |</button> -->
 
-              <HamburgerHeader v-if="!anyTrue" :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
+              <HamburgerHeader :header="header" v-if="!anyTrue" :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
               <NewHeader v-if="showModal.new.headers" :pages="pages" @cancelAdd="cancelAdd('headers')" @addHeader="addHeader" @getImages="getImages" @deleteSaved="deleteSavedElement" :savedHeaders="localSaved.headers" :images="images"/>
               <NewWidget v-if="showModal.new.widgets" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
               <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit('widgets')"/>

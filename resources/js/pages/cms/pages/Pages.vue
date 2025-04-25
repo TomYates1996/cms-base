@@ -79,7 +79,10 @@ export default {
                 slug = `/cms/pages/${this.parent.section}`;
                 return slug;
             } else {
-                slug = `/cms/pages/${this.parent.slug}`;
+                const segments = this.parent.slug.split('/').filter(Boolean); // split and remove empty strings
+                segments.pop();
+                segments.join('/');
+                slug = `/cms/pages/children/${segments}`;
                 return slug;
             }
         }

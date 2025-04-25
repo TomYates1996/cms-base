@@ -55,6 +55,13 @@ html {
         --sea-green: #0a5749;
         --dull-green: #32570a;
         --pale-green: #afd18a;
+        /* Site main colours */
+        --primary-colour: var(--sea-green);
+        --text-primary: var(--white);
+        --secondary-colour: var(--pale-green);
+        --text-secondary: var(--black);
+        --tertiary-colour: var(--dull-green);
+        --text-tertiary: var(--white);
         /* Widths */
         --width-base: 1050px;
     }

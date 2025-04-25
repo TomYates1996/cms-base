@@ -44,12 +44,19 @@
                 </div>
     
                 <div class="form-slide-link form-field">
-                <label for="section">Section</label>
-                <select id="section" name="section" v-model="newHeader.section" required aria-label="Select section for the header" aria-required="true">
-                    <option value="primary">Primary</option>
-                    <option value="secondary">Secondary</option>
-                    <option value="footer">Footer</option>
-                </select>
+                    <label for="section">Section</label>
+                    <select id="section" name="section" v-model="newHeader.section" required aria-label="Select section for the header" aria-required="true">
+                        <option value="primary">Primary</option>
+                        <option value="secondary">Secondary</option>
+                        <option value="footer">Footer</option>
+                    </select>
+                </div>
+                <div class="form-slide-link form-field">
+                    <label for="menu_type">Menu Type</label>
+                    <select id="menu_type" name="menu type" v-model="newHeader.menu_type" required aria-label="Select menu type for the header" aria-required="true">
+                        <option value="dropdown">Dropdown</option>
+                        <option value="hamburger">Hamburger</option>
+                    </select>
                 </div>
     
                 <div class="form-actions btn-row">

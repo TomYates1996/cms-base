@@ -119,6 +119,7 @@ class WidgetController extends Controller
             'headers.*.logo.id' => 'nullable|exists:images,id',
             'headers.*.link' => 'nullable|string',
             'headers.*.section' => 'required|in:primary,secondary,footer',
+            'headers.*.menu_type' => 'required|in:dropdown,hamburger',
             
             'footers' => 'nullable|array',
             'footers.*.logo.id' => 'nullable|exists:images,id',
@@ -160,6 +161,7 @@ class WidgetController extends Controller
                 'name' => $header['name'] ?? null,
                 'is_saved' => $header['is_saved'] ?? false,
                 'template_id' => $header['template_id'] ?? null,
+                'menu_type' => $header['menu_type'],
             ]);
         }
         foreach ($footers as $index => $footer) {

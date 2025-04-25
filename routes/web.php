@@ -28,7 +28,6 @@ require __DIR__.'/auth.php';
 // Pages
 Route::get('api/pages', [PageController::class, 'index']);
 Route::get('api/pages', [PageController::class, 'index']);
-Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
 
 Route::get('cms/dashboard', [PageController::class, 'load_dashboard'])->name('cms.dashboard');
 
@@ -43,7 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/cms/slides', [SlideController::class, 'load'])->name('slides.load');
     Route::get('/cms/pages', [PageController::class, 'load'])->name('pages.load');
     Route::delete('/cms/pages/delete/{page_id}', [PageController::class, 'destroy'])->name('pages.delete');
-    Route::get('/cms/pages/children/{page_slug}', [PageController::class, 'children'])->name('pages.children');
+    Route::get('/cms/pages/children/{page_slug}', [PageController::class, 'children'])->where('page_slug', '.*')->name('pages.children');
     Route::get('/cms/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
     Route::get('/cms/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
     Route::get('api/slides', [SlideController::class, 'index']);
@@ -68,8 +67,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/images/update', [ImageController::class, 'update'])->name('images.update');
         Route::get('/slides/new', [SlideController::class, 'load_create'])->name('slides.load.create');
         Route::delete('/slides/delete/{id}', [SlideController::class, 'delete'])->name('slides.delete');
-
-
+        
+        
         // Display all widgets for a page
         Route::get('/pages/{pageId}/widgets', [WidgetController::class, 'index'])->name('widgets.index');
         
@@ -83,7 +82,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
         
         Route::post('/pages/save', [WidgetController::class, 'save'])->name('page.save');
-
+        
     });
-
+    
 });
+
+Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');
