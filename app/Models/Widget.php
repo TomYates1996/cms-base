@@ -15,9 +15,15 @@ class Widget extends Model
         'name',
         'template_id',
         'order',
+        'subtitle',
+        'description',
     ];
     public function slides()
     {
         return $this->belongsToMany(Slide::class, 'widget_slide');
+    }
+    public function footers()
+    {
+        return $this->belongsToMany(Footer::class, 'footer_widget', 'widget_id', 'footer_id');
     }
 }

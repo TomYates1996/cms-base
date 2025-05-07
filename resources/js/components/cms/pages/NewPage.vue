@@ -16,7 +16,7 @@
         <div class="form-show-nav form-field">
           <label id="show-in-nav-label">Show in Navigation:</label>
           <button class="show-in-nav btn-default" @click.prevent="toggleShow" type="button" :aria-pressed="form.show_in_nav" aria-labelledby="show-in-nav-label">
-            {{ form.show_in_nav ? 'No' : 'Yes' }}
+            {{ form.show_in_nav ? 'Yes' : 'No' }}
           </button>
         </div>
 

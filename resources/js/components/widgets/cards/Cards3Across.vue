@@ -23,9 +23,8 @@
 export default {
     props: {
         widget: Object,
+        test: String,
     },
-    created() {
-    }
 }
 </script>
 

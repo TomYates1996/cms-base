@@ -41,6 +41,10 @@ export default {
             openCol3Dropdown: null,
         }
     },
+    created() {
+        console.log(this.pages);
+        
+    },
     methods: {
         toggle() {
            this.toggled = !this.toggled;

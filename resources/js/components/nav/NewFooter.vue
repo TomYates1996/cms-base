@@ -50,6 +50,21 @@
               <option value="footer">Footer</option>
             </select>
           </div>
+
+          <ul v-if="newFooter.social">
+            <li v-for="social in newFooter.social" :key="social.id">
+              {{ social.label }}
+              <font-awesome-icon :icon="['fab', social.icon]" />
+            </li>
+          </ul>
+
+          <button class="btn-default" @click.prevent="showAdd = !showAdd">Add Social Media</button>
+          <AddList v-if="showAdd" :items="socialMedia" :type="'social'" @created="$emit('created', $event)" @selected="addSocial"/>
+
+          <!-- Footer Widget -->
+          <div class="footer-cta">
+            <button class="btn-default" @click.prevent="addCTA()">Add CTA</button>
+          </div>
   
           <!-- Actions -->
           <div class="form-actions btn-row">
@@ -61,26 +76,42 @@
     </div>
   </template>
  
- <script>
- import NewImage from '../cms/slides/images/NewImage.vue';
+<script>
+import AddList from '../cms/reusable/AddList.vue';
+import NewImage from '../cms/slides/images/NewImage.vue';
+import axios from 'axios';
+
  
  
- export default {
-     components: {
-         NewImage
-     },
-     props: {
-         images: Array,
-         savedFooters: Array,
-     },
-     data() {
+export default {
+    components: {
+        NewImage,
+        AddList,
+    },
+    props: {
+        images: Array,
+        savedFooters: Array,
+        socialMedia: Array,
+    },
+    data() {
          return {
              newFooter: {},
              showImageGrid: false,
              newTab: true,
+             showAdd: false,
          }
-     },
+    },
      methods: {
+          async addCTA() {
+            const response = await axios.post('api.create.cta.test', {
+                footer_id: 1,
+                title: 'Sign up',
+                type: 'cta',
+                description: 'Join our mailing list for all the latest news and info.',
+            });
+            console.log(response);
+            
+          },
          addFooter() {
              this.$emit('addFooter', this.newFooter)
          },
@@ -101,6 +132,14 @@
          savedFooter(item) {
             this.newFooter = item;
             this.addFooter();
+         },
+         addSocial(item) {
+          this.showAdd = false;
+          if (this.newFooter.social) {
+            this.newFooter.social.push(item);
+          } else {
+            this.newFooter.social = [item]
+          }
          },
      },
  }

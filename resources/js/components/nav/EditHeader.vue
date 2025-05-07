@@ -15,12 +15,27 @@
           </div>
         </div>
         <div class="form-slide-link form-field">
-          <label for="section-select">Section</label>
-          <select id="section-select" name="section" v-model="header.section" required aria-label="Select section for the header" aria-required="true">
-            <option value="primary">Primary</option>
-            <option value="secondary">Secondary</option>
-            <option value="footer">Footer</option>
-          </select>
+            <label for="menu_type">Menu Type</label>
+            <select id="menu_type" name="menu type" v-model="header.menu_type" required aria-label="Select menu type for the header" aria-required="true">
+                <option value="dropdown">Dropdown</option>
+                <option value="hamburger">Hamburger</option>
+            </select>
+        </div>
+        <div class="form-slide-link form-field">
+            <label for="section">Section</label>
+            <select id="section" name="section" v-model="header.section" required aria-label="Select section for the header" aria-required="true">
+                <option value="primary">Primary</option>
+                <option value="secondary">Secondary</option>
+                <option value="footer">Footer</option>
+            </select>
+        </div>
+        <div class="form-slide-link form-field" v-if="header.menu_type === 'hamburger'">
+            <label for="section-hamburger">Hamburger Section</label>
+            <select id="section-hamburger" name="section hamburger" v-model="header.section_hamburger" required aria-label="Select section for the hamburger" aria-required="true">
+                <option value="primary">Primary</option>
+                <option value="secondary">Secondary</option>
+                <option value="footer">Footer</option>
+            </select>
         </div>
         <div class="form-actions btn-row">
           <button type="button" @click="saveEdit()" class="btn-default" aria-label="Save header changes">Save Changes</button>

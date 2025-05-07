@@ -1,38 +1,42 @@
 <template>
     <div class="page-wrap">
         <div class="page-left">
-            <table v-if="!showModal.edit.details && !showModal.new" class="page-list" role="table" aria-label="Page List">
+            <table v-if="!showModal.edit.details && !showModal.new && !showModal.newLink" class="page-list" role="table" aria-label="Page List">
                 <thead>
                     <tr class="table-head">
                         <th scope="col">Details</th>
                         <th scope="col">Title</th>
                         <th scope="col">Slug</th>
                         <th scope="col">Show in Nav</th>
-                        <th scope="col">Created By</th>
+                        <th scope="col">Type</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="page in pages" :key="page.id" class="page-item">
                         <td class="options-section" aria-label="Actions for page">
-                            <button v-if="$page.props.auth.user" class="option" @click="editDetails(page)" title="Edit details" aria-label="Edit details for {{ page.title }} page"><font-awesome-icon :icon="['fas', 'keyboard']" /></button>
-                            <Link v-if="$page.props.auth.user" :href="`/cms/pages/edit-content/${page.slug}`" title="Edit content" method="get" class="option" role="button" aria-label="Edit content for {{ page.title }}"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></Link>
-                            <Link v-if="$page.props.auth.user" :href="`/cms/pages/children/${page.slug}`" method="get" title="View page children" class="option" role="button" aria-label="View children for {{ page.title }}"><font-awesome-icon :icon="['fas', 'children']" /></Link>
+                            <button v-if="$page.props.auth.user && !page.is_link" class="option" @click="editDetails(page)" title="Edit details" aria-label="Edit details for {{ page.title }} page"><font-awesome-icon :icon="['fas', 'keyboard']" /></button>
+                            <Link v-if="$page.props.auth.user && !page.is_link" :href="`/cms/pages/edit-content/${page.slug}`" title="Edit content" method="get" class="option" role="button" aria-label="Edit content for {{ page.title }}"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></Link>
+                            <Link v-if="$page.props.auth.user && !page.is_link" :href="`/cms/pages/children/${page.slug}`" method="get" title="View page children" class="option" role="button" aria-label="View children for {{ page.title }}"><font-awesome-icon :icon="['fas', 'children']" /></Link>
                             <button v-if="$page.props.auth.user" class="option" @click="deletePage(page.id)" title="Delete page" aria-label="Delete {{ page.title }} page"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
                         </td>
                         <td><a :href="'/' + page.slug" class="page-title" title="Visit page" aria-label="Visit page: {{ page.title }}">{{ page.title }}</a></td>
                         <td><a :href="'/' + page.slug" class="page-slug" title="Visit page" aria-label="Visit {{ page.title }}">{{ page.slug }}</a></td>
                         <td class="page-slug" aria-label="Show in nav">{{ page.show_in_nav ? 'Yes' : 'No' }}</td>
-                        <td aria-label="Created by">{{ page.created_by }}</td>
+                        <td aria-label="Type">{{ page.is_link ? 'Link' : 'Page' }}</td>
                     </tr>
                 </tbody>
             </table>
 
             <EditPage @cancelNew="toggleEdit" v-if="showModal.edit.details" :page="currentPage"/>
             <NewPage v-if="showModal.new" :parent="parent" :section="section" @cancelNew="toggleNew"/>
+            <NewPageLink v-if="showModal.newLink" :parent="parent" :section="section"/>
         </div>
         <div class="page-right">
             <button @click="toggleNew()" :aria-expanded="showModal.new.toString()" :aria-controls="'newPageForm'" class="btn-default">
                 {{ showModal.new ? 'Cancel' : 'New Page' }}
+            </button>
+            <button @click="toggleNewLink()" :aria-expanded="showModal.newLink.toString()" :aria-controls="'newPageLinkForm'" class="btn-default">
+                {{ showModal.newLink ? 'Cancel' : 'New Page Link' }}
             </button>
             <Link v-if="$page.props.auth.user && parent" :href="this.parentUrl" method="get" role="button" class="btn-default" aria-label="Return to parent page">
                 Parent
@@ -48,6 +52,7 @@ import NewPage from '@/components/cms/pages/NewPage.vue';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3'
 import CMSLayout from '@/layouts/CMSLayout.vue';
+import NewPageLink from '@/components/cms/pages/NewPageLink.vue';
 
   
 export default {
@@ -56,6 +61,7 @@ export default {
         Link,
         EditPage,
         NewPage,
+        NewPageLink,
     },
     props: {
         pages: Array,
@@ -67,6 +73,7 @@ export default {
             showModal: {
                 edit: {},
                 new: false,
+                newLink: false,
             },
             showForm : false,
             currentPage: {},       
@@ -111,6 +118,11 @@ export default {
         toggleNew() {
             this.showModal.new = !this.showModal.new;
             this.showModal.edit.details = false;
+        },
+        toggleNewLink() {
+            this.showModal.newLink = !this.showModal.newLink;
+            this.showModal.edit.details = false;
+            this.showModal.new = false;
         },
         toggleEdit() {
             this.showModal.edit.details = false;

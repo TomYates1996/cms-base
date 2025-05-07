@@ -11,6 +11,7 @@ use App\Models\Footer;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 
 
 class WidgetController extends Controller
@@ -104,81 +105,6 @@ class WidgetController extends Controller
         return;
     }
 
-    public function save(Request $request)
-    {
-        
-        $request->validate([
-            'page_id' => 'required|integer',
-            'widgets' => 'nullable|array',
-            'widgets.*.title' => 'nullable|string',
-            'widgets.*.type' => 'required|string',
-            'widgets.*.slides' => 'nullable|array', 
-            'widgets.*.slides.*.id' => 'integer|exists:slides,id',
-
-            'headers' => 'nullable|array',
-            'headers.*.logo.id' => 'nullable|exists:images,id',
-            'headers.*.link' => 'nullable|string',
-            'headers.*.section' => 'required|in:primary,secondary,footer',
-            'headers.*.menu_type' => 'required|in:dropdown,hamburger',
-            
-            'footers' => 'nullable|array',
-            'footers.*.logo.id' => 'nullable|exists:images,id',
-            'footers.*.section' => 'required|in:primary,secondary,footer',
-        ]);
-
-
-        $widgets = $request->input('widgets');
-        $headers = $request->input('headers');
-        $footers = $request->input('footers');
-        $page_id = $request->input('page_id');
-        
-        Widget::where('page_id', $page_id)->delete();
-        Header::where('page_id', $page_id)->delete();
-        Footer::where('page_id', $page_id)->delete();
-
-        foreach ($widgets as $index => $widget) {
-            $widget['page_id'] = $page_id;
-            $widget['order'] = $index + 1; 
-
-            if (!isset($widget['created_at'])) {
-                $widget['created_at'] = Carbon::now();  
-            }
-
-            $new_widget = Widget::create($widget);
-
-            if (isset($widget['slides']) && is_array($widget['slides'])) {
-                $new_widget->slides()->attach(array_column($widget['slides'], 'id'));
-            }
-        }
-
-        foreach ($headers as $index => $header) {
-            Header::create([
-                'page_id' => $page_id,
-                'logo_image_id' => $header['logo']['id'] ?? null,
-                'link' => $header['link'] ?? null,
-                'section' =>$header['section'],
-                'order' => $index + 1,
-                'name' => $header['name'] ?? null,
-                'is_saved' => $header['is_saved'] ?? false,
-                'template_id' => $header['template_id'] ?? null,
-                'menu_type' => $header['menu_type'],
-            ]);
-        }
-        foreach ($footers as $index => $footer) {
-            Footer::create([
-                'page_id' => $page_id,
-                'logo_id' => $footer['logo']['id'] ?? null,
-                'section' =>$footer['section'],
-                'order' => $index + 1,
-                'name' => $footer['name'],
-                'is_saved' => $footer['is_saved'],
-                'template_id' => $footer['template_id'],
-            ]);
-        }
-
-        return;
-    }
-
     public function save_widget(Request $request, Widget $widget)
     {
         $request->validate([
@@ -255,34 +181,72 @@ class WidgetController extends Controller
     public function save_footer(Request $request, Footer $footer)
     {
         if ($request->is_saved) {
+            // Generate a new template ID for the new footer version
             $templateId = (Footer::max('template_id') ?? 0) + 1;
-
+    
+            // Update the footer with new template ID and other data
             $footer->update([
                 'is_saved' => $request->is_saved,
                 'name' => $request->name,
                 'template_id' => $templateId,
             ]);
-            
-            $clonedFooter = $footer->replicate(); 
-            $clonedFooter->page_id = null; 
-            $clonedFooter->save(); 
-        
+    
+            // Check if a page is provided and associate the footer with the page
+            if (isset($request->page_id)) {
+                $page = Page::find($request->page_id);  // Find the page by ID
+    
+                // Associate the footer with the page using the pivot table
+                if ($page) {
+                    $footer->pages()->syncWithoutDetaching([$page->id]);  // This ensures a unique footer for the page
+                }
+            }
+    
+            // Handle social media data
+            if (isset($request->social_media) && is_array($request->social_media)) {
+                foreach ($request->social_media as $socialData) {
+                    $footer->socialMedia()->updateOrCreate(
+                        ['id' => $socialData['id'] ?? null],
+                        [
+                            'label' => $socialData['label'],
+                            'link' => $socialData['link'],
+                            'icon' => $socialData['icon'],
+                        ]
+                    );
+                }
+            }
+    
+            // Handle widgets data
+            if (isset($request->widgets) && is_array($request->widgets)) {
+                foreach ($request->widgets as $widgetData) {
+                    $footer->widgets()->updateOrCreate(
+                        ['id' => $widgetData['id'] ?? null],
+                        [
+                            'name' => $widgetData['name'],
+                            'title' => $widgetData['title'],
+                            'type' => $widgetData['type'],
+                            'order' => $widgetData['order'],
+                            'description' => $widgetData['description'],
+                        ]
+                    );
+                }
+            }
         } else {
-            $templateId = $footer->template_id;
-            $footerToDelete = Footer::where('template_id', $templateId)->whereNull('page_id')->first(); 
-            
+            // If footer is not being saved, handle removal
+            $footerToDelete = Footer::where('template_id', $footer->template_id)->whereNull('page_id')->first();
+    
             if ($footerToDelete) {
                 $footerToDelete->delete();
             }
-
+    
+            // Update footer attributes to mark it as not saved
             $footer->update([
                 'is_saved' => $request->is_saved,
                 'name' => $request->name,
                 'template_id' => null,
             ]);
         }
-        
-        return;
+    
+        return response()->json(['message' => 'Footer saved successfully.']);
     }
 
     public function create_save_widget(Request $request)
@@ -375,7 +339,7 @@ class WidgetController extends Controller
         ]);
 
         $item = $data['item'];
-
+        dd($item);
         if ($item['is_saved']) {
             $templateId = (Footer::max('template_id') ?? 0) + 1;
             $clonedFooterData = $item;
@@ -439,7 +403,7 @@ class WidgetController extends Controller
             'type' => 'required|string|in:widgets,headers,footers',
             'item' => 'required|array',
         ]);
-
+    
         $typeMap = [
             'widgets' => \App\Models\Widget::class,
             'headers' => \App\Models\Header::class,
@@ -455,11 +419,12 @@ class WidgetController extends Controller
         }
     
         $model = $typeMap[$type];
-    
-        $query = $model::where('template_id', $templateId);
-    
+        
+        // Handle Widgets
         if ($type === 'widgets') {
-            $query->each(function ($widget) use ($item) {
+            $widgets = $model::where('template_id', $templateId)->get();
+    
+            foreach ($widgets as $widget) {
                 $widget->update([
                     'title' => $item['title'] ?? $widget->title,
                     'type' => $item['type'] ?? $widget->type,
@@ -470,26 +435,79 @@ class WidgetController extends Controller
                     $slideIds = collect($item['slides'])->pluck('id')->toArray();
                     $widget->slides()->sync($slideIds);
                 }
-            });
-        } elseif ($type === 'headers' || $type === 'footers') {
-            $query->each(function ($row) use ($item, $type) {
+            }
+        }
+    
+        // Handle Headers or Footers
+        if ($type === 'headers' || $type === 'footers') {
+            $footerOrHeader = $model::where('template_id', $templateId)->first();
+            
+            if ($footerOrHeader) {
                 $data = [
-                    'section' => $item['section'] ?? $row->section,
-                    'name' => $item['name'] ?? $row->name,
+                    'section' => $item['section'] ?? $footerOrHeader->section,
+                    'name' => $item['name'] ?? $footerOrHeader->name,
                 ];
     
                 if ($type === 'headers') {
-                    $data['link'] = $item['link'] ?? $row->link;
+                    $data['link'] = $item['link'] ?? $footerOrHeader->link;
                     $data['logo_image_id'] = $item['logo']['id'] ?? null;
                 } else {
                     $data['logo_id'] = $item['logo']['id'] ?? null;
                 }
     
-                $row->update($data);
-            });
+                // Update Footer or Header
+                $footerOrHeader->update($data);
+                
+                // Handle Social Media Links
+                if ($type === 'footers' && !empty($item['social_media'])) {
+                    $socialIds = collect($item['social_media'])
+                        ->pluck('id')
+                        ->filter()
+                        ->toArray();
+                    $footerOrHeader->socialMedia()->sync($socialIds);
+                }
+    
+                // Handle Widgets in Footer
+                if ($type === 'footers' && !empty($item['widgets'])) {
+                    $widgetIds = collect($item['widgets'])
+                        ->pluck('id')
+                        ->filter()
+                        ->toArray();
+                    $footerOrHeader->widgets()->sync($widgetIds);
+                }
+            }
         }
     
-        return response()->json(['message' => 'Saved item updated across all instances.']);
+        return response()->json(['message' => 'Item updated successfully.']);
+    }
+
+    public function cta_test(Request $request)
+    {
+        $validated = $request->validate([
+            // 'footer_id'   => 'required|exists:footers,id',
+            'title'       => 'nullable|string|max:255',
+            'type'        => 'required|string',
+            'description' => 'nullable|string',
+        ]);
+        $widget = Widget::create([
+            'page_id'     => null,
+            'title'       => $validated['title'],
+            'type'        => $validated['type'],
+            'order'       => null,
+            'template_id' => null,
+            'is_saved'    => false,
+            'name'        => null,
+            'subtitle'    => null,
+            'description' => $validated['description'],
+        ]);
+    
+        // $footer = Footer::find($validated['footer_id']);
+        // $footer->widgets()->attach($widget->id);
+    
+        return response()->json([
+            'message' => '',
+            'widget' => $widget,
+        ]);
     }
 
 }

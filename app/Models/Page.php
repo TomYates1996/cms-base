@@ -17,6 +17,8 @@ class Page extends Model
         'section',
         'level',
         'parent_id',
+        'is_link',
+        'linked_page_id',
     ];
     public function widgets()
     {
@@ -24,11 +26,11 @@ class Page extends Model
     }
     public function headers()
     {
-        return $this->hasMany(Header::class);
+        return $this->belongsToMany(Header::class);
     }
     public function footers()
     {
-        return $this->hasMany(Footer::class);
+        return $this->belongsToMany(Footer::class, 'footer_page');
     }
     public function parent()
     {

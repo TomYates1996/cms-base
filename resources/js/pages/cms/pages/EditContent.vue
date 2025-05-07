@@ -16,20 +16,21 @@
       <!-- Header Sidebar -->
       <div class="sidebar-option sidebar-header">
         <h5>Header</h5>
-        <div v-for="(header, index) in localContent.headers" :key="index" class="widget-option">
-            <p>Header - {{ header.section }}</p>
-            <button @click="editElement('headers', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
-            <button @click="deleteElement('headers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
-            <button @click="saveWidget(header, 'headers', index)" class="save-btn"><font-awesome-icon :icon="header.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
+        <div v-if="localContent.header" class="widget-option">
+            <p>Header - {{ localContent.header.section }}</p>
+            <button @click="editHeader()" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
+            <!-- <button @click="deleteElement('headers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button> -->
+            <button @click="showSavedNav(savedHeaders , 'headers')" class="download-btn"><font-awesome-icon :icon="['fas', 'download']"/></button>
+            <button @click="saveHeader(localContent.header, 'header')" class="save-btn"><font-awesome-icon :icon="localContent.header.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
         </div>
-        <button @click="openAddItem('headers')" class="btn-default" v-if="localContent.headers && localContent.headers.length < 1">Add Header</button>
+        <!-- <button @click="openAddItem('headers')" class="btn-default" v-if="localContent.headers && localContent.headers.length < 1">Add Header</button> -->
       </div>
       <!-- Widgets Sidebar -->
       <div class="sidebar-option sidebar-widgets">
         <h5>Widgets</h5>
         <div class="widget-options">
           <div v-for="(widget, index) in localContent.widgets" :key="index" class="widget-option">
-              <p>{{ widget.type }}</p>
+              <p>{{ widget.label }}</p>
               <button @click="editElement('widgets', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
               <div class="move-buttons">
                 <button @click="orderUp(index)" :disabled="index === 0" class="edit-btn"><font-awesome-icon :icon="['fas', 'angle-up']" /></button>
@@ -45,13 +46,14 @@
         <!-- Footer Sidebar -->
         <div class="sidebar-option sidebar-footer">
           <h5>Footer</h5>
-          <div v-for="(footer, index) in localContent.footers" :key="index" class="widget-option">
-            <p>Footer - {{ footer.section }}</p>
-            <button @click="editElement('footers', index)" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
-            <button @click="deleteElement('footers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
-            <button @click="saveWidget(footer, 'footers', index)" class="save-btn"><font-awesome-icon :icon="footer.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
+          <div v-if="localContent.footer" class="widget-option">
+            <p>Footer - {{ localContent.footer.section }}</p>
+            <button @click="editFooter()" class="edit-btn"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
+            <!-- <button @click="deleteElement('footers', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button> -->
+            <button @click="showSavedNav(savedFooters , 'footers')" class="download-btn"><font-awesome-icon :icon="['fas', 'download']"/></button>
+            <button @click="saveHeader(localContent.footer, 'footer')" class="save-btn"><font-awesome-icon :icon="localContent.footer.is_saved ? ['fas', 'lock'] : ['fas', 'unlock']" /></button>
         </div>
-        <button @click="openAddItem('footers')" class="btn-default" v-if="localContent.footers && localContent.footers.length < 1">Add Footer</button>
+        <!-- <button @click="openAddItem('footer')" class="btn-default" v-if="localContent.footer">Add Footer</button> -->
       </div>
             <!-- <EditSlide v-if="showEditSlide" :slide="slideToEdit"/> -->
           </div>
@@ -67,16 +69,17 @@
             </ul>
             <!-- <button @click="closeWhatsOpen" class="close-open" v-if="anyTrue">| Close |</button> -->
 
-              <HamburgerHeader :header="header" v-if="!anyTrue" :pages="header.pages" v-for="(header, index) in localContent.headers" :key="index" :link="header.link" :logo="header.logo"/>
-              <NewHeader v-if="showModal.new.headers" :pages="pages" @cancelAdd="cancelAdd('headers')" @addHeader="addHeader" @getImages="getImages" @deleteSaved="deleteSavedElement" :savedHeaders="localSaved.headers" :images="images"/>
+              <SavedNavList v-if="showModal.saved.footers || showModal.saved.headers" :itemList="boxContent" :onClickAction="onClickAction" @footers="setNewFooter" @headers="setNewHeader" />
+
+              <HamburgerHeader :header="localContent.header" v-if="!anyTrue && localContent.header" :allPages="pages" :pages="localContent.header.pages" :link="localContent.header.link" :logo="localContent.header.logo"/>
               <NewWidget v-if="showModal.new.widgets" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
               <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit('widgets')"/>
-              <EditHeader v-if="showModal.edit.headers" :header="itemInfo" :images="images" @saveEdit="saveEdit('headers')" @cancelEdit="cancelEdit('headers')"/>
-              <EditFooter v-if="showModal.edit.footers" :footer="itemInfo" :images="images" @saveEdit="saveEdit('footers')" @cancelEdit="cancelEdit('footers')"/>
-              <NewFooter v-if="showModal.new.footers" :savedFooters="localSaved.footers" @getImages="getImages" @addFooter="addFooter" @cancelAdd="cancelAdd('footers')" :images="images"/>
+              <EditHeader v-if="showModal.edit.header" :header="itemInfo" :images="images" @saveEdit="saveHeaderEdit()" @cancelEdit="cancelEdit('headers')"/>
+              <EditFooter v-if="showModal.edit.footer" :footer="itemInfo" :pages="pages" :socialMedia="localContent.socialMedia" @created="addSocialLink" :images="images" @saveEdit="saveFooter()" @cancelEdit="cancelEdit('footer')"/>
               <div v-if="!anyTrue" class="widget-container">
                 <component v-for="widget in localContent.widgets" :key="widget.id" :is="widget.type" :widget="widget"/>
               </div>
+              <Footer v-if="localContent.footer" :footer="localContent.footer" :pages="pages" />
         </div>
     </div>
   </template>
@@ -95,6 +98,8 @@ import NewHeader from '@/components/nav/NewHeader.vue';
 import EditHeader from '@/components/nav/EditHeader.vue';
 import NewFooter from '@/components/nav/NewFooter.vue';
 import EditFooter from '@/components/nav/EditFooter.vue';
+import Footer from '@/components/nav/Footer.vue';
+import SavedNavList from '@/components/nav/SavedNavList.vue';
 
 export default {
     setup(){
@@ -112,13 +117,15 @@ export default {
         pages: Object,
         page: Object,
         widgets: Array,
-        headers: Array,
-        footers: Array,
+        header: Object,
+        footer: Object,
         savedWidgets: Array,
         savedHeaders: Array,
         savedFooters: Array,
     },
     components: {
+      SavedNavList,
+      Footer,
       EditFooter,
       NewFooter,
       EditHeader,
@@ -129,11 +136,11 @@ export default {
       useForm,
       Link,
       EditSlide,
-        defineAsyncComponent,
-        cards_2_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards2Across.vue')),
-        cards_3_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards3Across.vue')),
-        cards_4_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards4Across.vue')),
-        imagebox_with_caption : defineAsyncComponent(() => import('@/Components/Widgets/imagebox/ImageBoxWithCaption.vue')),
+      defineAsyncComponent,
+      cards_2_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards2Across.vue')),
+      cards_3_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards3Across.vue')),
+      cards_4_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards4Across.vue')),
+      imagebox_with_caption : defineAsyncComponent(() => import('@/Components/Widgets/imagebox/ImageBoxWithCaption.vue')),
     },
     data() {
       return {
@@ -159,13 +166,17 @@ export default {
         localSaved: [],
         itemInfo: {},
         useType: '',
+        boxContent: [],
+        onClickAction: '',
       };
     },
     created() {
         this.localContent.widgets = this.widgets;
-        this.localContent.headers =this.headers;
-        this.localContent.footers = this.page.footers;
+        this.localContent.header = this.header;
+        this.localContent.footer = this.footer;
 
+        this.getWidgetLabel();
+        this.getSocialMedia();
         
         this.localSaved.widgets = this.savedWidgets;
         this.localSaved.headers = this.savedHeaders;
@@ -183,6 +194,35 @@ export default {
         },
     },
     methods: {
+      setNewFooter(footer) {
+        this.localContent.footer = footer;
+      },
+      setNewHeader(header) {
+        this.localContent.header = header;
+      },
+      showSavedNav(items, type) {
+        this.showModal.saved.footers = true;
+        this.boxContent = items;
+        this.onClickAction = type;
+      },
+      addSocialLink(newItem) {
+        this.localContent.socialMedia.push(newItem);
+      },
+      getSocialMedia() {
+          axios.get('/api/social-media')
+          .then(response => {
+            this.localContent.socialMedia = response.data;
+          })
+          .catch(error => {
+            console.error('Error fetching social media links:', error);
+          });
+      },
+      getWidgetLabel() {
+        this.localContent.widgets.forEach(widget => {
+          let item = this.$widgetOptions.find(option => option.name === widget.type);
+          widget.label = item.label;
+        })
+      },
       getImages() {
             axios.get('/api/images/all')
             .then((response) => {
@@ -203,6 +243,32 @@ export default {
         if (index < this.localContent.widgets.length - 1) {
           [this.localContent.widgets[index], this.localContent.widgets[index + 1]] = [this.localContent.widgets[index + 1], this.localContent.widgets[index]];
         }
+      },
+      editHeader() {
+        if (this.localContent.header.is_saved === true) {
+          if (confirm('this is a saved element and editing will update all instances of the item thoughout the site')) {
+          } else {
+            return;
+          }
+        }
+          Object.keys(this.showModal.edit).forEach(key => {
+            this.showModal.edit[key] = false;
+          });
+          this.showModal.edit.header = true;
+          this.itemInfo = JSON.parse(JSON.stringify(this.localContent.header));
+      },
+      editFooter() {
+        if (this.localContent.footer.is_saved === true) {
+          if (confirm('this is a saved element and editing will update all instances of the item thoughout the site')) {
+          } else {
+            return;
+          }
+        }
+          Object.keys(this.showModal.edit).forEach(key => {
+            this.showModal.edit[key] = false;
+          });
+          this.showModal.edit.footer = true;
+          this.itemInfo = JSON.parse(JSON.stringify(this.localContent.footer));
       },
       editElement(type, index) {
         if (this.localContent[type][index].is_saved === true) {
@@ -225,13 +291,71 @@ export default {
           }
           this.editIndex = index;
       },
+      saveHeaderEdit() {
+        this.itemInfo.pages = this.pages[this.itemInfo.section];
+        
+        
+        this.localContent.header = this.itemInfo;
+        this.showModal.edit.header = false;
+        console.log(this.localContent.header);
+        
+
+        if (this.itemInfo.is_saved) {
+              axios.post(`/item/update-save`, {
+              template_id: this.itemInfo.template_id,
+              type: 'headers',
+              item: this.itemInfo,
+            })
+            .then(() => {
+                if (this.localSaved.headers) {
+                  Object.assign(this.localSaved.headers, this.itemInfo);
+                }
+                if (this.localContent.header?.template_id === this.itemInfo.template_id) {
+                  this.localContent.header = {
+                    ...this.localContent.header,
+                    ...this.itemInfo
+                  };
+                }
+            })
+            .catch(error => {
+              console.error('Failed:', error);
+            });
+        }
+      },
+      saveFooter() {
+        this.itemInfo.pages = this.pages[this.itemInfo.section];
+        this.localContent.footer = this.itemInfo;
+        this.showModal.edit.footer = false;
+
+        // if (this.itemInfo.is_saved) {
+        //       axios.post(`/item/update-save`, {
+        //       template_id: this.itemInfo.template_id,
+        //       type: 'footers',
+        //       item: this.itemInfo,
+        //     })
+        //     .then(() => {
+        //         if (this.localSaved.footers) {
+        //           Object.assign(this.localSaved.footers, this.itemInfo);
+        //         }
+        //         if (this.localContent.footer?.template_id === this.itemInfo.template_id) {
+        //           this.localContent.footer = {
+        //             ...this.localContent.footer,
+        //             ...this.itemInfo
+        //           };
+        //         }      
+        //     })
+        //     .catch(error => {
+        //       console.error('Failed:', error);
+        //     });
+        // }
+      },
       saveEdit(type, slides) {
         if (type === "widgets") {
           console.log(slides);
           
           this.selectedSlides = slides;
           this.itemInfo.slides = this.selectedSlides;
-        } else if (type === "footers" || type === "headers") {
+        } else if (type === "footer" || type === "header") {
           this.itemInfo.pages = this.pages[this.itemInfo.section];
         }
         this.localContent[type][this.editIndex] = this.itemInfo;
@@ -332,25 +456,28 @@ export default {
         this.showModal.saved[type] = false;
       },
       addWidget(newWidget) {
-            this.localContent.widgets.push(newWidget);
-            
+        let item = this.$widgetOptions.find(option => option.name === newWidget.type);
+        newWidget.label = item.label;
+        this.localContent.widgets.push(newWidget);
 
-            this.slides.filter(slide => slide.selected).forEach(slide => {
-              slide.selected = false;
-            })
-          this.cancelAdd('widgets');
-        },
+        this.slides.filter(slide => slide.selected).forEach(slide => {
+          slide.selected = false;
+        })
+        this.cancelAdd('widgets');
+      },
         addHeader(newHeader) {
           newHeader.pages = this.pages[newHeader.section];
-          this.localContent.headers.push(newHeader);
-          this.cancelAdd('headers');
+          this.localContent.header = newHeader;
+          this.cancelAdd('header');
       },
       savePage() {
+        console.log(this.localContent.header);
+        
         router.post(`/cms/pages/save`, { 
           widgets: this.localContent.widgets, 
           page_id: this.page.id, 
-          headers: this.localContent.headers,
-          footers: this.localContent.footers,
+          header: this.localContent.header,
+          footer: this.localContent.footer,
           }, {
             onSuccess: () => {
               router.get(`/cms/pages/${this.page.section}`);
@@ -363,14 +490,39 @@ export default {
       },
 
       cancelAddFooter() {
-        this.showModal.new.footers = false;
+        this.showModal.new.footer = false;
       },
 
       addFooter(newFooter) {
-        this.localContent.footers.push(newFooter);
+        this.localContent.footer = newFooter;
         this.cancelAddFooter();
       },
 
+      saveHeader(item, type) {
+        let name = '';
+        if (!item.is_saved) {
+          name = window.prompt("Enter a name for this saved item:", item.name || "");
+          if (name === null);
+        }
+
+        // if (!this[type].id === item.id || item.id === undefined) {
+        //   item.is_saved = !item.is_saved;
+        //   name = name || null;
+        //   return;
+        // } 
+        
+        axios.put(`/${type}/${item.id}/save`, {
+          is_saved: !item.is_saved,
+          name: name || null,
+        })
+        .then(() => {
+          this.localContent[type].is_saved = !this.localContent[type].is_saved;
+          this.localContent[type].name = name;
+        })
+        .catch(error => {
+          console.error('Failed:', error);
+        });
+      },
       saveWidget(item, type, index) {
         let name = '';
         if (!item.is_saved) {
@@ -469,6 +621,8 @@ export default {
             display: flex;
             flex-direction: column;
             width: 75%;
+            position: relative;
+            min-height: 100vh;
         }
     }
     .slide-list {

@@ -1,10 +1,10 @@
 <template>
-  <nav class="nav" role="navigation">
+  <nav class="nav" role="navigation" :class="'menu-'+header.menu_type">
     <a class="logo" :href="'/' + link" v-if="logo">
       <img :src="'/' + logo.image_path" :alt="logo.image_alt">
     </a>
-    <ul class="page-list">
-      <li class="page-item level-1" v-for="page in pages" :key="page.id">
+    <ul class="page-list navigation-secondary">
+      <li class="page-item level-1" v-for="page in header.pages" :key="page.id">
         <a :href="'/' + page.slug">{{ page.title }}</a>
 
         <!-- Level 2 Dropdown -->
@@ -22,7 +22,7 @@
         </ul>
       </li>
     </ul>
-    <DropdownNav v-if="header.menu_type === 'hamburger'" :pages="pages"/>
+    <DropdownNav :pages="header.menu_type === 'dropdown' ? header.pages : header.hamburger_pages"/>
   </nav>
   
 </template>
@@ -33,6 +33,7 @@ import DropdownNav from './DropdownNav.vue';
 export default {
     props: {
         pages: Array,
+        allPages: Object,
         link: String,
         logo: Object,
         header: Object,
@@ -40,28 +41,38 @@ export default {
     components: {
       DropdownNav,
     },
+    created() {
+      console.log(this.header);
+      
+    },
 }
 </script>
 
 <style scoped>
-  .logo img {
+.logo img {
     max-width: 160px;
-  }
-  .nav {
+}
+.nav {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     align-items: center;
     padding: 20px;
-  }
-  .page-list {
+}
+.navigation-secondary {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex; 
+  display: none; 
   justify-content: center; 
   gap: 5px;
 }
 
+@media screen and (min-width: 1024px) {
+  nav.menu-dropdown ::v-deep(.toggle-btn) {
+    display: none;
+  }
+}
+  
 .page-item {
   position: relative;
 }
@@ -73,12 +84,11 @@ export default {
   white-space: nowrap;
 }
 
-/* Level 2 and Level 3 Dropdowns */
 .dropdown {
   display: none;
   flex-direction: column;
   position: absolute;
-  top: 100%; /* Position below the parent item */
+  top: 100%; 
   left: 50%;
   transform: translateX(-50%);
   background-color: var(--white);
@@ -88,6 +98,7 @@ export default {
 }
 .dropdown.level-3 {
   transform: none;
+  top: 0px;
 }
 
 .page-item:hover > .dropdown {
@@ -108,5 +119,17 @@ export default {
 
 .page-item .dropdown.level-3 {
   left: 100%; 
+}
+
+@media screen and (min-width: 64em) {
+    .nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: center;
+        padding: 20px;
+    }
+    .navigation-secondary {
+      display: flex;
+    }
 }
 </style>

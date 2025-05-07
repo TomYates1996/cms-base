@@ -5,86 +5,67 @@ use Inertia\Inertia;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SlideController;
 use App\Http\Controllers\WidgetController;
+use App\Http\Controllers\SocialMediaController;
 use App\Http\Controllers\ImageController;
-
+use App\Http\Controllers\FooterController;
+use App\Http\Controllers\HeaderController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::redirect('/cms', 'cms/dashboard', 301);
-
-Route::get('cms/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('cms.dashboard');
-
-
-////////////// Routes for non authenticated users //////////////
-
-
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
-// Pages
 Route::get('api/pages', [PageController::class, 'index']);
 Route::get('api/pages', [PageController::class, 'index']);
 
-Route::get('cms/dashboard', [PageController::class, 'load_dashboard'])->name('cms.dashboard');
+Route::middleware('auth')->prefix('cms')->group(function () {
+    Route::get('/', fn() => redirect()->route('cms.dashboard'));
+    Route::get('/dashboard', [PageController::class, 'load_dashboard'])->name('cms.dashboard');
+    Route::get('/slides/edit/{slide_slug}', [SlideController::class, 'load_edit'])->name('api.slides.load.edit');
+    Route::get('/slides', [SlideController::class, 'load'])->name('slides.load');
+    Route::get('/pages', [PageController::class, 'load'])->name('pages.load');
+    Route::delete('/pages/delete/{page_id}', [PageController::class, 'destroy'])->name('pages.delete');
+    Route::get('/pages/children/{page_slug}', [PageController::class, 'children'])->where('page_slug', '.*')->name('pages.children');
+    Route::get('/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
+    Route::get('/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
+    Route::get('/pages/primary', [PageController::class, 'load_primary'])->name('pages.load.primary');
+    Route::get('/pages/secondary', [PageController::class, 'load_secondary'])->name('pages.load.secondary');
+    Route::get('/pages/footer', [PageController::class, 'load_footer'])->name('pages.load.footer');
+    Route::post('/pages/save', [PageController::class, 'save'])->name('page.save');
+    Route::get('/images', [ImageController::class, 'load'])->name('images.load');
+    Route::get('/images/edit', [ImageController::class, 'load_edit'])->name('images.load.edit');
+    Route::post('/images/update', [ImageController::class, 'update'])->name('images.update');
+    Route::get('/slides/new', [SlideController::class, 'load_create'])->name('slides.load.create');
+    Route::delete('/slides/delete/{id}', [SlideController::class, 'delete'])->name('slides.delete');
+    Route::get('/pages/{pageId}/widgets', [WidgetController::class, 'index'])->name('widgets.index');
+    Route::get('/pages/{pageId}/widgets/create', [WidgetController::class, 'create'])->name('widgets.create');
+    Route::post('/pages/{pageId}/widgets', [WidgetController::class, 'store'])->name('widgets.store');
+    Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
+});
 
-// CMS Actions
 Route::middleware('auth')->group(function () {
     Route::put('/pages/update/{slug}', [PageController::class, 'update'])->name('api.pages.update');
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
+    Route::post('/pages/link/store', [PageController::class, 'store_link'])->name('api.pages.link.store');
     Route::get('/api/slides', [SlideController::class, 'index'])->name('api.slides.index');
     Route::post('/api/slides', [SlideController::class, 'store'])->name('api.slides.store');
     Route::put('/api/slides', [SlideController::class, 'update'])->name('api.slides.update');
-    Route::get('/cms/slides/edit/{slide_slug}', [SlideController::class, 'load_edit'])->name('api.slides.load.edit');
-    Route::get('/cms/slides', [SlideController::class, 'load'])->name('slides.load');
-    Route::get('/cms/pages', [PageController::class, 'load'])->name('pages.load');
-    Route::delete('/cms/pages/delete/{page_id}', [PageController::class, 'destroy'])->name('pages.delete');
-    Route::get('/cms/pages/children/{page_slug}', [PageController::class, 'children'])->where('page_slug', '.*')->name('pages.children');
-    Route::get('/cms/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
-    Route::get('/cms/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
-    Route::get('api/slides', [SlideController::class, 'index']);
     Route::post('/create/new-image', [ImageController::class, 'store'])->name('cms.image.store');
     Route::get('/api/images/all', [ImageController::class, 'index'])->name('cms.image.index');
     Route::get('/api/pages/all', [PageController::class, 'index_all'])->name('cms.page.index');
     Route::put('/widgets/{widget}/save', [WidgetController::class, 'save_widget'])->name('widgets.save');
-    Route::put('/headers/{header}/save', [WidgetController::class, 'save_header'])->name('header.save');
-    Route::put('/footers/{footer}/save', [WidgetController::class, 'save_footer'])->name('footer.save');
+    Route::put('/header/{header}/save', [HeaderController::class, 'save_header'])->name('header.save');
+    Route::put('/footer/{footer}/save', [FooterController::class, 'save_footer'])->name('footer.save');
     Route::post('/item/delete-save', [WidgetController::class, 'delete_save_item'])->name('widgets.delete-save');
     Route::post('/item/update-save', [WidgetController::class, 'update_save_item'])->name('widgets.update-save');
     Route::post('/widgets/create-save', [WidgetController::class, 'create_save_widget'])->name('widgets.create-save');
-    Route::post('/headers/create-save', [WidgetController::class, 'create_save_header'])->name('header.create-save');
-    Route::post('/footers/create-save', [WidgetController::class, 'create_save_footer'])->name('footer.create-save');
-    
-    Route::prefix('cms')->group(function () {
-        Route::get('/pages/primary', [PageController::class, 'load_primary'])->name('pages.load.primary');
-        Route::get('/pages/secondary', [PageController::class, 'load_secondary'])->name('pages.load.secondary');
-        Route::get('/pages/footer', [PageController::class, 'load_footer'])->name('pages.load.footer');
-        Route::get('/images', [ImageController::class, 'load'])->name('images.load');
-        Route::get('/images/edit', [ImageController::class, 'load_edit'])->name('images.load.edit');
-        Route::post('/images/update', [ImageController::class, 'update'])->name('images.update');
-        Route::get('/slides/new', [SlideController::class, 'load_create'])->name('slides.load.create');
-        Route::delete('/slides/delete/{id}', [SlideController::class, 'delete'])->name('slides.delete');
-        
-        
-        // Display all widgets for a page
-        Route::get('/pages/{pageId}/widgets', [WidgetController::class, 'index'])->name('widgets.index');
-        
-        // Show form to create a new widget
-        Route::get('/pages/{pageId}/widgets/create', [WidgetController::class, 'create'])->name('widgets.create');
-        
-        // Store a new widget
-        Route::post('/pages/{pageId}/widgets', [WidgetController::class, 'store'])->name('widgets.store');
-        
-        // Show form to edit a widget
-        Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
-        
-        Route::post('/pages/save', [WidgetController::class, 'save'])->name('page.save');
-        
-    });
-    
+    Route::post('/header/create-save', [WidgetController::class, 'create_save_header'])->name('header.create-save');
+    Route::post('/footer/create-save', [FooterController::class, 'create_save'])->name('footer.create-save');
+    Route::get('/api/social-media', [SocialMediaController::class, 'index'])->name('api.social.index');
+    Route::post('/api/social-media/store', [SocialMediaController::class, 'store'])->name('api.social.store');
+    Route::post('/api/store/cta', [WidgetController::class, 'cta_test'])->name('api.create.cta.test');
 });
 
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

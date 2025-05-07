@@ -44,6 +44,13 @@
                 </div>
     
                 <div class="form-slide-link form-field">
+                    <label for="menu_type">Menu Type</label>
+                    <select id="menu_type" name="menu type" v-model="newHeader.menu_type" required aria-label="Select menu type for the header" aria-required="true">
+                        <option value="dropdown">Dropdown</option>
+                        <option value="hamburger">Hamburger</option>
+                    </select>
+                </div>
+                <div class="form-slide-link form-field">
                     <label for="section">Section</label>
                     <select id="section" name="section" v-model="newHeader.section" required aria-label="Select section for the header" aria-required="true">
                         <option value="primary">Primary</option>
@@ -51,11 +58,12 @@
                         <option value="footer">Footer</option>
                     </select>
                 </div>
-                <div class="form-slide-link form-field">
-                    <label for="menu_type">Menu Type</label>
-                    <select id="menu_type" name="menu type" v-model="newHeader.menu_type" required aria-label="Select menu type for the header" aria-required="true">
-                        <option value="dropdown">Dropdown</option>
-                        <option value="hamburger">Hamburger</option>
+                <div class="form-slide-link form-field" v-if="newHeader.menu_type === 'hamburger'">
+                    <label for="section-hamburger">Hamburger Section</label>
+                    <select id="section-hamburger" name="section hamburger" v-model="newHeader.section_hamburger" required aria-label="Select section for the hamburger" aria-required="true">
+                        <option value="primary">Primary</option>
+                        <option value="secondary">Secondary</option>
+                        <option value="footer">Footer</option>
                     </select>
                 </div>
     
@@ -94,6 +102,9 @@ export default {
         'getImages',    
         'deleteSaved'   
     ],
+    created() {
+        this.newHeader.section_hamburger = 'primary';
+    },
     methods: {
         addHeader() {
             this.$emit('addHeader', this.newHeader)

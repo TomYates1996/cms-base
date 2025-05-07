@@ -85,55 +85,59 @@ class PageController extends Controller
     // Load the CMS Page Edit Content Page
     public function load_edit_content(Request $request, $slug)
     {
-        $page = Page::where('slug', $slug)->with('widgets.slides.image', 'headers.logo', 'footers.logo')->firstOrFail(); 
-
-        $pages = Page::where('show_in_nav', true)->get()->groupBy('section');
-
-        $headers = $page->headers->map(function ($header) use ($pages) {
-            $header->pages = $pages[$header->section] ?? collect();
-            return $header;
-        });
-
-        $footers = $page->footers;
-
-        $savedWidgets = Widget::with('slides.image')->where('is_saved', true)->whereNull('page_id')->get();
-        $savedHeaders = Header::with('logo')->where('is_saved', true)->whereNull('page_id')->get()->map(function ($header) use ($pages) {
-            $header->pages = $pages[$header->section] ?? collect();
-            return $header;
-        });;
-        $savedFooters = Footer::with('logo')
-            ->where('is_saved', true)
-            ->whereNull('page_id')
-            ->get()
-            ->map(function ($footer) use ($pages) {
-                $footer->pages = $pages[$footer->section] ?? collect();
-                return $footer;
-            });
-
         $flatPages = Page::orderBy('level')->get();
         $groupedFlatPages = $flatPages->groupBy('section');
 
-        
-        $pages = [];
-        
+        $formattedPages = [];
         foreach ($groupedFlatPages as $section => $pagesInSection) {
-            $pages[$section] = $this->buildTree($pagesInSection->toArray());
+            $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
         }
 
-        $headers = $page->headers->map(function ($header) use ($pages) {
-            $header->pages = $pages[$header->section] ?? collect();
-            return $header;
-        });
+        $page = Page::where('slug', $slug)
+            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->firstOrFail();
+
+        $header = $page->headers->first();
+        $footer = $page->footers->first();
+
+        // Load the saved widgets
+        $savedWidgets = Widget::with('slides.image')
+            ->where('is_saved', true)
+            ->whereNull('page_id')
+            ->get();
+
+        $savedHeaders = Header::with('logo')
+            ->where('is_saved', true)
+            ->whereNull('page_id')
+            ->get()
+            ->map(function ($header) use ($formattedPages) {
+                $header->pages = $formattedPages[$header->section] ?? collect();
+                return $header;
+            });
+
+        $savedFooters = Footer::with('logo', 'socialMedia', 'widgets.slides.image')
+            ->where('is_saved', true)
+            ->whereNull('page_id')
+            ->get()
+            ->map(function ($footer) use ($formattedPages) {
+                $footer->pages = $formattedPages[$footer->section] ?? collect();
+                return $footer;
+            });
+
+        if ($header) {
+            $header->pages = $formattedPages[$header->section] ?? collect();
+            $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
 
         return Inertia::render('cms/pages/EditContent', [
-            'pages' => $pages,
+            'pages' => $formattedPages,
             'page' => $page,
             'widgets' => $page->widgets,
             'savedWidgets' => $savedWidgets,
             'savedHeaders' => $savedHeaders,
             'savedFooters' => $savedFooters,
-            'headers' => $headers,
-            'footers' => $footers,
+            'header' => $header,
+            'footer' => $footer,
         ]);
     }
     
@@ -233,6 +237,40 @@ class PageController extends Controller
         $validated['created_by'] = $user->id;
         
         $page = Page::create($validated);
+
+        // Create empty header and footer
+        $header = Header::create(); 
+        $footer = Footer::create();
+
+        // Attach to the page using pivot tables
+        $page->headers()->attach($header->id);
+        $page->footers()->attach($footer->id);
+        
+        return;
+    }
+    // Create a new page link
+    public function store_link(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validated = $request->validate([
+            'id' => 'required|integer',
+            'title' => 'required|string|max:255',
+            'section' => 'required|in:primary,secondary,footer',
+        ]);
+        
+        $pageToCopy = Page::findOrFail($validated['id']);
+        
+        $newPage = new Page([
+            'is_link' => true,
+            'linked_page_id' => $pageToCopy['id'],
+            'slug' => $pageToCopy['slug'],
+            'title' => $validated['title'],
+            'section' => $validated['section'],
+            'created_by' => $user->id,
+        ]);
+        
+        $newPage->save();
         
         return;
     }
@@ -249,16 +287,16 @@ class PageController extends Controller
                 $grandchildren = Page::where('parent_id', $child->id)->get();
                 foreach ($grandchildren as $grandchild) {
                     $grandchild->widgets()->delete();
-                    $grandchild->headers()->delete();
+                    $grandchild->header()->delete();
                     $grandchild->delete();
                 }
                 $child->widgets()->delete();
-                $child->headers()->delete();
+                $child->header()->delete();
                 $child->delete();
             }
             
             $page->widgets()->delete();
-            $page->headers()->delete();
+            $page->header()->delete();
             
             $page->delete();
         } else {
@@ -296,5 +334,147 @@ class PageController extends Controller
         }
     
         return $branch;
+    }
+
+    public function save(Request $request)
+    {
+        $request->validate([
+            'page_id' => 'required|integer',
+            'widgets' => 'nullable|array',
+            'widgets.*.title' => 'nullable|string',
+            'widgets.*.type' => 'required|string',
+            'widgets.*.slides' => 'nullable|array', 
+            'widgets.*.slides.*.id' => 'integer|exists:slides,id',
+
+            'header.logo.id' => 'nullable|exists:images,id',
+            'header.link' => 'nullable|string',
+            'header.section' => 'required|in:primary,secondary,footer',
+            'header.section_hamburger' => 'required|in:primary,secondary,footer',
+            'header.menu_type' => 'required|in:dropdown,hamburger',
+            
+            'footer.logo.id' => 'nullable|exists:images,id',
+            'footer.section' => 'required|in:primary,secondary,footer',
+            'footer.social_media' => 'nullable|array',
+            'footer.social_media.*.id' => 'integer|exists:social_media_links,id',
+        ]);
+
+        
+        $widgets = $request->input('widgets');
+        $headerInput = $request->input('header');
+        $headerData = Header::find($headerInput['id']);
+        $page_id = $request->input('page_id');
+        $page = Page::with('headers', 'footers')->find($page_id);
+        
+        // Widget::where('page_id', $page_id)->delete();
+        
+        // foreach ($widgets as $index => $widget) {
+        //     $widget['page_id'] = $page_id;
+        //     $widget['order'] = $index + 1; 
+        
+        //     if (!isset($widget['created_at'])) {
+        //         $widget['created_at'] = Carbon::now();  
+        //     }
+        
+        //     $new_widget = Widget::create($widget);
+        
+        //     if (isset($widget['slides']) && is_array($widget['slides'])) {
+        //         $new_widget->slides()->attach(array_column($widget['slides'], 'id'));
+        //     }
+        // }
+        
+        $existingHeader = $page->headers()->where('header_id', $headerData->id)->first();
+        if ($existingHeader) {
+            $headerData->update([
+                'logo_image_id' => $headerInput['logo']['id'] ?? null,
+                'link' => $headerInput['link'] ?? null,
+                'section' =>$headerInput['section'],
+                'menu_type' => $headerInput['menu_type'],
+                'section_hamburger' => $headerInput['section_hamburger'],
+            ]);
+        } else {
+            $currentHeader = $page->headers()->first();
+            
+            if ($currentHeader) {
+                $page->headers()->detach($currentHeader->id);
+                
+                if ($currentHeader->is_saved === false) {
+                    $currentHeader->delete();
+                }
+            }
+            
+            $page->headers()->attach($headerData->id);
+            $headerData->update([
+                'logo_image_id' => $headerInput['logo']['id'] ?? null,
+                'link' => $headerInput['link'] ?? null,
+                'section' =>$headerInput['section'],
+                'menu_type' => $headerInput['menu_type'],
+                'section_hamburger' => $headerInput['section_hamburger'],
+            ]);
+        }
+        
+        $footerInput = $request->input('footer');
+        $footerData = Footer::find($footerInput['id']);
+        
+        $currentFooter = $page->footers()->first();
+        
+        if (!$page->footers->contains($footerInput['id'])) {
+            if ($currentFooter) {
+                $page->footers()->detach($currentFooter->id);
+                
+                if (!$currentFooter->is_saved) {
+                    $currentFooter->delete();
+                }
+            }
+    
+            $page->footers()->attach($footerInput['id']);
+        }
+    
+        $footerData->update([
+            'section' => $footerInput['section'] ?? $footerData->section,
+        ]);
+    
+        if (isset($footerInput['social_media']) && is_array($footerInput['social_media'])) {
+            $socialMediaIds = collect($footerInput['social_media'])->pluck('id')->toArray();
+            $footerData->socialMedia()->sync($socialMediaIds);
+        }
+
+        if (isset($footerInput['logo']['id'])) {
+            $footerData->logo_id = $footerInput['logo']['id'];
+            $footerData->save();
+        }
+
+        foreach ($footerInput['widgets'] as $widget) {
+            if (isset($widget['id'])) {
+                $existingWidget = Widget::find($widget['id']);
+        
+                if ($existingWidget && !$footerData->widgets->contains($existingWidget->id)) {
+                    $footerData->widgets()->attach($existingWidget->id);
+                }
+            } else {
+                $newWidget = Widget::create([
+                    'title'       => $widget['title'] ?? null,
+                    'type'        => $widget['type'] ?? null,
+                    'is_saved'    => false,
+                    'description' => $widget['description'] ?? null,
+                ]);
+        
+                $footerData->widgets()->attach($newWidget->id);
+
+                if (isset($widget['slides']) && is_array($widget['slides'])) {
+                    foreach ($widget['slides'] as $slideData) {
+                        $slide = Slide::find($slideData['id']);
+                        
+                        if (!$slide) {
+                            continue; 
+                        }
+            
+                        if (!$widget->slides->contains($slide->id)) {
+                            $widget->slides()->attach($slide->id);
+                        }
+                    }
+                }
+            }
+        }        
+        return;
     }
 }

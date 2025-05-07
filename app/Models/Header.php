@@ -19,6 +19,7 @@ class Header extends Model
         'template_id',
         'order',
         'menu_type',
+        'section_hamburger',
     ];
 
     public function logo()
@@ -26,9 +27,9 @@ class Header extends Model
         return $this->belongsTo(Image::class, 'logo_image_id');
     }
 
-    public function page()
+    public function pages()
     {
-        return $this->belongsTo(Page::class);
+        return $this->belongsToMany(Page::class);
     }
 
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Image;
 use App\Models\Page;
+use App\Models\SocialMediaLinks;
 
 
 class Footer extends Model
@@ -26,9 +27,9 @@ class Footer extends Model
         'is_saved' => 'boolean',
     ];
 
-    public function page()
+    public function pages()
     {
-        return $this->belongsTo(Page::class);
+        return $this->belongsToMany(Page::class, 'footer_page');
     }
 
     public function logo()
@@ -51,4 +52,17 @@ class Footer extends Model
             'name' => null,    
         ]);
     }
+
+    public function socialMedia()
+    {
+        return $this->belongsToMany(SocialMediaLink::class, 'footer_social_media_link')
+                    ->withTimestamps()
+                    ->withPivot('order');
+    }
+
+    public function widgets()
+    {
+        return $this->belongsToMany(Widget::class, 'footer_widget', 'footer_id', 'widget_id');
+    }
+
 }
