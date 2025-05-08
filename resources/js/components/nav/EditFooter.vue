@@ -20,6 +20,7 @@
             <li v-for="social in footer.social_media" :key="social.id">
               {{ social.label }}
               <font-awesome-icon :icon="['fab', social.icon]" />
+              <button><font-awesome-icon :icon="['fas', 'trash']" @click="removeSocial(social)" /></button>
             </li>
           </ul>
 
@@ -142,6 +143,12 @@ import axios from 'axios';
                 this.footer.social_media.push(item);
             } else {
                 this.footer.social_media = [item]
+            }
+        },
+        removeSocial(social) {
+            let index = this.footer.social_media.findIndex(item => item === social);
+            if (index !== -1) {
+                this.footer.social_media.splice(index, 1);
             }
         },
         toggleShowEditCTA(cta) {

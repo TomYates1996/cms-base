@@ -42,8 +42,6 @@ export default {
         }
     },
     created() {
-        console.log(this.pages);
-        
     },
     methods: {
         toggle() {

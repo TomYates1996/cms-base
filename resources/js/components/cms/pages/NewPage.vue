@@ -20,6 +20,13 @@
           </button>
         </div>
 
+        <div class="form-field layout">
+          <label for="layout">Select Layout</label>
+          <select id="layout" v-model="form.layout" aria-required="false">
+            <option v-for="layout in layouts" :key="layout.id" :value="layout.id">{{ layout.title }}</option>
+          </select>
+        </div>
+
       <button type="submit" class="btn-default" tabindex="5" :disabled="form.processing" :aria-busy="form.processing">
         <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" /> Save Page
       </button>
@@ -33,6 +40,7 @@
 <script>
 import { useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import axios from 'axios';
 
 export default {
   setup(){
@@ -43,6 +51,7 @@ export default {
           'created_by' : '',
           'parent' : {},
           'section' : '',
+          'layout' : '',
       });
 
       return { form } 
@@ -54,12 +63,28 @@ export default {
   data () {
     return {
       manualSlugChange: false, 
+      layouts: [],
     }
+  },
+  created() {
+    this.getLayouts();
+    console.log(this.layouts);
+    
   },
   components: {
       LoaderCircle,
   },
   methods: {
+      getLayouts() {
+        axios.get('/cms/layouts/index')
+        .then(response => {
+          console.log(response);
+          this.layouts = response.data; 
+        })
+        .catch(error => {
+          console.error('Error fetching layouts:', error);
+        });
+      },
       createPage () {
         this.form.parent = this.parent;
         this.form.section = this.section;

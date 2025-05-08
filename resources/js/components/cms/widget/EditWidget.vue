@@ -98,8 +98,6 @@ export default {
     },
     methods: {
         saveEdit() {
-            console.log(this.initialSlides);
-            
             this.$emit('saveEdit', 'widgets', this.initialSlides)
         },
         cancelEdit() {

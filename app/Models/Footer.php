@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Image;
 use App\Models\Page;
+use App\Models\Layout;
 use App\Models\SocialMediaLinks;
 
 
@@ -63,6 +64,11 @@ class Footer extends Model
     public function widgets()
     {
         return $this->belongsToMany(Widget::class, 'footer_widget', 'footer_id', 'widget_id');
+    }
+
+    public function layouts()
+    {
+        return $this->hasMany(Layout::class); 
     }
 
 }

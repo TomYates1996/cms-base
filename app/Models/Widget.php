@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Slide;
+use App\Models\Page;
+use App\Models\Layout;
 
 class Widget extends Model
 {
@@ -18,6 +20,10 @@ class Widget extends Model
         'subtitle',
         'description',
     ];
+    public function pages()
+    {
+        return $this->belongsToMany(Page::class, 'page_widget')->withPivot('position', 'visibility');
+    }
     public function slides()
     {
         return $this->belongsToMany(Slide::class, 'widget_slide');
@@ -25,5 +31,9 @@ class Widget extends Model
     public function footers()
     {
         return $this->belongsToMany(Footer::class, 'footer_widget', 'widget_id', 'footer_id');
+    }
+    public function layouts()
+    {
+        return $this->belongsToMany(Layout::class, 'layout_widget');
     }
 }

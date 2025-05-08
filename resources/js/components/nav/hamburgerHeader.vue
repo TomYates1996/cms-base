@@ -42,8 +42,6 @@ export default {
       DropdownNav,
     },
     created() {
-      console.log(this.header);
-      
     },
 }
 </script>

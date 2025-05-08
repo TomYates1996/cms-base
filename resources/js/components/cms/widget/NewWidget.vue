@@ -79,7 +79,7 @@
                   <span class="visually-hidden">Widget -> {{ item.type }} - {{ item.name }}</span>
                   <span aria-hidden="true"><font-awesome-icon :icon="['fas', 'plus']" /></span>
             </button>
-            <button @click.prevent="deleteSaved('widgets', index)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
+            <button @click.prevent="deleteSaved(item)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
         </li>
     </ul>
   </div>
@@ -89,6 +89,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     props: {
         slides: Array,
@@ -103,8 +105,6 @@ export default {
           chosenSlides: [],
         }
     },
-    created() {
-    },
     emits: [
         'cancelAdd',    
         'addHeader',  
@@ -114,16 +114,37 @@ export default {
     methods: {
         addWidget() {
             this.newWidget.slides = this.slides.filter(slide => slide.selected);
-            this.newWidget.page_id = this.page.id;
-            
             this.$emit('addWidget', this.newWidget)
         },
         savedWidget(item) {
             this.newWidget = item;
-            this.addWidget();
+            this.$emit('addWidget', this.newWidget)
         },
-        deleteSaved(type, index) {
-            this.$emit('deleteSaved', type, index )
+        deleteSaved(item) {
+          if (confirm("Do you want to delete or unsave the widget?\n\nClick 'OK' to delete all, 'Cancel' to simply unsave.")) {
+            axios.delete(`/widget/delete/${item.id}`)
+                .then(() => {
+                    let index = this.savedWidgets.findIndex(savedWidget => savedWidget.id === item.id);
+                    if (index !== -1) {
+                        this.savedWidgets.splice(index, 1); 
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed:', error);
+                });
+          } else {
+            axios.post(`/widget/unsave/${item.id}`)
+                .then(() => {
+                    item.is_saved = false;
+                    let index = this.savedWidgets.findIndex(savedWidget => savedWidget.id === item.id);
+                    if (index !== -1) {
+                        this.savedWidgets.splice(index, 1); 
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed:', error);
+                });
+            }
         },
         cancelAdd() {
             this.$emit('cancelAdd')

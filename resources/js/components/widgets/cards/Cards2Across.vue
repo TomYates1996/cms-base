@@ -24,8 +24,6 @@ export default {
     props: {
         widget: Object,
     },
-    created() {
-    }
 }
 </script>
 

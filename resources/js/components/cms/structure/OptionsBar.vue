@@ -52,6 +52,16 @@
                 Images
             </Link>
         </li>
+        <li>
+            <Link 
+                v-if="$page.props.auth.user"
+                href="/cms/layouts"
+                method="get"
+                class="option"
+            >
+                Layouts
+            </Link>
+        </li>
     </ul>
   </nav>
 </template>

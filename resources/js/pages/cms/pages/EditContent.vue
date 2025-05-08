@@ -2,10 +2,10 @@
   <div class="page-wrapper">
     <div class="page-left detail">
       <div class="main-buttons">
-        <button @click="savePage()" class="btn-default">Save Page</button>
+        <button @click="layout ? saveLayout() : savePage()" class="btn-default">Save {{ layout ? 'layout' : 'page' }}</button>
         <Link 
              v-if="$page.props.auth.user"
-             :href="`/cms/pages/${page.section}`"
+             :href="layout ? '/cms/layouts' : '/cms/pages/' + page.section"
              method="get"
              class="btn-default"
           >
@@ -122,6 +122,7 @@ export default {
         savedWidgets: Array,
         savedHeaders: Array,
         savedFooters: Array,
+        layout: Boolean,
     },
     components: {
       SavedNavList,
@@ -181,6 +182,7 @@ export default {
         this.localSaved.widgets = this.savedWidgets;
         this.localSaved.headers = this.savedHeaders;
         this.localSaved.footers = this.savedFooters;
+
         this.getImages();
     },
     computed: {
@@ -471,8 +473,6 @@ export default {
           this.cancelAdd('header');
       },
       savePage() {
-        console.log(this.localContent.header);
-        
         router.post(`/cms/pages/save`, { 
           widgets: this.localContent.widgets, 
           page_id: this.page.id, 
@@ -481,6 +481,19 @@ export default {
           }, {
             onSuccess: () => {
               router.get(`/cms/pages/${this.page.section}`);
+            }
+          }
+        );
+      },
+      saveLayout() {
+        router.post(`/cms/layouts/save`, { 
+          widgets: this.localContent.widgets, 
+          layout_id: this.page.id, 
+          header: this.localContent.header,
+          footer: this.localContent.footer,
+          }, {
+            onSuccess: () => {
+              router.get(`/cms/layouts`);
             }
           }
         );
@@ -504,12 +517,6 @@ export default {
           name = window.prompt("Enter a name for this saved item:", item.name || "");
           if (name === null);
         }
-
-        // if (!this[type].id === item.id || item.id === undefined) {
-        //   item.is_saved = !item.is_saved;
-        //   name = name || null;
-        //   return;
-        // } 
         
         axios.put(`/${type}/${item.id}/save`, {
           is_saved: !item.is_saved,
@@ -523,30 +530,29 @@ export default {
           console.error('Failed:', error);
         });
       },
+
       saveWidget(item, type, index) {
         let name = '';
         if (!item.is_saved) {
-          name = window.prompt("Enter a name for this saved item:", item.name || "");
+          name = window.prompt("Enter a name for this widget:");
           if (name === null);
         }
 
         if (!item.is_saved && !item.id) {
           item.is_saved = true;
           item.name = name;
-            axios.post(`/${type}/create-save`, {
+          axios.post(`/${type}/create-save`, {
             item: item,
           })
           .then((response) => {
-            console.log(response);
             
-            const templateId = response.data.template_id;
+            const templateId = response.data.widget.template_id;
             this.localContent[type][index].is_saved = true;
             this.localContent[type][index].name = name;
             this.localContent[type][index].template_id = templateId;
+            this.localContent[type][index].id = response.data.widget.id;
             this.localSaved[type].push(this.localContent[type][index]);
-            console.log(this.localSaved[type]);
-            
-            
+            console.log(this.localContent[type][index]);
           })
           .catch(error => {
             console.error('Failed:', error);

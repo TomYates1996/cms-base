@@ -22,7 +22,7 @@ class Page extends Model
     ];
     public function widgets()
     {
-        return $this->hasMany(Widget::class);
+        return $this->belongsToMany(Widget::class, 'page_widget')->withPivot('position', 'visibility')->orderBy('page_widget.position'); 
     }
     public function headers()
     {

@@ -11,6 +11,7 @@ use App\Models\Footer;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
 
@@ -105,6 +106,57 @@ class WidgetController extends Controller
         return;
     }
 
+    public function delete_saved_widget(Widget $widget)
+    {
+        $widget->pages()->detach(); 
+        $widget->slides()->detach();
+    
+        $widget->delete();
+    
+        return response()->json(['message' => 'Widget deleted successfully.']);
+    }
+
+    public function unsave_widget(Widget $widget)
+    {
+        DB::transaction(function () use ($widget) {
+            $pageWidgets = $widget->pages()->withPivot('position')->get();
+
+            
+            foreach ($pageWidgets as $pageWidget) {
+                $clonedWidget = $widget->replicate();
+                $clonedWidget->is_saved = false;
+                $clonedWidget->name = null;
+                $clonedWidget->template_id = null;
+                $clonedWidget->save();
+                
+                $slideIds = $widget->slides()->pluck('slides.id')->toArray();
+                if (!empty($slideIds)) {
+                    $clonedWidget->slides()->sync($slideIds);
+                }
+                
+                DB::table('page_widget')
+                ->where('page_id', $pageWidget->pivot->page_id)
+                ->where('widget_id', $widget->id)
+                ->update([
+                    'widget_id' => $clonedWidget->id,
+                    'position' => $pageWidget->pivot->position,
+                ]);
+            }
+            
+            $widget->update([
+                'is_saved' => false,
+                'name' => null,
+                'template_id' => null,
+            ]);
+            
+            if ($widget->pages()->count() === 0) {
+                $widget->delete();
+            }
+        });
+
+        return response()->json(['message' => 'Widget unsaved, cloned, and position maintained on pages.']);
+    }
+
     public function save_widget(Request $request, Widget $widget)
     {
         $request->validate([
@@ -112,180 +164,78 @@ class WidgetController extends Controller
             'name' => 'nullable|string|max:255',
         ]);
 
-        
         if ($request->is_saved) {
             $templateId = (Widget::max('template_id') ?? 0) + 1;
-
-            $widget->update([
-                'is_saved' => $request->is_saved,
-                'name' => $request->name,
-                'template_id' => $templateId,
-            ]);
-            
-            $clonedWidget = $widget->replicate(); 
-            $clonedWidget->page_id = null; 
-            $clonedWidget->save(); 
-        
-            if ($widget->slides()->exists()) {
-                $clonedWidget->slides()->sync($widget->slides->pluck('id')); 
-            }
-        } else {
-            $templateId = $widget->template_id;
-            $widgetToDelete = Widget::where('template_id', $templateId)->whereNull('page_id')->first(); 
-            
-            if ($widgetToDelete) {
-                $widgetToDelete->delete();
-            }
-
-            $widget->update([
-                'is_saved' => $request->is_saved,
-                'name' => $request->name,
-                'template_id' => null,
-            ]);
         }
+            
+        $widget->update([
+            'is_saved' => $request->is_saved,
+            'name' => $request->name,
+            'template_id' => $templateId ?? null,
+        ]);
         
         return;
-    }
-    public function save_header(Request $request, Header $header)
-    {
-        if ($request->is_saved) {
-            $templateId = (Header::max('template_id') ?? 0) + 1;
-
-            $header->update([
-                'is_saved' => $request->is_saved,
-                'name' => $request->name,
-                'template_id' => $templateId,
-            ]);
-            
-            $clonedHeader = $header->replicate(); 
-            $clonedHeader->page_id = null; 
-            $clonedHeader->save(); 
-        
-        } else {
-            $templateId = $header->template_id;
-            $headerToDelete = Header::where('template_id', $templateId)->whereNull('page_id')->first(); 
-            
-            if ($headerToDelete) {
-                $headerToDelete->delete();
-            }
-
-            $header->update([
-                'is_saved' => $request->is_saved,
-                'name' => $request->name,
-                'template_id' => null,
-            ]);
-        }
-        
-        return;
-    }
-    public function save_footer(Request $request, Footer $footer)
-    {
-        if ($request->is_saved) {
-            // Generate a new template ID for the new footer version
-            $templateId = (Footer::max('template_id') ?? 0) + 1;
-    
-            // Update the footer with new template ID and other data
-            $footer->update([
-                'is_saved' => $request->is_saved,
-                'name' => $request->name,
-                'template_id' => $templateId,
-            ]);
-    
-            // Check if a page is provided and associate the footer with the page
-            if (isset($request->page_id)) {
-                $page = Page::find($request->page_id);  // Find the page by ID
-    
-                // Associate the footer with the page using the pivot table
-                if ($page) {
-                    $footer->pages()->syncWithoutDetaching([$page->id]);  // This ensures a unique footer for the page
-                }
-            }
-    
-            // Handle social media data
-            if (isset($request->social_media) && is_array($request->social_media)) {
-                foreach ($request->social_media as $socialData) {
-                    $footer->socialMedia()->updateOrCreate(
-                        ['id' => $socialData['id'] ?? null],
-                        [
-                            'label' => $socialData['label'],
-                            'link' => $socialData['link'],
-                            'icon' => $socialData['icon'],
-                        ]
-                    );
-                }
-            }
-    
-            // Handle widgets data
-            if (isset($request->widgets) && is_array($request->widgets)) {
-                foreach ($request->widgets as $widgetData) {
-                    $footer->widgets()->updateOrCreate(
-                        ['id' => $widgetData['id'] ?? null],
-                        [
-                            'name' => $widgetData['name'],
-                            'title' => $widgetData['title'],
-                            'type' => $widgetData['type'],
-                            'order' => $widgetData['order'],
-                            'description' => $widgetData['description'],
-                        ]
-                    );
-                }
-            }
-        } else {
-            // If footer is not being saved, handle removal
-            $footerToDelete = Footer::where('template_id', $footer->template_id)->whereNull('page_id')->first();
-    
-            if ($footerToDelete) {
-                $footerToDelete->delete();
-            }
-    
-            // Update footer attributes to mark it as not saved
-            $footer->update([
-                'is_saved' => $request->is_saved,
-                'name' => $request->name,
-                'template_id' => null,
-            ]);
-        }
-    
-        return response()->json(['message' => 'Footer saved successfully.']);
     }
 
     public function create_save_widget(Request $request)
     {
-        $data = $request->validate([
-            'item' => 'required|array',
-            'item.title' => 'nullable|string',
-            'item.type' => 'required|string',
-            'item.is_saved' => 'required|boolean',
-            'item.name' => 'nullable|string',
-            'item.slides' => 'nullable|array',
-            'item.slides.*.id' => 'integer|exists:slides,id',
+        $widgetData = $request->input('item');
+
+        $validator = Validator::make($widgetData, [
+            'title' => 'nullable|string',
+            'subtitle' => 'nullable|string',
+            'description' => 'nullable|string',
+            'link' => 'nullable|string',
+            // 'type' => 'required|string',
+            // 'is_saved' => 'required|boolean',
+            'name' => 'nullable|string',
+            'slides' => 'nullable|array',
+            'slides.*.id' => 'integer|exists:slides,id',
         ]);
 
-        $item = $data['item'];
-
-        if ($item['is_saved']) {
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation error.',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+        
+        if ($widgetData['is_saved']) {
             $templateId = (Widget::max('template_id') ?? 0) + 1;
 
-            $clonedWidgetData = $item;
-            $clonedWidgetData['template_id'] = $templateId;
-            $clonedWidgetData['page_id'] = null;
-            $clonedWidgetData['is_saved'] = true;
-
-            $clonedWidget = Widget::create($clonedWidgetData);
-
-            if (!empty($item['slides'])) {
-                $clonedWidget->slides()->attach(array_column($item['slides'], 'id'));
-            }
-
-            return response()->json([
-                'message' => 'Template widget saved.',
+            $widget = Widget::create([
+                'title' => $widgetData['title'] ?? null,
+                'description' => $widgetData['description'] ?? null,
+                'subtitle' => $widgetData['subtitle'] ?? null,
+                'link' => $widgetData['link'] ?? null,
+                'type' => $widgetData['type'],
+                'is_saved' => true,
+                'name' => $widgetData['name'],
                 'template_id' => $templateId,
             ]);
-        }
+        
+            if (isset($widgetData['slides']) && is_array($widgetData['slides'])) {
+                $slideIds = array_column($widgetData['slides'], 'id');
+                $widget->slides()->attach($slideIds); 
+            }
+            
+            return response()->json([
+                'message' => 'Widget saved successfully.',
+                'widget' => $widget,
+            ], 200);
 
-        return response()->json([
-            'message' => 'Widget not marked as saved.',
-        ], 400);
+        } else {
+            $widget->update([
+                'is_saved' => false,
+                'name' => null,
+                'template_id' => null,
+            ]);
+        
+            return response()->json([
+                'message' => 'Widget not saved (is_saved is false).',
+                'widget' => $widget,
+            ], 200);
+        }
     }
 
     public function create_save_header(Request $request)

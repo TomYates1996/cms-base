@@ -54,7 +54,6 @@ export default {
             axios.get('/api/pages/all')
             .then((response) => {
                 this.pages = response.data.pages; 
-                console.log(this.pages);
             })
         },
         selectPage(page) {

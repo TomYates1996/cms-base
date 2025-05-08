@@ -48,7 +48,6 @@ export default {
             this.footer.social_media.concat(this.footer.social)
         }
         this.footer.pages = this.pages[this.footer.section];
-        console.log(this.footer);
     },
 }
 </script>

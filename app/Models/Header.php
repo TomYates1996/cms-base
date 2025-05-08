@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Image;
 use App\Models\Page;
+use App\Models\Layout;
 
 
 class Header extends Model
@@ -30,6 +31,11 @@ class Header extends Model
     public function pages()
     {
         return $this->belongsToMany(Page::class);
+    }
+
+    public function layouts()
+    {
+        return $this->hasMany(Layout::class); 
     }
 
 }
