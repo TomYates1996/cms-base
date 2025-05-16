@@ -20,6 +20,8 @@ class Widget extends Model
         'order',
         'subtitle',
         'description',
+        'link',
+        'link_text',
     ];
     public function pages()
     {

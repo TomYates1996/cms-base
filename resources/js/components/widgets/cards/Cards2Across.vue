@@ -15,11 +15,11 @@ export default {
     },
     data() {
         return {
-            // Add the image ratios here 
+            // Add image aspect ratios 
             aspectRatios: [
                 { width: 640, height: 400, at: 640 },
-                { width: 466, height: 300, at: 1024 },
-                { width: 768, height: 400, at: 1440 },
+                { width: 466, height: 350, at: 1024 },
+                { width: 800, height: 600, at: 1440 },
             ],
         }
     },

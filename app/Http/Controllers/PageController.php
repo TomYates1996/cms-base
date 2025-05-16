@@ -548,6 +548,8 @@ class PageController extends Controller
                     'variant'        => $widget['variant'] ?? null,
                     'is_saved'    => false,
                     'description' => $widget['description'] ?? null,
+                    'link' => $widget['link'] ?? null,
+                    'link_text' => $widget['link_text'] ?? null,
                 ]);
         
                 $footerData->widgets()->attach($newWidget->id);

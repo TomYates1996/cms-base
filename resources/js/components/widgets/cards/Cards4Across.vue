@@ -17,9 +17,9 @@ export default {
         return {
             // Add the image ratios here 
             aspectRatios: [
-                { width: 320, height: 320, at: 640 },
-                { width: 480, height: 100, at: 1024 },
-                { width: 768, height: 400, at: 1440 },
+                { width: 640, height: 400, at: 640 },
+                { width: 229, height: 143, at: 1024 },
+                { width: 500, height: 313, at: 1440 },
             ],
         }
     },

@@ -15,16 +15,15 @@
             <option v-for="widget in widgetOptions" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
           </select>
         </div>
-  
-        <div class="widget-title form-field">
+        <div v-if="widget.type.variant && widgetOptions.find(option => option.variant === widget.type.variant)?.hasHeader" class="widget-title form-field">
           <label for="widget-title">Widget Title</label>
           <input id="widget-title" name="widget-title" type="text" v-model="widget.title" aria-required="true" required />
         </div>
-        <div class="widget-subtitle form-field">
+        <div v-if="widget.type.variant && widgetOptions.find(option => option.variant === widget.type.variant)?.hasHeader" class="widget-subtitle form-field">
           <label for="widget-subtitle">Subtitle</label>
           <input id="widget-subtitle" name="widget-subtitle" type="text" v-model="widget.subtitle" aria-required="false" />
         </div>
-        <div class="widget-description form-field">
+        <div v-if="widget.type.variant && widgetOptions.find(option => option.variant === widget.type.variant)?.hasHeader" class="widget-description form-field">
           <label for="widget-description">Description</label>
           <input id="widget-description" name="widget-description" type="text" v-model="widget.description" aria-required="false" />
         </div>
@@ -98,6 +97,7 @@ export default {
     },
     created() {
         this.initialSlides = this.widget.slides;
+        this.widget.type = { name: this.widget.type, variant: this.widget.variant }
     },
     computed: {
         filteredSlides() {

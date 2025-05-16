@@ -19,18 +19,25 @@
             <option v-for="widget in widgetOptions" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
           </select>
         </div>
-  
-        <div class="widget-title form-field">
+        <div v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasHeader" class="widget-title form-field">
           <label for="widget-title">Title</label>
           <input id="widget-title" name="widget-title" type="text" v-model="newWidget.title" aria-required="false" />
         </div>
-        <div class="widget-subtitle form-field">
+        <div v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasHeader" class="widget-subtitle form-field">
           <label for="widget-subtitle">Subtitle</label>
           <input id="widget-subtitle" name="widget-subtitle" type="text" v-model="newWidget.subtitle" aria-required="false" />
         </div>
-        <div class="widget-description form-field">
+        <div v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasHeader" class="widget-description form-field">
           <label for="widget-description">Description</label>
           <input id="widget-description" name="widget-description" type="text" v-model="newWidget.description" aria-required="false" />
+        </div>
+        <div class="widget-description form-field">
+          <label for="widget-link">Link</label>
+          <input id="widget-link" name="widget-link" type="text" v-model="newWidget.link" aria-required="false" />
+        </div>
+        <div v-if="newWidget.link" class="widget-description form-field">
+          <label for="widget-link-text">Link Text</label>
+          <input id="widget-link-text" name="widget-link-text" type="text" v-model="newWidget.link_text" aria-required="false" />
         </div>
   
         <section class="form-field" aria-labelledby="selected-slides-heading">

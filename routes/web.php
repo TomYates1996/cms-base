@@ -29,8 +29,6 @@ Route::get('/resize/slides/{filename}', function ($filename) {
     $filename = 'storage/slides/' . $filename; 
     $path = public_path($filename);
 
-
-    // Scale by height (width adjusts proportionally)
     $img = Image::read($path)
         ->scale(width: $width);
 

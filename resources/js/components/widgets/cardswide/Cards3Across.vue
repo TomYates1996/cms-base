@@ -1,5 +1,5 @@
 <template>
-    <WidgetStructure :widget="widget"/>
+    <WidgetStructure :widget="widget" :aspectRatios="aspectRatios"/>
 </template>
 
 <script>
@@ -12,6 +12,16 @@ export default {
     },
     props: {
         widget: Object,
+    },
+    data() {
+        return {
+            // Add the image ratios here 
+            aspectRatios: [
+                { width: 640, height: 250, at: 640 },
+                { width: 308, height: 191, at: 1024 },
+                { width: 600, height: 373, at: 1440 },
+            ],
+        }
     },
 }
 </script>

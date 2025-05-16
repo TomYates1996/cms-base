@@ -2,7 +2,7 @@
         <div class="big-image">
         <div class="item" v-if="slides.length > 0">
             <div class="image-section">
-            <ResponsiveImage :slide="slides[0]"/>
+            <ResponsiveImage :slide="slides[0]" :aspectRatios="mosaicRatios" :imageHovers="imageHovers"/>
             </div>
             <TextContent :slide="slides[0]"/>
         </div>
@@ -11,7 +11,7 @@
         <div class="small-images">
         <div v-for="(slide, index) in slides.slice(1)" :key="index" class="item">
             <div class="image-section">
-            <ResponsiveImage :slide="slide"/>
+            <ResponsiveImage :slide="slide" :aspectRatios="aspectRatios" :imageHovers="imageHovers"/>
             </div>
             <TextContent :slide="slide"/>
         </div>
@@ -29,31 +29,14 @@ export default {
     },
     props: {
         slides: Array,
+        aspectRatios: Array,
+        mosaicRatios: Array,
+        imageHovers: Boolean,
     },
 
 }
 </script>
 
 <style scoped>
-    .image-section {
-        display: flex;
-        img {
-            aspect-ratio: 1/1;
-            object-fit: cover;
-        }
-    }
-        .big-image {
-        grid-column: 1 / 2; /* First image takes the full space on the left */
-        }
 
-        .small-images {
-        grid-column: 2 / 3; /* Small images are on the right */
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        }
-
-        .item {
-        margin-bottom: 16px;
-        }
 </style>

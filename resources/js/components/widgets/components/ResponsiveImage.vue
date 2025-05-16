@@ -1,5 +1,10 @@
 <template>
-    <picture class="responsive-image">
+  <component
+    :is="slide.link ? 'a' : 'div'"
+    v-bind="slide.link ? { href: slide.link, 'aria-label': 'Link to related content' } : {}"
+    class="image-wrapper"
+  >
+    <picture class="responsive-picture">
       <source
         v-for="(source, index) in sources"
         :key="index"
@@ -9,16 +14,18 @@
       <img
         :src="fallbackSrc"
         :alt="slide.image.image_alt"
-        class="w-full h-auto object-cover"
+        :class="imageHovers ? 'image-hover' : ''"
       />
     </picture>
-  </template>
+  </component>
+</template>
   
   <script>
   export default {
     props: {
       slide: Object,
       aspectRatios: Array,
+      imageHovers: Boolean,
     },
     data() {
       return {
