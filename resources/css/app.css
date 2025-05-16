@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Cal+Sans&family=Telex&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -63,7 +64,44 @@ html {
         --tertiary-colour: var(--dull-green);
         --text-tertiary: var(--white);
         /* Widths */
+        --width-max: 1050px;
         --width-base: 1050px;
+
+        /* Fonts */
+        --font-bungee: "Bungee", sans-serif;
+        --font-telex: "Telex", sans-serif;
+        --font-cal-sans: "Cal Sans", sans-serif;
+
+        --font-heading: var(--font-cal-sans);
+        --font-body: var(--font-telex);
+
+        /* Text sizes */
+        --widget-heading: 600 26px var(--font-heading);
+        --widget-subheading: 400 14px var(--font-body);
+
+        --slide-title-default: 400 16px var(--font-heading);
+        --body-font: 400 14px var(--font-body);
+        --slide-desc-default: var(--body-font);
+        
+        @media screen and (min-width: 640px) {
+            /* Text sizes */
+            --widget-heading: 600 40px var(--font-heading);
+            --widget-subheading: 400 20px var(--font-body);
+
+            --slide-title-default: 400 20px var(--font-heading);
+            --body-font: 400 16px var(--font-body);
+            --slide-desc-default: var(--body-font);
+        }
+
+        @media screen and (min-width: 1024px) {
+            /* Text sizes */
+            --widget-heading: 600 40px var(--font-heading);
+            --widget-subheading: 400 20px var(--font-body);
+            --slide-title-default: 600 22px var(--font-heading);
+    
+            --body-font: 400 16px var(--font-body);
+        }
+
     }
 
     .dark {
@@ -109,10 +147,16 @@ html {
 
     body {
         @apply bg-background text-foreground;
+        min-height: 100vh;
     }
 }
 
 /* Global styles */
+body #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
 .btn-default,
 .btn-alt {

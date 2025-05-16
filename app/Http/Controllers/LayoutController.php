@@ -137,6 +137,7 @@ class LayoutController extends Controller
             'widgets' => 'nullable|array',
             'widgets.*.title' => 'nullable|string',
             'widgets.*.type' => 'required|string',
+            'widgets.*.variant' => 'required|string',
             'widgets.*.slides' => 'nullable|array', 
             'widgets.*.slides.*.id' => 'integer|exists:slides,id',
 
@@ -285,6 +286,7 @@ class LayoutController extends Controller
                 $newWidget = Widget::create([
                     'title'       => $widget['title'] ?? null,
                     'type'        => $widget['type'] ?? null,
+                    'variant'        => $widget['variant'] ?? null,
                     'is_saved'    => false,
                     'description' => $widget['description'] ?? null,
                 ]);

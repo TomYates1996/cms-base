@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SlideController;
@@ -10,6 +9,31 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\HeaderController;
+use Illuminate\Support\Facades\Route;
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\JpegEncoder;
+
+
+Route::get('/test-image', function () {
+    $path = public_path('storage/slides/bypm6BMolmFMWrKsiqcoSV6Q6yzT11vcEfrWGs93.jpg');
+
+    $img = Image::read($path)->resize(300, 200);
+
+    return response($img->encode(new JpegEncoder()))
+        ->header('Content-Type', 'image/jpeg');
+});
+
+Route::get('/resize/slides/{filename}', function ($filename) {
+    $width = request('w');
+    $height = request('h');
+    $filename = 'storage/slides/' . $filename; 
+    $path = public_path($filename);
+
+    $img = Image::read($path)->resize($width, $height);
+
+    return response($img->encode(new JpegEncoder()))
+    ->header('Content-Type', 'image/jpeg');
+});
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -76,5 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/social-media/store', [SocialMediaController::class, 'store'])->name('api.social.store');
     Route::post('/api/store/cta', [WidgetController::class, 'cta_test'])->name('api.create.cta.test');
 });
+
+
 
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

@@ -72,12 +72,12 @@
               <SavedNavList v-if="showModal.saved.footers || showModal.saved.headers" :itemList="boxContent" :onClickAction="onClickAction" @footers="setNewFooter" @headers="setNewHeader" />
 
               <HamburgerHeader :header="localContent.header" v-if="!anyTrue && localContent.header" :allPages="pages" :pages="localContent.header.pages" :link="localContent.header.link" :logo="localContent.header.logo"/>
-              <NewWidget v-if="showModal.new.widgets" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
+              <NewWidget v-if="showModal.new.widgets" :pages="pages" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
               <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit('widgets')"/>
-              <EditHeader v-if="showModal.edit.header" :header="itemInfo" :images="images" @saveEdit="saveHeaderEdit()" @cancelEdit="cancelEdit('headers')"/>
+              <EditHeader v-if="showModal.edit.header" :header="itemInfo" :images="images" @saveEdit="saveHeaderEdit()" @cancelEdit="cancelEdit('header')"/>
               <EditFooter v-if="showModal.edit.footer" :footer="itemInfo" :pages="pages" :socialMedia="localContent.socialMedia" @created="addSocialLink" :images="images" @saveEdit="saveFooter()" @cancelEdit="cancelEdit('footer')"/>
               <div v-if="!anyTrue" class="widget-container">
-                <component v-for="widget in localContent.widgets" :key="widget.id" :is="widget.type" :widget="widget"/>
+                <component v-for="widget in localContent.widgets" :key="widget.id" :is="widget.variant" :widget="widget"/>
               </div>
               <Footer v-if="localContent.footer" :footer="localContent.footer" :pages="pages" />
         </div>
@@ -100,6 +100,9 @@ import NewFooter from '@/components/nav/NewFooter.vue';
 import EditFooter from '@/components/nav/EditFooter.vue';
 import Footer from '@/components/nav/Footer.vue';
 import SavedNavList from '@/components/nav/SavedNavList.vue';
+import { asyncWidgets } from '@/utils/asyncWidgets';
+import { widgetOptions } from '@/utils/widgetOptions.js';
+
 
 export default {
     setup(){
@@ -138,13 +141,11 @@ export default {
       Link,
       EditSlide,
       defineAsyncComponent,
-      cards_2_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards2Across.vue')),
-      cards_3_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards3Across.vue')),
-      cards_4_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards4Across.vue')),
-      imagebox_with_caption : defineAsyncComponent(() => import('@/Components/Widgets/imagebox/ImageBoxWithCaption.vue')),
+      ...asyncWidgets,
     },
     data() {
       return {
+        widgetOptions,
         showModal: {
           edit : {},
           new: {},
@@ -186,9 +187,9 @@ export default {
         this.getImages();
     },
     computed: {
-        widgetOptions() {
-            return this.$widgetOptions;
-        },
+        // widgetOptions() {
+        //     return this.$widgetOptions;
+        // },
         anyTrue() {
           return Object.values(this.showModal).some(section =>
             Object.values(section).some(val => val === true)
@@ -221,7 +222,7 @@ export default {
       },
       getWidgetLabel() {
         this.localContent.widgets.forEach(widget => {
-          let item = this.$widgetOptions.find(option => option.name === widget.type);
+          let item = this.widgetOptions.find(option => option.variant === widget.variant);
           widget.label = item.label;
         })
       },
@@ -458,7 +459,7 @@ export default {
         this.showModal.saved[type] = false;
       },
       addWidget(newWidget) {
-        let item = this.$widgetOptions.find(option => option.name === newWidget.type);
+        let item = this.widgetOptions.find(option => option.variant === newWidget.variant);
         newWidget.label = item.label;
         this.localContent.widgets.push(newWidget);
 

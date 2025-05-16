@@ -13,9 +13,35 @@
         <input id="description" name="description" type="text" required v-model="form.description" aria-required="true" />
         </div>
 
-        <div class="form-slide-link form-field">
-        <label for="link">Link</label>
-        <input id="link" name="link" type="text" required v-model="form.link" aria-required="true" />
+        <div class="form-slide-link form-field form-wrap">
+            <div class="link-upper">
+                <label>Link</label>
+                <div>
+                    <label>
+                    <input type="radio" value="page" v-model="linkType" />
+                    Internal page
+                    </label>
+                    <label>
+                    <input type="radio" value="custom" v-model="linkType" />
+                    Custom URL
+                    </label>
+                </div>
+            </div>
+
+            <div v-if="linkType === 'page'" class="link-option page-option">
+                <label for="link">Select a Page</label>
+                <select id="link" name="link" required v-model="form.link" aria-required="true">
+                <option disabled value="">Please select a page</option>
+                <option v-for="page in pages" :key="page.id" :value="'/' + page.slug">
+                    {{ page.title }}
+                </option>
+                </select>
+            </div>
+
+            <div v-else class="link-option">
+                <label for="custom-link">Custom URL</label>
+                <input id="custom-link" name="custom-link" type="text" required v-model="form.link" placeholder="https://example.com" aria-required="true" />
+            </div>
         </div>
 
         <div class="form-slide-image form-field">
@@ -75,12 +101,14 @@ import NewImage from './images/NewImage.vue';
     },
     props: {
         images: Array,
+        pages: Array,
     },
     data() {
         return {
             imagePreview: null, 
             showImageGrid: false,
             showNewSlide: false,
+            linkType: 'page',
         };
     },
     emits: ['refreshImages'],
@@ -187,6 +215,25 @@ import NewImage from './images/NewImage.vue';
         border: 1px solid var(--black);
         padding: 4px;
         border-radius: 2px;
+    }
+    .form-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        .link-upper {
+            display: flex;
+            gap: 20px;
+            div label:last-of-type {
+                margin-left: 20px;
+            }
+        }
+        .link-option {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            select {
+                padding: 4px;
+            }
+        }
     }
 }
 </style>

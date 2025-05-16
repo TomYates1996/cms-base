@@ -16,13 +16,21 @@
         <div class="widget-type-select form-field">
           <label for="widget-type">Select Widget Type</label>
           <select id="widget-type" v-model="newWidget.type" aria-required="true" required>
-            <option v-for="widget in $widgetOptions" :key="widget.id" :value="widget.name">{{ widget.label }}</option>
+            <option v-for="widget in widgetOptions" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
           </select>
         </div>
   
         <div class="widget-title form-field">
-          <label for="widget-title">Widget Title</label>
-          <input id="widget-title" name="widget-title" type="text" v-model="newWidget.title" aria-required="true" required />
+          <label for="widget-title">Title</label>
+          <input id="widget-title" name="widget-title" type="text" v-model="newWidget.title" aria-required="false" />
+        </div>
+        <div class="widget-subtitle form-field">
+          <label for="widget-subtitle">Subtitle</label>
+          <input id="widget-subtitle" name="widget-subtitle" type="text" v-model="newWidget.subtitle" aria-required="false" />
+        </div>
+        <div class="widget-description form-field">
+          <label for="widget-description">Description</label>
+          <input id="widget-description" name="widget-description" type="text" v-model="newWidget.description" aria-required="false" />
         </div>
   
         <section class="form-field" aria-labelledby="selected-slides-heading">
@@ -35,7 +43,7 @@
                 <div class="slide-info">
                   <h3 class="slide-title">{{ slide.title }}</h3>
                   <div class="slide-actions">
-                    <button type="button" class="edit-slide" @click="editSlide(slide)" :aria-label="'Edit slide ' + slide.title" title="Edit Slide"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
+                    <!-- <button type="button" class="edit-slide" @click="editSlide(slide)" :aria-label="'Edit slide ' + slide.title" title="Edit Slide"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button> -->
                     <button type="button" class="remove-slide-btn" @click.prevent="removeSlide(slide)" :aria-label="'Remove slide ' + slide.title + ' from selection'" title="Remove Slide">Remove</button>
                   </div>
                 </div>
@@ -57,32 +65,34 @@
   
     <div v-if="showSlideList" class="slide-box slide-popup">
      <ul class="slide-list">
-        <li v-for="slide in slides.filter(s => !chosenSlides.some(c => c.id === s.id))" :key="slide.id" class="slide-item">
+      <li v-for="slide in slides.filter(s => !s.selected)" :key="slide.id" class="slide-item" :class="{ 'chosen': isChosen(slide) }"> 
           <article class="slide-card">
+            <div class="slide-actions">
+              <!-- <button type="button" class="edit-slide" @click="editSlide(slide)" :aria-label="'Edit slide ' + slide.title" title="Edit Slide"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button> -->
+              <button type="button" class="add-slide-btn" @click.prevent="addSlide(slide)" :aria-label="'Add slide ' + slide.title + ' from selection'" title="Add Slide"><font-awesome-icon :icon=" isChosen(slide) ? ['fas', 'minus'] : ['fas', 'plus'] " /> </button>
+            </div>
                 <img v-if="slide.image" class="slide-list-img" :src="'/' + slide.image.image_path" :alt="slide.image.image_alt || ('Image for ' + slide.title)" />
                 <div class="slide-info">
                   <h3 class="slide-title">{{ slide.title }}</h3>
-                  <div class="slide-actions">
-                    <button type="button" class="edit-slide" @click="editSlide(slide)" :aria-label="'Edit slide ' + slide.title" title="Edit Slide"><font-awesome-icon :icon="['fas', 'pen-to-square']" /></button>
-                    <button type="button" class="add-slide-btn" @click.prevent="addSlide(slide)" :aria-label="'Add slide ' + slide.title + ' from selection'" title="Add Slide">Add</button>
-                  </div>
                 </div>
             </article>
           </li>
           </ul>
-    </div>
-  </div>
-  <div v-if="!newTab" class="tab-inners">
-    <ul class="saved-item-list" >
+          <!-- <button class="btn-default" @click.prevent="showModal.newSlide = true">New Slide</button> -->
+        </div>
+      </div>
+      <div v-if="!newTab" class="tab-inners">
+        <ul class="saved-item-list" >
           <li v-for="(item, index) in savedWidgets" :key="index" class="saved-item">
-              <button type="button" class="add-saved-element" @click.prevent="savedWidget(item)" aria-label="Add saved widget to page">
-                  <span class="visually-hidden">Widget -> {{ item.type }} - {{ item.name }}</span>
-                  <span aria-hidden="true"><font-awesome-icon :icon="['fas', 'plus']" /></span>
+            <button type="button" class="add-saved-element" @click.prevent="savedWidget(item)" aria-label="Add saved widget to page">
+              <span class="visually-hidden">Widget -> {{ item.type }} - {{ item.name }}</span>
+              <span aria-hidden="true"><font-awesome-icon :icon="['fas', 'plus']" /></span>
             </button>
             <button @click.prevent="deleteSaved(item)" class="delete-btn"><font-awesome-icon :icon="['fas', 'trash-can']" /></button>
-        </li>
-    </ul>
-  </div>
+          </li>
+        </ul>
+      </div>
+      <!-- <NewSlide v-if="showModal.newSlide" :pages="pages" :images="images" @refreshImages="getImages" @cancelNew="newSlide()"/> -->
 
 </div>
 
@@ -90,30 +100,56 @@
 
 <script>
 import axios from 'axios';
+import NewSlide from '../slides/NewSlide.vue';
+import { widgetOptions } from '@/utils/widgetOptions.js';
 
 export default {
+    components: {
+      NewSlide,
+    },
     props: {
         slides: Array,
         page: Object,
         savedWidgets: Array,
+        pages: Object,
       },
       data() {
         return {
+          widgetOptions,
           newWidget: {},
+          showModal: {
+              newSlide: false,
+          },
           newTab: true,
           showSlideList: false,
           chosenSlides: [],
+          images: [],
         }
     },
     emits: [
         'cancelAdd',    
         'addHeader',  
+        'addWidget',  
         'getImages',    
         'deleteSaved'   
     ],
+    // created() {
+    //   this.getImages();
+    // },
     methods: {
+      // getImages() {
+      //       axios.get('/api/images/all')
+      //       .then((response) => {
+      //           this.images = response.data.images; 
+      //       })
+      //   },
+        isChosen(slide) {
+          return this.chosenSlides.some(c => c.id === slide.id);
+        },
         addWidget() {
             this.newWidget.slides = this.slides.filter(slide => slide.selected);
+            this.newWidget.variant = this.newWidget.type.variant;
+            this.newWidget.type = this.newWidget.type.name;            
             this.$emit('addWidget', this.newWidget)
         },
         savedWidget(item) {
@@ -187,8 +223,21 @@ export default {
 }
 
 .slide-list {
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  .chosen {
+    background-color: #e4e4e4;
+    border-radius: 5px;
+  }
   li.slide-item {
     display: flex;
+    padding: 5px;
+    .add-slide-btn {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
 
     .slide-list-img {
       height: 40px;

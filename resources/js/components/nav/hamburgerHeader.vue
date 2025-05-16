@@ -1,6 +1,6 @@
 <template>
   <nav class="nav" role="navigation" :class="'menu-'+header.menu_type">
-    <a class="logo" :href="'/' + link" v-if="logo">
+    <a class="logo" :href="link" v-if="logo">
       <img :src="'/' + logo.image_path" :alt="logo.image_alt">
     </a>
     <ul class="page-list navigation-secondary">
@@ -55,6 +55,9 @@ export default {
     grid-template-columns: repeat(2, 1fr);
     align-items: center;
     padding: 20px;
+    max-width: var(--width-max);
+    margin: 0px auto;
+    width: 100%;
 }
 .navigation-secondary {
   list-style: none;

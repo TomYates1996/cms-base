@@ -13,6 +13,7 @@ class Widget extends Model
         'title', 
         'page_id', 
         'type', 
+        'variant', 
         'is_saved',
         'name',
         'template_id',

@@ -114,8 +114,10 @@ export default {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             padding: 40px;
+            padding-top: 100px;
             gap: 10px;
-            max-width: 1000px;
+            max-width: var(--width-max);
+            margin: 0px auto;
             ul li {
                 display: flex;
                 width: 100%;

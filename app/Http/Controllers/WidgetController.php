@@ -38,6 +38,7 @@ class WidgetController extends Controller
         $validated = $request->validate([
             'title' => 'nullable|string',
             'type' => 'required|string',
+            'variant' => 'required|string',
             'slide_ids' => 'required|array', 
             'slide_ids.*' => 'exists:slides,id', 
         ]);
@@ -46,6 +47,7 @@ class WidgetController extends Controller
             'page_id' => $pageId,
             'title' => $validated['title'],
             'type' => $validated['type'],
+            'variant' => $validated['variant'],
         ]);
 
         $widget->slides()->attach($validated['slide_ids']);
@@ -74,6 +76,7 @@ class WidgetController extends Controller
         $validated = $request->validate([
             'title' => 'nullable|string',
             'type' => 'required|string',
+            'variant' => 'required|string',
             'slide_ids' => 'required|array',  // Ensure it's an array of slide IDs
             'slide_ids.*' => 'exists:slides,id',  // Ensure each slide ID exists
         ]);
@@ -85,6 +88,7 @@ class WidgetController extends Controller
         $widget->update([
             'title' => $validated['title'],
             'type' => $validated['type'],
+            'variant' => $validated['variant'],
         ]);
 
         // Sync the slides (this removes old associations and adds the new ones)
@@ -209,6 +213,7 @@ class WidgetController extends Controller
                 'subtitle' => $widgetData['subtitle'] ?? null,
                 'link' => $widgetData['link'] ?? null,
                 'type' => $widgetData['type'],
+                'variant' => $widgetData['variant'],
                 'is_saved' => true,
                 'name' => $widgetData['name'],
                 'template_id' => $templateId,
@@ -378,6 +383,7 @@ class WidgetController extends Controller
                 $widget->update([
                     'title' => $item['title'] ?? $widget->title,
                     'type' => $item['type'] ?? $widget->type,
+                    'variant' => $item['variant'] ?? $widget->variant,
                     'name' => $item['name'] ?? $widget->name,
                 ]);
     
@@ -437,12 +443,14 @@ class WidgetController extends Controller
             // 'footer_id'   => 'required|exists:footers,id',
             'title'       => 'nullable|string|max:255',
             'type'        => 'required|string',
+            'variant'        => 'required|string',
             'description' => 'nullable|string',
         ]);
         $widget = Widget::create([
             'page_id'     => null,
             'title'       => $validated['title'],
             'type'        => $validated['type'],
+            'variant'        => $validated['variant'],
             'order'       => null,
             'template_id' => null,
             'is_saved'    => false,

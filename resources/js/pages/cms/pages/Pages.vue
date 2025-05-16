@@ -99,7 +99,7 @@ export default {
     // },
     methods: {
         deletePage(page_id) {
-            if (confirm("Are you sure you want to delete this page?")) {
+            if (confirm("Are you sure you want to delete this page? All child pages will also be deleted.")) {
                 router.delete(`/cms/pages/delete/${page_id}`, {
                 onSuccess: () => {
                     // this.$inertia.get('/cms/pages'); 

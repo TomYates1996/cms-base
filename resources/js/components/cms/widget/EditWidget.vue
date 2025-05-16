@@ -12,13 +12,21 @@
         <div class="widget-type-select form-field">
           <label for="widget-type">Select Widget Type</label>
           <select id="widget-type" v-model="widget.type" aria-required="true" required>
-            <option v-for="widget in $widgetOptions" :key="widget.id" :value="widget.name">{{ widget.label }}</option>
+            <option v-for="widget in widgetOptions" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
           </select>
         </div>
   
         <div class="widget-title form-field">
           <label for="widget-title">Widget Title</label>
           <input id="widget-title" name="widget-title" type="text" v-model="widget.title" aria-required="true" required />
+        </div>
+        <div class="widget-subtitle form-field">
+          <label for="widget-subtitle">Subtitle</label>
+          <input id="widget-subtitle" name="widget-subtitle" type="text" v-model="widget.subtitle" aria-required="false" />
+        </div>
+        <div class="widget-description form-field">
+          <label for="widget-description">Description</label>
+          <input id="widget-description" name="widget-description" type="text" v-model="widget.description" aria-required="false" />
         </div>
   
         <section class="form-field" aria-labelledby="selected-slides-heading">
@@ -73,6 +81,8 @@
   
 
 <script>
+import { widgetOptions } from '@/utils/widgetOptions.js';
+
 export default {
     props: {
         widget: Object,
@@ -83,6 +93,7 @@ export default {
             showSlideList: false,
             initialSlides: [],
             chosenSlides: [],
+            widgetOptions,
         }
     },
     created() {
@@ -98,6 +109,8 @@ export default {
     },
     methods: {
         saveEdit() {
+            this.widget.variant = this.widget.type.variant;
+            this.widget.type = this.widget.type.name;
             this.$emit('saveEdit', 'widgets', this.initialSlides)
         },
         cancelEdit() {

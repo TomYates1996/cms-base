@@ -3,11 +3,15 @@
     <Head title="Welcome">
     </Head>
 
-    <HamburgerHeader v-for="header in headers" :key="header.id" :pages="header.pages" :logo="header.logo"/>
+    <HamburgerHeader :header="header" :allPages="pages" :pages="header.pages" :link="header.link" :logo="header.logo"/>
+
     <component v-for="widget in widgets" :key="widget.id" 
-        :is="widget.type"
+        :is="widget.variant"
         :widget="widget"
     />
+
+    <Footer v-if="footer" :footer="footer" :pages="pages" />
+
 
 </template>
 
@@ -17,21 +21,23 @@ import { defineAsyncComponent } from 'vue';
 import axios from 'axios';
 import HamburgerHeader from '@/components/nav/HamburgerHeader.vue';
 import Cards4 from '@/components/cms/pages/collections/cards/Cards4.vue';
+import Footer from '@/components/nav/Footer.vue';
+import { asyncWidgets } from '@/utils/asyncWidgets';
 
 export default {
     components: {
+        Head,
+        Footer,
         HamburgerHeader,
         Cards4,
         defineAsyncComponent,
-        cards_2_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards2Across.vue')),
-        cards_3_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards3Across.vue')),
-        cards_4_across : defineAsyncComponent(() => import('@/Components/Widgets/Cards/Cards4Across.vue')),
-        imagebox_with_caption : defineAsyncComponent(() => import('@/Components/Widgets/imagebox/ImageBoxWithCaption.vue')),
+        ...asyncWidgets,
     },
     props: {
         widgets: Array,
-        headers: Array,
-        pages: Array,
+        header: Object,
+        footer: Object,
+        pages: Object,
     },
     data() {
         return {

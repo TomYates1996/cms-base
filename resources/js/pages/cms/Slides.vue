@@ -19,8 +19,8 @@
                             </div>
                         </li>
                     </ul>
-                        <EditSlide v-if="showModal.edit" :slide="currentSlide" :images="images" @cancelEdit="cancelEdit()"/>
-                        <Newslide v-if="showModal.new" :images="images" @refreshImages="getImages" @cancelNew="newSlide()"/>
+                        <EditSlide v-if="showModal.edit" :pages="pages" :slide="currentSlide" :images="images" @cancelEdit="cancelEdit()"/>
+                        <Newslide v-if="showModal.new" :pages="pages" :images="images" @refreshImages="getImages" @cancelNew="newSlide()"/>
                 </div>
                 <div class="page-right">
                     <button class="btn-default new-slide-toggle" @click="newSlide()" aria-expanded="showNewSlide.toString()" aria-controls="new-slide-form" aria-label="Create a new slide">
@@ -49,6 +49,9 @@ export default {
         Link,
         OptionsBar,
         EditSlide,
+    },
+    props: {
+        pages : Array,
     },
     data() {
         return {
@@ -94,13 +97,15 @@ export default {
             });
         },
         deleteSlide(slide) {
-            axios.delete(`/cms/slides/delete/${slide.id}`)
-            .then(response => {
-                this.$inertia.visit('/cms/slides', { method: 'get' });
-            })
-            .catch(error => {
-                console.log('error');
-            })
+            if (confirm("Are you sure you want to delete this page? All child pages will also be deleted.")) {
+                axios.delete(`/cms/slides/delete/${slide.id}`)
+                .then(response => {
+                    this.$inertia.visit('/cms/slides', { method: 'get' });
+                })
+                .catch(error => {
+                    console.log('error');
+                })
+            }
         },
         newSlide() {
             this.showModal.new = !this.showModal.new;

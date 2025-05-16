@@ -173,26 +173,38 @@ class PageController extends Controller
         ]);
     }
     
-    // Load a page
     public function show($slug)
     {
         $slug = ltrim($slug, '/');
-        $page = Page::where('slug', $slug)->with('widgets.slides.image', 'headers.logo')->firstOrFail();
-        
-        $navPages = Page::where('show_in_nav', true)->get()->groupBy('section');
-        
-        $headers = $page->headers->map(function ($header) use ($navPages) {
-            $header->pages = $navPages[$header->section] ?? collect();
-            return $header;
-        });
-        
+    
+        $flatPages = Page::orderBy('level')->get();
+        $groupedFlatPages = $flatPages->groupBy('section');
+    
+        $formattedPages = [];
+        foreach ($groupedFlatPages as $section => $pagesInSection) {
+            $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
+        }
+    
+        $page = Page::where('slug', $slug)
+            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->firstOrFail();
+    
+        $header = $page->headers->first();
+        $footer = $page->footers->first();
+    
+        if ($header) {
+            $header->pages = $formattedPages[$header->section] ?? collect();
+            $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
+    
         $page->increment('views');
-        
+    
         return Inertia::render('Welcome', [
             'page' => $page,
-            'pages' => $navPages,
+            'pages' => $formattedPages,
             'widgets' => $page->widgets,
-            'headers' =>$headers,
+            'header' => $header,
+            'footer' => $footer,
         ]);
     }
     
@@ -323,33 +335,33 @@ class PageController extends Controller
         return;
     }
     
-    public function destroy(Request $request, $id) 
+    public function destroy(Request $request, $id)
     {
         $user = auth()->user();
-        if ($user) {
-            $page = Page::findOrFail($id);
-            
-            $children = Page::where('parent_id', $page->id)->get();
-            
-            foreach ($children as $child) {
-                $grandchildren = Page::where('parent_id', $child->id)->get();
-                foreach ($grandchildren as $grandchild) {
-                    $grandchild->widgets()->delete();
-                    $grandchild->header()->delete();
-                    $grandchild->delete();
-                }
-                $child->widgets()->delete();
-                $child->header()->delete();
-                $child->delete();
-            }
-            
-            $page->widgets()->delete();
-            $page->header()->delete();
-            
-            $page->delete();
-        } else {
+
+        if (!$user) {
             return;
         }
+
+        $page = Page::findOrFail($id);
+
+        // Get children and grandchildren
+        $children = Page::where('parent_id', $page->id)->get();
+
+        foreach ($children as $child) {
+            $grandchildren = Page::where('parent_id', $child->id)->get();
+
+            foreach ($grandchildren as $grandchild) {
+                $this->detachAndDeleteItems($grandchild);
+                $grandchild->delete();
+            }
+
+            $this->detachAndDeleteItems($child);
+            $child->delete();
+        }
+
+        $this->detachAndDeleteItems($page);
+        $page->delete();
     }
     
     // Load CMS Dashboard
@@ -390,7 +402,10 @@ class PageController extends Controller
             'page_id' => 'required|integer',
             'widgets' => 'nullable|array',
             'widgets.*.title' => 'nullable|string',
+            'widgets.*.subtitle' => 'nullable|string',
+            'widgets.*.description' => 'nullable|string',
             'widgets.*.type' => 'required|string',
+            'widgets.*.variant' => 'required|string',
             'widgets.*.slides' => 'nullable|array', 
             'widgets.*.slides.*.id' => 'integer|exists:slides,id',
 
@@ -530,6 +545,7 @@ class PageController extends Controller
                 $newWidget = Widget::create([
                     'title'       => $widget['title'] ?? null,
                     'type'        => $widget['type'] ?? null,
+                    'variant'        => $widget['variant'] ?? null,
                     'is_saved'    => false,
                     'description' => $widget['description'] ?? null,
                 ]);
@@ -552,5 +568,32 @@ class PageController extends Controller
             }
         }        
         return;
+    }
+
+    private function detachAndDeleteItems($page)
+    {
+        // Widgets
+        foreach ($page->widgets as $widget) {
+            $page->widgets()->detach($widget->id);
+            if ($widget->pages()->count() === 0) {
+                $widget->delete();
+            }
+        }
+
+        // Headers
+        foreach ($page->headers as $header) {
+            $page->headers()->detach($header->id);
+            if ($header->pages()->count() === 0) {
+                $header->delete();
+            }
+        }
+
+        // Footers
+        foreach ($page->footers as $footer) {
+            $page->footers()->detach($footer->id);
+            if ($footer->pages()->count() === 0) {
+                $footer->delete();
+            }
+        }
     }
 }

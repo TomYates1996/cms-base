@@ -28,7 +28,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthBase title="Log in to your account" description="Enter your email and password below to log in">
+    <AuthBase title="Log in to the CMS" description="Enter your email and password below to log in">
         <Head title="Log in" />
 
         <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
@@ -78,7 +78,7 @@ const submit = () => {
                     </Label>
                 </div>
 
-                <Button type="submit" class="mt-4 w-full" :tabindex="4" :disabled="form.processing">
+                <Button type="submit" class="btn-default" :tabindex="4" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Log in
                 </Button>
@@ -86,7 +86,7 @@ const submit = () => {
 
             <div class="text-center text-sm text-muted-foreground">
                 Don't have an account?
-                <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>
+                <TextLink :href="route('register')" :tabindex="5">Request Access</TextLink>
             </div>
         </form>
     </AuthBase>

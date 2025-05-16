@@ -14,8 +14,51 @@
         </div>
 
         <div class="form-slide-link form-field">
-        <label for="link">Link</label>
-        <input id="link" name="link" type="text" required v-model="form.link" aria-required="true" />
+            <label>Link</label>
+
+            <!-- Static Display Mode -->
+            <div v-if="!editMode">
+                <span>
+                <!-- Show title if it's a page slug, otherwise show raw link -->
+                {{ linkType === 'page' ? getPageTitle(form.link) || form.link : form.link }}
+                </span>
+                <button type="button" @click="editMode = true" class="ml-2 text-blue-500 underline">Change</button>
+            </div>
+
+            <!-- Edit Mode -->
+            <div v-else>
+                <!-- Toggle between page and custom -->
+                <div class="mb-2">
+                <label>
+                    <input type="radio" value="page" v-model="linkType" />
+                    Select a page
+                </label>
+                <label class="ml-4">
+                    <input type="radio" value="custom" v-model="linkType" />
+                    Enter custom URL
+                </label>
+                </div>
+
+                <!-- Page selection -->
+                <div v-if="linkType === 'page'">
+                <select v-model="form.link" @change="editMode = false">
+                    <option disabled value="">Please select a page</option>
+                    <option v-for="page in pages" :key="page.id" :value="'/' + page.slug">
+                    {{ page.title }}
+                    </option>
+                </select>
+                </div>
+
+                <!-- Custom URL input -->
+                <div v-else>
+                <input
+                    type="text"
+                    v-model="form.link"
+                    placeholder="https://example.com"
+                    @blur="editMode = false"
+                />
+                </div>
+            </div>
         </div>
 
         <div class="form-slide-image form-field">
@@ -64,6 +107,7 @@ export default {
     props: {
         slide: Object,
         images: Array,
+        pages: Array,
     },
     setup() {
         const form = useForm({
@@ -81,6 +125,8 @@ export default {
         return {
             imagePreview: null, 
             showImageGrid: false, 
+            linkType: 'page',
+            editMode: false,
         };
     },
     created() {
@@ -96,6 +142,10 @@ export default {
         }
     },
     methods: {
+        getPageTitle(slug) {
+            const match = this.pages.find(p => p.slug === slug);
+            return match ? match.title : null;
+        },
         refreshImages() {
             this.$emit('refreshImages');
         },
@@ -198,6 +248,25 @@ export default {
         border: 1px solid var(--black);
         padding: 4px;
         border-radius: 2px;
+    }
+    .form-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        .link-upper {
+            display: flex;
+            gap: 20px;
+            div label:last-of-type {
+                margin-left: 20px;
+            }
+        }
+        .link-option {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            select {
+                padding: 4px;
+            }
+        }
     }
 }
 </style>

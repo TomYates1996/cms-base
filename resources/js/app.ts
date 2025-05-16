@@ -31,15 +31,6 @@ declare module 'vite/client' {
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-// Widget Types - (When adding to this list, make sure to create the template)
-const widgetOptions = [
-    { id: 1, name: 'cards_2_across', description: '2 cards in a row', label: 'Cards 2 Across' , path: 'cards/Cards2Across'},
-    { id: 2, name: 'cards_3_across', description: '3 cards in a row', label: 'Cards 3 Across' , path: 'cards/Cards3Across' },
-    { id: 3, name: 'cards_4_across', description: '4 cards in a row', label: 'Cards 4 Across' , path: 'cards/Cards4Across' },
-    { id: 4, name: 'side_by_side', description: 'Show a text paragraph next to a big image', label: 'Side by Side' , path: 'cards/Cards2Across' },
-    { id: 5, name: 'side_by_side_full', description: 'Show a text paragraph next to a big image (full screen)', label: 'Side by Side (Full Screen)' , path: 'cards/Cards2Across'},
-];
-
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
@@ -47,9 +38,7 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
-            .component("font-awesome-icon", FontAwesomeIcon)
-            
-        app.config.globalProperties.$widgetOptions = widgetOptions; 
+            .component("font-awesome-icon", FontAwesomeIcon) 
         app.config.globalProperties.$appName = appName;  
         app.mount(el);
     },

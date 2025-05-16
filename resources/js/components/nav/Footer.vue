@@ -24,8 +24,10 @@
             </div>
         </div>
         <div class="footer-attributions">
-            <p>&copy;TomCorp 2025</p>
-            <p>Site made using TomCMS</p>
+            <div class="attributions-inner">
+                <p>&copy;TomCorp 2025</p>
+                <p>Site made using TomCMS</p>
+            </div>
         </div>
     </footer>
 </template>
@@ -57,13 +59,16 @@ footer {
     display: flex;
     flex-direction: column;
     margin-top: auto;
+    background-color: var(--secondary-colour);
     .footer-top {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         justify-content: space-between;
         align-items: start;
-        background-color: var(--secondary-colour);
         padding: 20px;
+        max-width: var(--width-max);
+        margin: 0px auto;
+        width: 100%;
         .footer-logo {
             max-width: 200px;
             height: auto;
@@ -79,12 +84,16 @@ footer {
         }
     }
     .footer-attributions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         background-color: var(--primary-colour);
-        color: var(--text-primary);
-        padding: 10px 20px;
+        .attributions-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-primary);
+            padding: 10px 20px;
+            max-width: var(--width-max);
+            margin: 0px auto;
+        }
     }
 }
 </style>
