@@ -2,10 +2,10 @@
     <div :class="'core-widget ' + widget.type + ' ' + widget.variant">
         <WidgetHeader :title="widget.title" :subtitle="widget.subtitle" :description="widget.description"/>
         <div v-if="widget.type !== 'mosaic'" class="content">
-            <SlideContent :slides="widget.slides" />
+            <SlideContent :slides="widget.slides" :aspectRatios="aspectRatios" />
         </div>
         <div v-else class="content">
-            <MosaicContent :slides="widget.slides" />
+            <MosaicContent :slides="widget.slides" :aspectRatios="aspectRatios" />
         </div>
     </div>
 </template>
@@ -23,6 +23,7 @@ export default {
     },
     props: {
         widget: Object,
+        aspectRatios: Array,
     },
 }
 </script>

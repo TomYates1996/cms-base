@@ -29,10 +29,27 @@ Route::get('/resize/slides/{filename}', function ($filename) {
     $filename = 'storage/slides/' . $filename; 
     $path = public_path($filename);
 
-    $img = Image::read($path)->resize($width, $height);
+
+    // Scale by height (width adjusts proportionally)
+    $img = Image::read($path)
+        ->scale(width: $width);
+
+    // If scaled height is less than target height then scale up
+    if ($height && $img->height() < $height) {
+        $img->scale(height: $height);
+        if ($width && $img->width() > $width) {
+            $cropX = intval(($img->width() - $width) / 2);
+            $img->crop($width, $height, $cropX, 0);
+        }
+    } else {
+        if ($height && $img->height() > $height) {
+            $cropY = intval(($img->height() - $height) / 2);
+            $img->crop($width, $height, 0, $cropY);
+        }
+    }
 
     return response($img->encode(new JpegEncoder()))
-    ->header('Content-Type', 'image/jpeg');
+        ->header('Content-Type', 'image/jpeg');
 });
 
 Route::get('/', function () {

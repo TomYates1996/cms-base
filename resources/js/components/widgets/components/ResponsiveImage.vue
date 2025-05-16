@@ -1,5 +1,5 @@
 <template>
-    <picture>
+    <picture class="responsive-image">
       <source
         v-for="(source, index) in sources"
         :key="index"
@@ -18,16 +18,12 @@
   export default {
     props: {
       slide: Object,
+      aspectRatios: Array,
     },
     data() {
       return {
         sources: [],
         fallbackSrc: '',
-        aspectRatios: [
-          { width: 320, height: 320, at: 640 },
-          { width: 480, height: 100, at: 1024 },
-          { width: 768, height: 400, at: 1440 },
-        ],
       };
     },
     created() {
@@ -55,3 +51,5 @@
     };
 </script>
   
+<style>
+</style>
