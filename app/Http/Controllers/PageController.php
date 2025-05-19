@@ -454,6 +454,8 @@ class PageController extends Controller
                     'description' => $widgetData['description'] ?? null,
                     'subtitle' => $widgetData['subtitle'] ?? null,
                     'link' => $widgetData['link'] ?? null,
+                    'link_text' => $widgetData['link_text'] ?? null,
+                    'slide_link_text' => $widgetData['slide_link_text'] ?? null,
                 ]);
                 $widget = $existingWidget;
             } else {
@@ -550,6 +552,7 @@ class PageController extends Controller
                     'description' => $widget['description'] ?? null,
                     'link' => $widget['link'] ?? null,
                     'link_text' => $widget['link_text'] ?? null,
+                    'slide_link_text' => $widget['slide_link_text'] ?? null,
                 ]);
         
                 $footerData->widgets()->attach($newWidget->id);

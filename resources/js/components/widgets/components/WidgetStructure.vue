@@ -1,11 +1,11 @@
 <template>
     <div :class="'core-widget ' + widget.type + ' ' + widget.variant">
-        <WidgetHeader v-if="widget.title || widget.subtitle || widget.description" :title="widget.title" :subtitle="widget.subtitle" :description="widget.description"/>
+        <WidgetHeader v-if="widget.title || widget.subtitle || widget.description" :widget="widget"/>
         <div v-if="widget.type !== 'mosaic'" class="content">
-            <SlideContent :slides="widget.slides" :aspectRatios="aspectRatios" />
+            <SlideContent :widget="widget" :aspectRatios="aspectRatios" />
         </div>
         <div v-else class="content">
-            <MosaicContent :slides="widget.slides" :aspectRatios="aspectRatios" :mosaicRatios="mosaicRatios" :imageHovers="imageHovers"/>
+            <MosaicContent :widget="widget" :aspectRatios="aspectRatios" :mosaicRatios="mosaicRatios" :imageHovers="imageHovers"/>
         </div>
     </div>
 </template>

@@ -22,6 +22,7 @@ class Widget extends Model
         'description',
         'link',
         'link_text',
+        'slide_link_text',
     ];
     public function pages()
     {

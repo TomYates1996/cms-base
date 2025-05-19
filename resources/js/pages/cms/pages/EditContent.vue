@@ -73,7 +73,7 @@
 
               <HamburgerHeader :header="localContent.header" v-if="!anyTrue && localContent.header" :allPages="pages" :pages="localContent.header.pages" :link="localContent.header.link" :logo="localContent.header.logo"/>
               <NewWidget v-if="showModal.new.widgets" :pages="pages" @deleteSaved="deleteSavedElement" :savedWidgets="localSaved.widgets" :slides="slides" @addWidget="addWidget" @cancelAdd="cancelAdd('widgets')" :page="page" />
-              <EditWidget v-if="showModal.edit.widgets" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit('widgets')"/>
+              <EditWidget v-if="showModal.edit.widgets" :pages="pages" :widget="itemInfo" :slides="slides" @saveEdit="saveEdit" @cancelEdit="cancelEdit('widgets')"/>
               <EditHeader v-if="showModal.edit.header" :header="itemInfo" :images="images" @saveEdit="saveHeaderEdit()" @cancelEdit="cancelEdit('header')"/>
               <EditFooter v-if="showModal.edit.footer" :footer="itemInfo" :pages="pages" :socialMedia="localContent.socialMedia" @created="addSocialLink" :images="images" @saveEdit="saveFooter()" @cancelEdit="cancelEdit('footer')"/>
               <div v-if="!anyTrue" class="widget-container">

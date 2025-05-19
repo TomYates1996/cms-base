@@ -31,13 +31,23 @@
           <label for="widget-description">Description</label>
           <input id="widget-description" name="widget-description" type="text" v-model="newWidget.description" aria-required="false" />
         </div>
-        <div class="widget-description form-field">
-          <label for="widget-link">Link</label>
-          <input id="widget-link" name="widget-link" type="text" v-model="newWidget.link" aria-required="false" />
-        </div>
-        <div v-if="newWidget.link" class="widget-description form-field">
+        <label for="widget-link">Link</label>
+        <select id="widget-link" v-model="newWidget.link">
+          <option value="">-- Select a link --</option>
+          <optgroup v-for="(items, category) in pages" :key="category" :label="category">
+            <option v-for="page in items" :key="page.id" :value="page.slug">
+              {{ page.title }}
+            </option>
+          </optgroup>
+        </select>
+        <div v-if="newWidget.link" class="widget-link-text form-field">
           <label for="widget-link-text">Link Text</label>
           <input id="widget-link-text" name="widget-link-text" type="text" v-model="newWidget.link_text" aria-required="false" />
+        </div>
+
+        <div class="widget-slide-link-text form-field">
+          <label for="widget-slide-link-text">Slide Link Text</label>
+          <input id="widget-slide-link-text" name="widget-slide-link-text" type="text" v-model="newWidget.slide_link_text" aria-required="false" />
         </div>
   
         <section class="form-field" aria-labelledby="selected-slides-heading">

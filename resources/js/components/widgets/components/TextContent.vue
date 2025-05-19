@@ -7,6 +7,9 @@
             {{ slide.title }}
         </h3>
         <p class="slide-desc">{{ slide.description }}</p>
+        <button v-if="slide.link && widget.slide_link_text" class="btn-alt btn-read-more">
+            {{ widget.slide_link_text }}
+        </button>
     </div>
 </template>
 
@@ -14,6 +17,7 @@
 export default {
     props: {
         slide: Object,
+        widget: Object,
     },
 }
 </script>
@@ -24,13 +28,16 @@ export default {
         display: flex;
         gap: 10px;
         flex-direction: column;
-        align-content: flex-start;
+        align-items: flex-start;
         justify-content: flex-start;
         .slide-title {
             font: var(--slide-title-default);
         }
         .slide-desc {
             font: var(--slide-desc-default);
+        }
+        .btn-read-more {
+            display: flex;
         }
     }
 </style>

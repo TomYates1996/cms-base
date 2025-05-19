@@ -80,6 +80,7 @@ html {
         --border-radius-cards: var(--border-radius-default);
         --border-radius-hero: 0px;
         --border-radius-hero-alt: 100px 0px 100px 0px;
+        --border-radius-slider-arrows: 100%;
 
         /* Fonts */
         --font-bungee: "Bungee", sans-serif;
@@ -89,7 +90,10 @@ html {
         --font-heading: var(--font-cal-sans);
         --font-body: var(--font-telex);
 
-        /* Text sizes */
+        /* Font Sizes */
+        --text-2xl: 1.25rem; 
+
+        /* Text Collections */
         --widget-heading: 600 26px var(--font-heading);
         --widget-subheading: 400 14px var(--font-body);
 

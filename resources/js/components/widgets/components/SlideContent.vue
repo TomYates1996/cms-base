@@ -1,9 +1,9 @@
 <template>
-    <div class="item" v-for="(slide, index) in slides" :key="index">
+    <div class="item" v-for="(slide, index) in widget.slides" :key="index">
         <div class="image-section">
             <ResponsiveImage :slide="slide" :aspectRatios="aspectRatios"/>
         </div>
-        <TextContent :slide="slide"/>
+        <TextContent :slide="slide" :widget="widget"/>
     </div>
 </template>
 
@@ -17,7 +17,7 @@ export default {
         ResponsiveImage,
     },
     props: {
-        slides: Array,
+        widget: Object,
         aspectRatios: Array,
     },
 
