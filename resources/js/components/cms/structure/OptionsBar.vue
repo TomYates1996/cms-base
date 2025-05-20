@@ -62,6 +62,16 @@
                 Layouts
             </Link>
         </li>
+        <li>
+            <Link 
+                v-if="$page.props.auth.user"
+                href="/cms/blog"
+                method="get"
+                class="option"
+            >
+                Blog
+            </Link>
+        </li>
     </ul>
   </nav>
 </template>

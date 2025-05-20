@@ -31,8 +31,8 @@
           <label for="widget-description">Description</label>
           <input id="widget-description" name="widget-description" type="text" v-model="newWidget.description" aria-required="false" />
         </div>
-        <label for="widget-link">Link</label>
-        <select id="widget-link" v-model="newWidget.link">
+        <label for="widget-link" v-if="newWidget.type !== 'text'">Link</label>
+        <select id="widget-link" v-if="newWidget.type !== 'text'" v-model="newWidget.link">
           <option value="">-- Select a link --</option>
           <optgroup v-for="(items, category) in pages" :key="category" :label="category">
             <option v-for="page in items" :key="page.id" :value="page.slug">
@@ -40,17 +40,17 @@
             </option>
           </optgroup>
         </select>
-        <div v-if="newWidget.link" class="widget-link-text form-field">
+        <div v-if="newWidget.link && newWidget.type !== 'text'" class="widget-link-text form-field">
           <label for="widget-link-text">Link Text</label>
           <input id="widget-link-text" name="widget-link-text" type="text" v-model="newWidget.link_text" aria-required="false" />
         </div>
 
-        <div class="widget-slide-link-text form-field">
+        <div class="widget-slide-link-text form-field" v-if="newWidget.type !== 'text'">
           <label for="widget-slide-link-text">Slide Link Text</label>
           <input id="widget-slide-link-text" name="widget-slide-link-text" type="text" v-model="newWidget.slide_link_text" aria-required="false" />
         </div>
   
-        <section class="form-field" aria-labelledby="selected-slides-heading">
+        <section class="form-field" aria-labelledby="selected-slides-heading" v-if="newWidget.type !== 'text'">
           <h2 id="selected-slides-heading" class="form-subtitle">Selected Slides</h2>
           <ul class="slide-list selected-slides">
             <li v-if="slides.filter(slide => slide.selected).length < 1">No slides</li>
@@ -69,7 +69,7 @@
           </ul>
         </section>
   
-        <div class="form-field">
+        <div class="form-field" v-if="newWidget.type !== 'text'">
           <button @click.prevent="showSlideListF()" class="btn-default" aria-label="Open slide selector">Select Slides</button>
         </div>
   

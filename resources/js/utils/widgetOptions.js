@@ -12,8 +12,9 @@ export const widgetOptions = [
     { id: 10, name: 'hero', variant: 'hero_image_alt', description: 'A big image banner for the top of the page', label: 'Hero Image Alt' , path: 'hero/HeroImageAlt' , hasHeader: false},
     { id: 11, name: 'slider', variant: 'slider_2_across', description: 'A carousel of images, 2 shown at a time', label: 'Slider 2 Across' , path: 'slider/Slider2Across' , hasHeader: true},
     { id: 12, name: 'slider', variant: 'slider_2_across_full', description: 'A full width carousel of images, 2 shown at a time', label: 'Slider 2 Across (Full Width)' , path: 'slider/Slider2AcrossFull' , hasHeader: true},
-    { id: 11, name: 'slider', variant: 'slider_3_across', description: 'A carousel of images, 3 shown at a time', label: 'Slider 3 Across' , path: 'slider/Slider3Across' , hasHeader: true},
-    { id: 13, name: 'slider', variant: 'slider_3_across_full', description: 'A full width carousel of images, 3 shown at a time', label: 'Slider 3 Across (Full Width)' , path: 'slider/Slider3AcrossFull' , hasHeader: true},
-    { id: 11, name: 'slider', variant: 'slider_4_across', description: 'A carousel of images, 4 shown at a time', label: 'Slider 4 Across' , path: 'slider/Slider4Across' , hasHeader: true},
-    { id: 14, name: 'slider', variant: 'slider_4_across_full', description: 'A full width carousel of images, 4 shown at a time', label: 'Slider 4 Across (Full Width)' , path: 'slider/Slider4AcrossFull' , hasHeader: true},
+    { id: 13, name: 'slider', variant: 'slider_3_across', description: 'A carousel of images, 3 shown at a time', label: 'Slider 3 Across' , path: 'slider/Slider3Across' , hasHeader: true},
+    { id: 14, name: 'slider', variant: 'slider_3_across_full', description: 'A full width carousel of images, 3 shown at a time', label: 'Slider 3 Across (Full Width)' , path: 'slider/Slider3AcrossFull' , hasHeader: true},
+    { id: 15, name: 'slider', variant: 'slider_4_across', description: 'A carousel of images, 4 shown at a time', label: 'Slider 4 Across' , path: 'slider/Slider4Across' , hasHeader: true},
+    { id: 16, name: 'slider', variant: 'slider_4_across_full', description: 'A full width carousel of images, 4 shown at a time', label: 'Slider 4 Across (Full Width)' , path: 'slider/Slider4AcrossFull' , hasHeader: true},
+    { id: 17, name: 'text', variant: 'text_box', description: 'A text box', label: 'Text Box' , path: 'text/TextBox' , hasHeader: false},
 ];

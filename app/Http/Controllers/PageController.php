@@ -8,6 +8,7 @@ use App\Models\Widget;
 use App\Models\Header;
 use App\Models\Footer;
 use App\Models\Layout;
+use App\Models\Blog;
 use Inertia\Inertia;
 
 class PageController extends Controller
@@ -65,6 +66,16 @@ class PageController extends Controller
 
         return Inertia::render('cms/pages/Layouts', [
             'layouts' => $layouts,
+        ]);
+    }
+
+    // Load Blog
+    public function load_blogs()
+    {
+        $blogs = Blog::all();
+
+        return Inertia::render('cms/pages/Blogs', [
+            'blogPosts' => $blogs,
         ]);
     }
 

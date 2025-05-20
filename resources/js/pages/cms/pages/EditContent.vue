@@ -2,10 +2,19 @@
   <div class="page-wrapper">
     <div class="page-left detail">
       <div class="main-buttons">
-        <button @click="layout ? saveLayout() : savePage()" class="btn-default">Save {{ layout ? 'layout' : 'page' }}</button>
+        <button v-if="!isBlog" @click="layout ? saveLayout() : savePage()" class="btn-default">Save {{ layout ? 'layout' : 'page' }}</button>
+        <button v-if="isBlog" @click="saveBlog()" class="btn-default">Save blog post</button>
         <Link 
-             v-if="$page.props.auth.user"
+             v-if="$page.props.auth.user && !isBlog"
              :href="layout ? '/cms/layouts' : '/cms/pages/' + page.section"
+             method="get"
+             class="btn-default"
+          >
+              Cancel Changes
+          </Link>
+        <Link 
+             v-if="$page.props.auth.user && isBlog"
+             :href="'/cms/blog'"
              method="get"
              class="btn-default"
           >
@@ -126,6 +135,10 @@ export default {
         savedHeaders: Array,
         savedFooters: Array,
         layout: Boolean,
+        isBlog: {
+          type: Boolean,
+          default: false,
+        }
     },
     components: {
       SavedNavList,
@@ -495,6 +508,17 @@ export default {
           }, {
             onSuccess: () => {
               router.get(`/cms/layouts`);
+            }
+          }
+        );
+      },
+      saveBlog() {
+        router.post(`/cms/blog/post/save`, { 
+          widgets: this.localContent.widgets, 
+          blog_id: this.page.id, 
+          }, {
+            onSuccess: () => {
+              router.get(`/cms/blog`);
             }
           }
         );

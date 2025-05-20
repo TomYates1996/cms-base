@@ -40,4 +40,8 @@ class Widget extends Model
     {
         return $this->belongsToMany(Layout::class, 'layout_widget');
     }
+    public function blogs()
+    {
+        return $this->belongsToMany(Blog::class, 'blog_widget');
+    }
 }
