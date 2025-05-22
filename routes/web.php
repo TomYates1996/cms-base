@@ -26,32 +26,33 @@ Route::get('/test-image', function () {
         ->header('Content-Type', 'image/jpeg');
 });
 
-Route::get('/resize/slides/{filename}', function ($filename) {
+Route::get('/resize/{path}', function ($path) {
     $width = request('w');
     $height = request('h');
-    $filename = 'storage/slides/' . $filename; 
-    $path = public_path($filename);
 
-    $img = Image::read($path)
-        ->scale(width: $width);
+    $storagePath = public_path('storage/' . $path);
 
-    // If scaled height is less than target height then scale up
+    if (!file_exists($storagePath)) {
+        abort(404, 'Image not found: ' . $path);
+    }
+
+    $img = Image::read($storagePath)->scale(width: $width);
+
+    // Handle scaling/cropping
     if ($height && $img->height() < $height) {
         $img->scale(height: $height);
         if ($width && $img->width() > $width) {
             $cropX = intval(($img->width() - $width) / 2);
             $img->crop($width, $height, $cropX, 0);
         }
-    } else {
-        if ($height && $img->height() > $height) {
-            $cropY = intval(($img->height() - $height) / 2);
-            $img->crop($width, $height, 0, $cropY);
-        }
+    } elseif ($height && $img->height() > $height) {
+        $cropY = intval(($img->height() - $height) / 2);
+        $img->crop($width, $height, 0, $cropY);
     }
 
     return response($img->encode(new JpegEncoder()))
         ->header('Content-Type', 'image/jpeg');
-});
+})->where('path', '.*');
 
 Route::get('/', function () {
     return Inertia::render('Welcome');

@@ -54,11 +54,11 @@ export default {
                 spaceBetween: 10,
                 breakpoints: {
                 640: {
-                    slidesPerView: 2,
+                    slidesPerView: 1,
                     spaceBetween: 20,
                 },
                 1024: {
-                    slidesPerView: 2,
+                    slidesPerView: 1,
                     spaceBetween: 20,
                 },
                 },

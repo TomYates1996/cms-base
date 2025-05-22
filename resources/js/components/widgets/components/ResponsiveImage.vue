@@ -34,28 +34,28 @@
       };
     },
     created() {
-      const urlPattern = /^\/?([\w-]+\/)*([^\/]+\.(jpg|jpeg|png|webp|gif))$/i;
+      const urlPattern = /^\/?((?:[\w-]+\/)*)([^\/]+\.(jpg|jpeg|png|webp|gif))$/i;
       const match = this.slide.image.image_path.match(urlPattern);
-  
+
       if (!match) {
         console.error('Invalid image URL format:', this.slide.image.image_path);
         return;
       }
-  
+
       const folder = match[1];
-      const fullFilename = match[2];
-  
+      const fullFilename = match[2]; 
+
       const sortedRatios = [...this.aspectRatios].sort((a, b) => a.at - b.at);
-  
+
       this.sources = sortedRatios.map(ratio => ({
         media: `(max-width: ${ratio.at}px)`,
         src: `/resize/${folder}${fullFilename}?w=${ratio.width}&h=${ratio.height}`,
       }));
-  
+
       const fallback = sortedRatios[sortedRatios.length - 1];
       this.fallbackSrc = `/resize/${folder}${fullFilename}?w=${fallback.width}&h=${fallback.height}`;
     },
-    };
+  };
 </script>
   
 <style>
