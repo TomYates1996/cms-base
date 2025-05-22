@@ -6,7 +6,7 @@
           <h1>Blogs</h1>
           <ul class="blog-list">
             <li v-for="blog in blogPosts" :key="blog.id" class="blog-list-item">
-              <p>{{ blog.title }}</p>
+              <a :href="`/blog/post/${blog.slug}`">{{ blog.title }}</a>
                 <button v-if="$page.props.auth.user" class="option" @click="deleteBlog(blog.id)" title="Delete blog" aria-label="Delete blog: {{ blog.title }}">
                     <font-awesome-icon :icon="['fas', 'trash-can']" />
                 </button>

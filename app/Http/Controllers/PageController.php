@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Page;
 use App\Models\Widget;
 use App\Models\Header;
+use App\Models\Slide;
 use App\Models\Footer;
 use App\Models\Layout;
 use App\Models\Blog;
@@ -199,7 +200,79 @@ class PageController extends Controller
         $page = Page::where('slug', $slug)
             ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
             ->firstOrFail();
+
+        foreach ($page->widgets as $widget) {
+            if ($widget->feed_type === 'blog') {
+                $blogs = Blog::latest()->take($widget->to_show ?? 4)->get();
+
+                $virtualSlides = $blogs->map(function ($blog) {
+                    $slide = new Slide();
+                    $slide->title = $blog->title;
+                    $slide->description = $blog->excerpt ?? '';
+                    $slide->link = url("/blog/post/{$blog->slug}");
+                    $slide->image_id = $blog->image_id;
+                    $slide->setRelation('image', $blog->image); 
+                    return $slide;
+                });
+
+                $widget->setRelation('slides', $virtualSlides);
+            }
+        }
     
+        $header = $page->headers->first();
+        $footer = $page->footers->first();
+    
+        if ($header) {
+            $header->pages = $formattedPages[$header->section] ?? collect();
+            $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
+    
+        $page->increment('views');
+
+        return Inertia::render('Welcome', [
+            'page' => $page,
+            'pages' => $formattedPages,
+            'widgets' => $page->widgets,
+            'header' => $header,
+            'footer' => $footer,
+        ]);
+    }
+
+    public function blog_post($slug)
+    {
+        $slug = ltrim($slug, '/');
+    
+        $flatPages = Page::orderBy('level')->get();
+        $groupedFlatPages = $flatPages->groupBy('section');
+    
+        $formattedPages = [];
+        foreach ($groupedFlatPages as $section => $pagesInSection) {
+            $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
+        }
+    
+        $page = Page::where('slug', 'blog/post')
+            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->firstOrFail();
+
+        $blog = Blog::where('slug', $slug)
+            ->with('widgets.slides.image')
+            ->firstOrFail();
+
+        $pageWidgets = $page->widgets;
+        $blogWidgets = $blog->widgets;
+
+        $finalWidgets = collect();
+
+        foreach ($pageWidgets as $widget) {
+            if ($widget->variant === 'blog_post') {
+                foreach ($blogWidgets as $blogWidget) {
+                    $finalWidgets->push($blogWidget);
+                }
+            } else {
+                $finalWidgets->push($widget);
+            }
+        }
+
         $header = $page->headers->first();
         $footer = $page->footers->first();
     
@@ -213,7 +286,7 @@ class PageController extends Controller
         return Inertia::render('Welcome', [
             'page' => $page,
             'pages' => $formattedPages,
-            'widgets' => $page->widgets,
+            'widgets' => $finalWidgets,
             'header' => $header,
             'footer' => $footer,
         ]);
@@ -467,6 +540,9 @@ class PageController extends Controller
                     'link' => $widgetData['link'] ?? null,
                     'link_text' => $widgetData['link_text'] ?? null,
                     'slide_link_text' => $widgetData['slide_link_text'] ?? null,
+                    'content' => $widgetData['content'] ?? null,
+                    'feed_type' => $widgetData['feed_type'] ?? null,
+                    'to_show' => $widgetData['to_show'] ?? null,
                 ]);
                 $widget = $existingWidget;
             } else {
@@ -564,6 +640,9 @@ class PageController extends Controller
                     'link' => $widget['link'] ?? null,
                     'link_text' => $widget['link_text'] ?? null,
                     'slide_link_text' => $widget['slide_link_text'] ?? null,
+                    'content' => $widget['content'] ?? null,
+                    'feed_type' => $widget['feed_type'] ?? null,
+                    'to_show' => $widget['to_show'] ?? null,
                 ]);
         
                 $footerData->widgets()->attach($newWidget->id);

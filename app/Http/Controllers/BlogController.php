@@ -9,6 +9,7 @@ use App\Models\Footer;
 use App\Models\Widget;
 use App\Models\Page;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 
 class BlogController extends Controller
@@ -21,6 +22,7 @@ class BlogController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:blogs,slug',
             'created_by' => 'nullable|string|max:255',
+            'image_id' => 'nullable|integer',
             'image_path' => 'nullable|string|max:1024', 
             'is_featured' => 'nullable|boolean',
             'category_id' => 'nullable|exists:categories,id',
@@ -34,6 +36,21 @@ class BlogController extends Controller
            
         // $validated['created_by'] = $user->id;
         $blog = Blog::create($validated);
+
+        // Add the blog header
+        $widget = Widget::create([
+            'title' => null,
+            'type' => 'blog',              
+            'variant' => 'blog_post_header',   
+            'image_path' => $validated['image_path'] ?? null,
+            'description' => null,
+            'content' => 
+                '<h1 class="post-title">'.$validated['title'].'</h1>'.
+                '<p class="author">'.$user->name.'</p>'.
+                '<p class="publish-date">'.now()->toDateString().'</p>'
+        ]);
+
+        $blog->widgets()->attach($widget->id, ['position' => 1]);
            
         return;
     }
@@ -88,6 +105,13 @@ class BlogController extends Controller
             ->with('widgets.slides.image')
             ->firstOrFail();
 
+        // $page = Page::where('slug', 'blog/post')
+        //     ->with('widgets.slides.image', 'header.logo', 'footer.logo', 'footer.socialMedia', 'footer.widgets')
+        //     ->firstOrFail();
+
+        // $header = $layout->header;
+        // $footer = $layout->footer;
+
         // Load the saved widgets
         $savedWidgets = Widget::with('slides.image')
             ->where('is_saved', true)
@@ -127,6 +151,17 @@ class BlogController extends Controller
         
         $incomingWidgetIds = collect($widgets)->pluck('id')->filter()->toArray(); 
         $currentWidgetIds = $blog->widgets()->pluck('widgets.id')->toArray();
+
+        $textWidget = collect($widgets)->firstWhere('type', 'text');
+
+        if ($textWidget && !empty($textWidget['content'])) {
+            $excerptText = Str::limit(strip_tags($textWidget['content']), 200);
+            $blog->excerpt = $excerptText;
+        } else {
+            $blog->excerpt = '';
+        }
+
+        $blog->save();
         
         $widgetsToDetach = array_diff($currentWidgetIds, $incomingWidgetIds);
 
@@ -156,6 +191,9 @@ class BlogController extends Controller
                     'description' => $widgetData['description'] ?? null,
                     'subtitle' => $widgetData['subtitle'] ?? null,
                     'link' => $widgetData['link'] ?? null,
+                    'link_text' => $widgetData['link_text'] ?? null,
+                    'slide_link_text' => $widgetData['slide_link_text'] ?? null,
+                    'content' => $widgetData['content'] ?? null,
                 ]);
                 $widget = $existingWidget;
             } else {

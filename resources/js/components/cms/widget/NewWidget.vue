@@ -16,7 +16,7 @@
         <div class="widget-type-select form-field">
           <label for="widget-type">Select Widget Type</label>
           <select id="widget-type" v-model="newWidget.type" aria-required="true" required>
-            <option v-for="widget in widgetOptions" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
+            <option v-for="widget in widgetOptions.filter(w => w.showWidget)" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
           </select>
         </div>
         <div v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasHeader" class="widget-title form-field">
@@ -31,8 +31,8 @@
           <label for="widget-description">Description</label>
           <input id="widget-description" name="widget-description" type="text" v-model="newWidget.description" aria-required="false" />
         </div>
-        <label for="widget-link" v-if="newWidget.type !== 'text'">Link</label>
-        <select id="widget-link" v-if="newWidget.type !== 'text'" v-model="newWidget.link">
+        <label for="widget-link" v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">Link</label>
+        <select id="widget-link" v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings" v-model="newWidget.link">
           <option value="">-- Select a link --</option>
           <optgroup v-for="(items, category) in pages" :key="category" :label="category">
             <option v-for="page in items" :key="page.id" :value="page.slug">
@@ -40,17 +40,37 @@
             </option>
           </optgroup>
         </select>
-        <div v-if="newWidget.link && newWidget.type !== 'text'" class="widget-link-text form-field">
+        <div v-if="newWidget.link && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings" class="widget-link-text form-field">
           <label for="widget-link-text">Link Text</label>
           <input id="widget-link-text" name="widget-link-text" type="text" v-model="newWidget.link_text" aria-required="false" />
         </div>
 
-        <div class="widget-slide-link-text form-field" v-if="newWidget.type !== 'text'">
+        <div class="widget-slide-link-text form-field" v-if="newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">
           <label for="widget-slide-link-text">Slide Link Text</label>
           <input id="widget-slide-link-text" name="widget-slide-link-text" type="text" v-model="newWidget.slide_link_text" aria-required="false" />
         </div>
-  
-        <section class="form-field" aria-labelledby="selected-slides-heading" v-if="newWidget.type !== 'text'">
+         <div v-if="newWidget.type &&  widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">
+          <label><strong>Feed Type:</strong></label>
+          <div style="margin-top: 8px;">
+            <label style="margin-right: 15px;">
+              <input type="radio" value="slides" v-model="newWidget.feed_type" />
+              Slides
+            </label>
+            <label style="margin-right: 15px;">
+              <input type="radio" value="blog" v-model="newWidget.feed_type" />
+              Blog
+            </label>
+            <label style="margin-right: 15px;">
+              <input type="radio" value="listings" v-model="newWidget.feed_type" />
+              Listings
+            </label>
+            <label>
+              <input type="radio" value="events" v-model="newWidget.feed_type" />
+              Events
+            </label>
+          </div>
+        </div>
+        <section class="form-field" aria-labelledby="selected-slides-heading" v-if="newWidget.feed_type === 'slides' && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">
           <h2 id="selected-slides-heading" class="form-subtitle">Selected Slides</h2>
           <ul class="slide-list selected-slides">
             <li v-if="slides.filter(slide => slide.selected).length < 1">No slides</li>
@@ -69,9 +89,22 @@
           </ul>
         </section>
   
-        <div class="form-field" v-if="newWidget.type !== 'text'">
+        <div class="form-field" v-if="newWidget.feed_type === 'slides' && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">
           <button @click.prevent="showSlideListF()" class="btn-default" aria-label="Open slide selector">Select Slides</button>
         </div>
+
+        <div v-if="newWidget.feed_type !== 'slides' && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasHeader" class="widget-slide-count form-field">
+          <label for="widget-slide-count">Amount to show</label>
+          <input
+            id="widget-slide-count"
+            name="widget-slide-count"
+            type="number"
+            v-model="newWidget.to_show"
+            aria-required="false"
+        />
+        </div>
+
+        <QuillEditor v-if="newWidget.type && newWidget.type.name === 'text'" v-model="newWidget.content" />
   
         <div class="form-actions">
           <button type="button" @click="addWidget()" class="btn-default" aria-label="Add Widget">Add Widget</button>
@@ -119,10 +152,12 @@
 import axios from 'axios';
 import NewSlide from '../slides/NewSlide.vue';
 import { widgetOptions } from '@/utils/widgetOptions.js';
+import QuillEditor from '../reusable/QuillEditor.vue';
 
 export default {
     components: {
       NewSlide,
+      QuillEditor,
     },
     props: {
         slides: Array,
@@ -133,7 +168,10 @@ export default {
       data() {
         return {
           widgetOptions,
-          newWidget: {},
+          newWidget: {
+            feed_type : 'slides',
+            to_show : 2,
+          },
           showModal: {
               newSlide: false,
           },
@@ -150,9 +188,6 @@ export default {
         'getImages',    
         'deleteSaved'   
     ],
-    // created() {
-    //   this.getImages();
-    // },
     methods: {
       // getImages() {
       //       axios.get('/api/images/all')

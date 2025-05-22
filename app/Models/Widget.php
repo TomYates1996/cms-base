@@ -23,6 +23,9 @@ class Widget extends Model
         'link',
         'link_text',
         'slide_link_text',
+        'content',
+        'feed_type',
+        'to_show',
     ];
     public function pages()
     {

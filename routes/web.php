@@ -72,7 +72,9 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::delete('/blog/delete/{blog_id}', [BlogController::class, 'destroy'])->name('blog.delete');
     Route::get('/pages/children/{page_slug}', [PageController::class, 'children'])->where('page_slug', '.*')->name('pages.children');
     Route::get('/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
-    Route::get('/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])->name('pages.load.edit.content');
+    Route::get('/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])
+        ->where('page_slug', '.*') 
+        ->name('pages.load.edit.content');
     Route::get('/layouts/edit-content/{id}', [LayoutController::class, 'load_edit_content'])->name('layouts.load.edit.content');
     Route::get('/layouts', [PageController::class, 'load_layouts'])->name('pages.load.layouts');
     Route::get('/layouts/index', [LayoutController::class, 'index'])->name('layouts.index');
@@ -125,4 +127,5 @@ Route::middleware('auth')->group(function () {
 
 
 
+Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

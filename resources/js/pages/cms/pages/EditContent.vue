@@ -23,7 +23,7 @@
       </div>
       
       <!-- Header Sidebar -->
-      <div class="sidebar-option sidebar-header">
+      <div class="sidebar-option sidebar-header" v-if="!isBlog">
         <h5>Header</h5>
         <div v-if="localContent.header" class="widget-option">
             <p>Header - {{ localContent.header.section }}</p>
@@ -53,7 +53,7 @@
         <button @click="openAddItem('widgets')" class="btn-default">Add Widget</button>
       </div>
         <!-- Footer Sidebar -->
-        <div class="sidebar-option sidebar-footer">
+        <div class="sidebar-option sidebar-footer" v-if="!isBlog">
           <h5>Footer</h5>
           <div v-if="localContent.footer" class="widget-option">
             <p>Footer - {{ localContent.footer.section }}</p>
@@ -208,7 +208,7 @@ export default {
             Object.values(section).some(val => val === true)
           );
         },
-    },
+   },
     methods: {
       setNewFooter(footer) {
         this.localContent.footer = footer;

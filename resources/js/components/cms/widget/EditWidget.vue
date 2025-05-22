@@ -12,7 +12,7 @@
         <div class="widget-type-select form-field">
           <label for="widget-type">Select Widget Type</label>
           <select id="widget-type" v-model="widget.type" aria-required="true" required>
-            <option v-for="widget in widgetOptions" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
+            <option v-for="widget in widgetOptions.filter(w => w.showWidget)" :key="widget.id" :value="{ name: widget.name, variant: widget.variant }">{{ widget.label }}</option>
           </select>
         </div>
         <div v-if="widget.type.variant && widgetOptions.find(option => option.variant === widget.type.variant)?.hasHeader" class="widget-title form-field">
@@ -32,25 +32,46 @@
           <label for="widget-link">Link</label>
           <input id="widget-link" name="widget-link" type="text" v-model="widget.link" aria-required="false" />
         </div> -->
-        <select v-model="widget.link">
+        <select v-if="widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings" v-model="widget.link">
           <optgroup v-for="(items, category) in pages" :key="category" :label="category">
             <option v-for="page in items" :key="page.id" :value="page.slug">
               {{ page.title }}
             </option>
           </optgroup>
         </select>
-        <div v-if="widget.link" class="widget-link-text form-field">
+        <div v-if="widget.link && widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings" class="widget-link-text form-field">
           <label for="widget-link-text">Link Text</label>
           <input id="widget-link-text" name="widget-link-text" type="text" v-model="widget.link_text" aria-required="false" />
         </div>
 
-        <div class="widget-slide-link-text form-field">
+        <div v-if="widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings" class="widget-slide-link-text form-field">
           <label for="widget-slide-link-text">Slide Link Text</label>
           <input id="widget-slide-link-text" name="widget-slide-link-text" type="text" v-model="widget.slide_link_text" aria-required="false" />
         </div>
         
+         <div v-if="widget.type">
+          <label><strong>Feed Type:</strong></label>
+          <div style="margin-top: 8px;">
+            <label style="margin-right: 15px;">
+              <input type="radio" value="slides" v-model="widget.feed_type" />
+              Slides
+            </label>
+            <label style="margin-right: 15px;">
+              <input type="radio" value="blog" v-model="widget.feed_type" />
+              Blog
+            </label>
+            <label style="margin-right: 15px;">
+              <input type="radio" value="listings" v-model="widget.feed_type" />
+              Listings
+            </label>
+            <label>
+              <input type="radio" value="events" v-model="widget.feed_type" />
+              Events
+            </label>
+          </div>
+        </div>
   
-        <section class="form-field" aria-labelledby="selected-slides-heading">
+        <section v-if="widget.feed_type === 'slides' && widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings" class="form-field" aria-labelledby="selected-slides-heading">
           <h2 id="selected-slides-heading" class="form-subtitle">Selected Slides</h2>
           <ul class="slide-list selected-slides">
             <li v-if="initialSlides.length < 1">No slides</li>
@@ -68,9 +89,22 @@
             </li>
           </ul>
         </section>
+        
+        <QuillEditor v-if="widget.type && widget.type.name === 'text'" v-model="widget.content" />
   
-        <div class="form-field">
+        <div class="form-field" v-if="widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings">
           <button @click.prevent="showSlideListF()" class="btn-default" aria-label="Open slide selector">Select Slides</button>
+        </div>
+
+        <div v-if="widget.feed_type !== 'slides' && widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasHeader" class="widget-slide-count form-field">
+          <label for="widget-slide-count">Amount to show</label>
+          <input
+            id="widget-slide-count"
+            name="widget-slide-count"
+            type="number"
+            v-model="widget.to_show"
+            aria-required="false"
+        />
         </div>
   
         <div class="form-actions">
@@ -103,8 +137,12 @@
 
 <script>
 import { widgetOptions } from '@/utils/widgetOptions.js';
+import QuillEditor from '../reusable/QuillEditor.vue';
 
 export default {
+    components: {
+      QuillEditor,
+    },
     props: {
         widget: Object,
         slides: Array,
