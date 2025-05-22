@@ -34,7 +34,7 @@
       };
     },
     created() {
-      const urlPattern = /^\/?(slides\/)([^\/]+\.(jpg|jpeg|png|webp|gif))$/i;
+      const urlPattern = /^\/?([\w-]+\/)*([^\/]+\.(jpg|jpeg|png|webp|gif))$/i;
       const match = this.slide.image.image_path.match(urlPattern);
   
       if (!match) {

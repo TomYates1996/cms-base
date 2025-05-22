@@ -9,6 +9,8 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ListingController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\HeaderController;
 use Illuminate\Support\Facades\Route;
 use Intervention\Image\Laravel\Facades\Image;
@@ -96,6 +98,8 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::get('/pages/{pageId}/widgets/create', [WidgetController::class, 'create'])->name('widgets.create');
     Route::post('/pages/{pageId}/widgets', [WidgetController::class, 'store'])->name('widgets.store');
     Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
+    Route::get('/crm/listings', [ListingController::class, 'load_listings'])->name('pages.load.listings');
+    Route::get('/crm/events', [EventController::class, 'load_events'])->name('pages.load.events');
 });
 
 Route::middleware('auth')->group(function () {
@@ -103,6 +107,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
     Route::post('/layout/store', [LayoutController::class, 'store'])->name('api.layout.store');
     Route::post('/blog/store', [BlogController::class, 'store'])->name('api.blogs.store');
+    Route::post('/cms/crm/listing/store', [ListingController::class, 'store'])->name('api.listing.store');
+    Route::post('/cms/crm/event/store', [EventController::class, 'store'])->name('api.event.store');
     Route::post('/pages/link/store', [PageController::class, 'store_link'])->name('api.pages.link.store');
     Route::get('/api/slides', [SlideController::class, 'index'])->name('api.slides.index');
     Route::post('/api/slides', [SlideController::class, 'store'])->name('api.slides.store');
@@ -127,5 +133,6 @@ Route::middleware('auth')->group(function () {
 
 
 
+Route::get('/listing/{slug}', [ListingController::class, 'load_page'])->where('slug', '.*')->name('listing.load');
 Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

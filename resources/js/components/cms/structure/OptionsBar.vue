@@ -72,6 +72,28 @@
                 Blog
             </Link>
         </li>
+        <li>
+            <button @click="toggle('crm')" :aria-expanded="this.expanded.crm" :aria-controls="'section-crm'" class="option accordion-toggle">
+                CRM
+                <span aria-hidden="hidden"><font-awesome-icon :icon="this.expanded.crm ? ['fas', 'sort-up'] : ['fas', 'sort-down']" /></span>
+            </button>
+            <Link 
+                v-if="$page.props.auth.user && this.expanded.crm"
+                href="/cms/crm/listings"
+                method="get"
+                class="option nav-child"
+            >
+                Listings
+            </Link>
+            <Link 
+                v-if="$page.props.auth.user && this.expanded.crm"
+                href="/cms/crm/events"
+                method="get"
+                class="option nav-child"
+            >
+                Events
+            </Link>
+        </li>
     </ul>
   </nav>
 </template>
