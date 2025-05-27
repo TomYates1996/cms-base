@@ -1,7 +1,7 @@
 <template>
     <div class="page-wrap">
       <div class="page-left">
-        <NewCRMItem :item="'listing'" v-if="showNewListing" @cancelNew="showNewListing = false"/>
+        <NewCRMItem :isListing="true" :listings="listings" :item="'listing'" v-if="showNewListing" @cancelNew="showNewListing = false"/>
         <div v-if="!showNewListing" class="listing-list-wrap">
           <h1>Listings</h1>
           <ul class="listing-list">

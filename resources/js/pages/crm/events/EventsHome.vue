@@ -1,31 +1,28 @@
 <template>
     <div class="page-wrap">
       <div class="page-left">
-        <NewBlog v-if="showNewBlogPost" @cancelNew="showNewBlogPost = false" />
-        <div v-if="!showNewBlogPost" class="blog-list-wrap">
-          <h1>Blogs</h1>
-          <ul class="blog-list">
-            <li v-for="blog in events" :key="blog.id" class="blog-list-item">
-              <a :href="`/blog/post/${blog.slug}`">{{ blog.title }}</a>
-                <button v-if="$page.props.auth.user" class="option" @click="deleteBlog(blog.id)" title="Delete blog" aria-label="Delete blog: {{ blog.title }}">
+        <NewCRMItem :isEvent="true" :events="events" :item="'event'" v-if="showNewListing" @cancelNew="showNewListing = false"/>
+        <div v-if="!showNewListing" class="event-list-wrap">
+          <h1>Events</h1>
+          <ul class="event-list">
+            <li v-for="event in events" :key="event.id" class="event-list-item">
+              <a :href="`/event/${event.slug}`">{{ event.title }}</a>
+                <button v-if="$page.props.auth.user" class="option" @click="deleteListing(event.id)" title="Delete event" aria-label="Delete event: {{ event.title }}">
                     <font-awesome-icon :icon="['fas', 'trash-can']" />
                 </button>
-                <Link v-if="$page.props.auth.user" :href="`/cms/blog/edit-content/${blog.id}`" title="Edit content" method="get" class="option" role="button" aria-label="Edit content for {{ layout.title }}">
-                    <font-awesome-icon :icon="['fas', 'pen-to-square']" />
-                    </Link>
                 </li>
             </ul>
         </div>
         </div>
         <div class="page-right">
-            <button class="new-layout" @click="showNewBlogPost = !showNewBlogPost" aria-expanded="showNewBlogPost" aria-controls="newBlogPostModal">{{ showNewBlogPost ? 'Cancel' : 'New Blog' }}</button>
+            <button class="new-layout" @click="showNewListing = !showNewListing" aria-expanded="showNewListing" aria-controls="newwListingModal">{{ showNewListing ? 'Cancel' : 'New Event' }}</button>
         </div>
     </div>
 </template>
   
 
 <script>
-import NewBlog from '@/components/cms/blog/NewBlog.vue';
+import NewCRMItem from '@/components/crm/NewCRMItem.vue';
 import CMSLayout from '@/layouts/CMSLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 
@@ -33,32 +30,32 @@ export default {
     layout: CMSLayout,
     components: {
         Link,
-        NewBlog,
+        NewCRMItem,
     },
     props: {
         events: Array,
     },
     data() {
         return {
-            showNewBlogPost: false,
-            localBlogPosts: [],
+            showNewListing: false,
+            localEvents: [],
         }
     },
     created() {
-        this.localBlogPosts = this.blogPosts;
+        this.localEvents = this.events;
     },
     methods: {
-        newBlog() {
-            this.showNewBlogPost = true;
+        newListing() {
+            this.showNewListing = true;
         },
-        deleteBlog(blog_id) {
-            if (confirm("Are you sure you want to delete this blog post?")) {
-                router.delete(`/cms/blog/delete/${blog_id}`, {
+        deleteListing(event_id) {
+            if (confirm("Are you sure you want to delete this event?")) {
+                router.delete(`/crm/event/delete/${event_id}`, {
                 onSuccess: () => {
-                    this.localBlogPosts = this.localBlogPosts.filter(item => item.id !== blog_id);
+                    this.localEvents = this.localEvents.filter(item => item.id !== event_id);
                 },
                 onError: (errors) => {
-                    console.log('Error deleting blog:', errors);
+                    console.log('Error deleting event:', errors);
                 }
                 });
             }
@@ -83,13 +80,13 @@ export default {
             gap: 10px;
         }
     }
-    .blog-list {
+    .event-list {
         display: flex;
         flex-direction: column;
         width: 100%;
         gap: 6px;
         padding-top: 10px;
-        .blog-list-item {
+        .event-list-item {
             width: 100%;;
             display: grid;
             grid-template-columns: repeat(3, 1fr);

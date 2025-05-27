@@ -36,18 +36,27 @@ Route::get('/resize/{path}', function ($path) {
         abort(404, 'Image not found: ' . $path);
     }
 
-    $img = Image::read($storagePath)->scale(width: $width);
+    $img = Image::read($storagePath);
+    $originalWidth = $img->width();
+    $originalHeight = $img->height();
 
-    // Handle scaling/cropping
-    if ($height && $img->height() < $height) {
-        $img->scale(height: $height);
-        if ($width && $img->width() > $width) {
+    if ($width && $height) {
+        $targetRatio = $width / $height;
+        $originalRatio = $originalWidth / $originalHeight;
+
+        if ($originalRatio > $targetRatio) {
+            $img->scale(height: $height);
             $cropX = intval(($img->width() - $width) / 2);
             $img->crop($width, $height, $cropX, 0);
+        } else {
+            $img->scale(width: $width);
+            $cropY = intval(($img->height() - $height) / 2);
+            $img->crop($width, $height, 0, $cropY);
         }
-    } elseif ($height && $img->height() > $height) {
-        $cropY = intval(($img->height() - $height) / 2);
-        $img->crop($width, $height, 0, $cropY);
+    } elseif ($width) {
+        $img->scale(width: $width);
+    } elseif ($height) {
+        $img->scale(height: $height);
     }
 
     return response($img->encode(new JpegEncoder()))
@@ -100,6 +109,8 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::post('/pages/{pageId}/widgets', [WidgetController::class, 'store'])->name('widgets.store');
     Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
     Route::get('/crm/listings', [ListingController::class, 'load_listings'])->name('pages.load.listings');
+    Route::get('/crm/listings/index', [ListingController::class, 'index'])->name('crm.listings.index');
+    Route::get('/crm/events/index', [EventController::class, 'index'])->name('crm.events.index');
     Route::get('/crm/events', [EventController::class, 'load_events'])->name('pages.load.events');
 });
 
@@ -134,6 +145,7 @@ Route::middleware('auth')->group(function () {
 
 
 
+Route::get('/event/{slug}', [EventController::class, 'load_page'])->where('slug', '.*')->name('event.load');
 Route::get('/listing/{slug}', [ListingController::class, 'load_page'])->where('slug', '.*')->name('listing.load');
 Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

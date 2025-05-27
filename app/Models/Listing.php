@@ -42,8 +42,23 @@ class Listing extends Model
         'social_links' => 'array',
         'opening_hours' => 'array',
         'media_gallery' => 'array',
-        'pricing' => 'array',
+        'prices' => 'array',  
         'tags' => 'array',
         'accessibility_info' => 'array',
     ];
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'organiser_id')
+        ->select('id', 'title', 'slug', 'thumbnail_image', 'short_description', 'start_datetime', 'end_datetime' ,'organiser_id');
+    }
+
+    public function relatedListings()
+    {
+        return $this->belongsToMany(Listing::class, 'listing_related', 'listing_id', 'related_listing_id');
+    }
+
+    public function inverselyRelatedListings()
+    {
+        return $this->belongsToMany(Listing::class, 'listing_related', 'related_listing_id', 'listing_id');
+    }
 }

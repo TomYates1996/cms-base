@@ -105,6 +105,13 @@ html {
         --blog-header-h1: 600 30px var(--font-heading);
         --blog-header-author: var(--body-font);
 
+        /* Listings */
+        --listing-title: 600 1.625rem var(--font-heading); /* Listing page title */
+        --listing-category: 400 1rem var(--font-body); /* Listing page category */
+        --listing-sub-category: 400 .875rem var(--font-body); /* Listing page sub category */
+        --listing-tab-heading: 600 1.5rem var(--font-heading); /* Listing tab heading */
+
+
         /* Widget Specific Fonts and sizes */
         --hero-alt-title: 600 48px var(--font-heading);
         
@@ -121,6 +128,12 @@ html {
             /* Blog */
             --blog-header-h1: 600 50px var(--font-heading);
             --blog-header-author: var(--body-font);
+
+            /* Listings */
+            --listing-title: 600 2.25rem var(--font-heading); /* Listing page title */
+            --listing-category: 400 1.125rem var(--font-body); /* Listing page category */
+            --listing-sub-category: 400 1rem var(--font-body); /* Listing page sub category */
+            --listing-tab-heading: 600 1.75rem var(--font-heading); /* Listing tab heading */
 
             
             /* Widget Specific Fonts and sizes */

@@ -26,7 +26,7 @@ class ListingController extends Controller
             'title' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'short_description' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string|max:400',
             'category' => 'nullable|string|max:255',
             'sub_category' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
@@ -53,21 +53,30 @@ class ListingController extends Controller
             'social_links' => 'nullable|array',
             'amenities' => 'nullable|array',
             'accessibility_info' => 'nullable|array',
+            'listing_ids' => 'nullable|array',
+            'listing_ids.*' => 'integer|exists:listings,id',
         ]);
         
-        $imagePath = $request->file('thumbnail_image')->store('crm/listing/thumbnails', 'public');
+        if ($request->hasFile('thumbnail_image') && $request->file('thumbnail_image')->isValid()) {
+            $imagePath = $request->file('thumbnail_image')->store('crm/listing/thumbnails', 'public');
+            $validated['thumbnail_image'] = $imagePath;
+        }
         
         $mediaPaths = [];
         
-        foreach ($request->file('media_gallery') as $file) {
-            $path = $file->store('crm/listing/media_gallery', 'public'); 
-            $mediaPaths[] = $path;
-        }
-        
-        $validated['media_gallery'] = $mediaPaths;
-        $validated['thumbnail_url'] = $imagePath;
+        if ($request->hasFile('media_gallery')) {
+            foreach ($request->file('media_gallery') as $file) {
+                $path = $file->store('crm/listing/media_gallery', 'public');
+                $mediaPaths[] = $path;
+            }
+            $validated['media_gallery'] = $mediaPaths;
+        };
         
         $listing = Listing::create($validated);
+
+        if (!empty($request->listing_ids)) {
+            $listing->relatedListings()->attach($request->listing_ids);
+        }
 
         return;
     }
@@ -76,22 +85,21 @@ class ListingController extends Controller
     {
         $slug = ltrim($slug, '/');
     
-        // $flatPages = Page::orderBy('level')->get();
-        // $groupedFlatPages = $flatPages->groupBy('section');
+        $flatPages = Page::orderBy('level')->get();
+        $groupedFlatPages = $flatPages->groupBy('section');
     
-        // $formattedPages = [];
-        // foreach ($groupedFlatPages as $section => $pagesInSection) {
-        //     $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
-        // }
+        $formattedPages = [];
+        foreach ($groupedFlatPages as $section => $pagesInSection) {
+            $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
+        }
     
-        // $page = Page::where('slug', 'blog/post')
-        //     ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
-        //     ->firstOrFail();
+        $page = Page::where('slug', 'listing')
+            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->firstOrFail();
 
-        // $pageWidgets = $page->widgets;
-        // $blogWidgets = $blog->widgets;
+        $pageWidgets = $page->widgets;
 
-        // $finalWidgets = collect();
+        $finalWidgets = collect();
 
         // foreach ($pageWidgets as $widget) {
         //     if ($widget->variant === 'blog_post') {
@@ -103,20 +111,51 @@ class ListingController extends Controller
         //     }
         // }
 
-        // $header = $page->headers->first();
-        // $footer = $page->footers->first();
+        $header = $page->headers->first();
+        $footer = $page->footers->first();
     
-        // if ($header) {
-        //     $header->pages = $formattedPages[$header->section] ?? collect();
-        //     $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
-        // }
+        if ($header) {
+            $header->pages = $formattedPages[$header->section] ?? collect();
+            $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
     
         // $page->increment('views');
 
-        $data = Listing::where('slug', $slug)->first();
+        $data = Listing::where('slug', $slug)
+        ->with(['relatedListings' => function ($query) {
+            $query->select('listings.id', 'title', 'slug', 'short_description', 'thumbnail_image');
+        }, 
+        'events'
+        ])
+        ->first();
 
         return Inertia::render('ProductPage', [
             'data' => $data,
+            'header' => $header,
+            'footer' => $footer,
+            'pages' => $formattedPages,
         ]);
+    }
+
+    public function index()
+    {
+        return Listing::all();
+    }
+
+    private function buildTree($pages, $parentId = null) {
+        $branch = [];
+    
+        foreach ($pages as $page) {
+            // If parent_id is null or matches, treat as an array
+            if ($page['parent_id'] === $parentId) {
+                $children = $this->buildTree($pages, $page['id']);
+                if ($children) {
+                    $page['children'] = $children;
+                }
+                $branch[] = $page;
+            }
+        }
+    
+        return $branch;
     }
 }
