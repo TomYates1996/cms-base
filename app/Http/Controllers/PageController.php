@@ -7,6 +7,9 @@ use App\Models\Page;
 use App\Models\Widget;
 use App\Models\Header;
 use App\Models\Slide;
+use App\Models\Listing;
+use App\Models\Event;
+use App\Models\Image;
 use App\Models\Footer;
 use App\Models\Layout;
 use App\Models\Blog;
@@ -212,6 +215,61 @@ class PageController extends Controller
                     $slide->link = url("/blog/post/{$blog->slug}");
                     $slide->image_id = $blog->image_id;
                     $slide->setRelation('image', $blog->image); 
+                    return $slide;
+                });
+
+                $widget->setRelation('slides', $virtualSlides);
+            } else if ($widget->feed_type === 'listings') {
+                $listings = Listing::inRandomOrder()->take($widget->to_show ?? 4)->get();
+
+                $virtualSlides = $listings->map(function ($listing) {
+                    $slide = new Slide();
+                    $slide->title = $listing->title;
+                    $slide->description = $listing->short_description ?? '';
+                    $slide->link = url("/listing/{$listing->slug}");
+
+                    $image = new Image();
+                    $image->image_path = $listing->thumbnail_image ?? config('global.placeholder_image.path');
+                    $image->image_alt = $listing->title ?? config('global.placeholder_image.alt');
+                    $slide->setRelation('image', $image); 
+                    return $slide;
+                });
+
+                $widget->setRelation('slides', $virtualSlides);
+            } else if ($widget->feed_type === 'events') {
+                $events = Event::inRandomOrder()->take($widget->to_show ?? 4)->get();
+
+                $virtualSlides = $events->map(function ($event) {
+                    $slide = new Slide();
+                    $slide->title = $event->title;
+                    $slide->description = $event->short_description ?? '';
+                    $slide->link = url("/event/{$event->slug}");
+                    $slide->startDate = $event->start_datetime;
+                    $slide->endDate = $event->end_datetime;
+
+                    $image = new Image();
+                    $image->image_path = $event->thumbnail_image ?? config('global.placeholder_image.path');
+                    $image->image_alt = $event->title ?? config('global.placeholder_image.alt');
+                    $slide->setRelation('image', $image); 
+                    return $slide;
+                });
+
+                $widget->setRelation('slides', $virtualSlides);
+            } else if ($widget->feed_type === 'product') {
+                $products = Product::inRandomOrder()->take($widget->to_show ?? 4)->get();
+
+                $virtualSlides = $products->map(function ($product) {
+                    $slide = new Slide();
+                    $slide->title = $product->title;
+                    $slide->description = $product->short_description ?? '';
+                    $slide->link = url("/product/{$product->slug}");
+                    $slide->startDate = $product->start_datetime;
+                    $slide->endDate = $product->end_datetime;
+
+                    $image = new Image();
+                    $image->image_path = $product->thumbnail_image ?? config('global.placeholder_image.path');
+                    $image->image_alt = $product->title ?? config('global.placeholder_image.alt');
+                    $slide->setRelation('image', $image); 
                     return $slide;
                 });
 
