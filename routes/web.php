@@ -9,6 +9,7 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HeaderController;
@@ -82,6 +83,7 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::delete('/pages/delete/{page_id}', [PageController::class, 'destroy'])->name('pages.delete');
     Route::delete('/layouts/delete/{layout_id}', [LayoutController::class, 'destroy'])->name('layouts.delete');
     Route::delete('/blog/delete/{blog_id}', [BlogController::class, 'destroy'])->name('blog.delete');
+    Route::delete('/crm/product/delete/{product_id}', [ProductController::class, 'destroy'])->name('product.delete');
     Route::get('/pages/children/{page_slug}', [PageController::class, 'children'])->where('page_slug', '.*')->name('pages.children');
     Route::get('/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
     Route::get('/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])
@@ -108,10 +110,14 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::get('/pages/{pageId}/widgets/create', [WidgetController::class, 'create'])->name('widgets.create');
     Route::post('/pages/{pageId}/widgets', [WidgetController::class, 'store'])->name('widgets.store');
     Route::get('/widgets/{id}/edit', [WidgetController::class, 'edit'])->name('widgets.edit');
+    Route::get('/crm/products', [ProductController::class, 'load_products'])->name('pages.load.products');
+    Route::get('/crm/products/index', [ProductController::class, 'index'])->name('crm.products.index');
+    Route::get('/crm/products/index', [ProductController::class, 'index'])->name('crm.products.variant.index');
     Route::get('/crm/listings', [ListingController::class, 'load_listings'])->name('pages.load.listings');
     Route::get('/crm/listings/index', [ListingController::class, 'index'])->name('crm.listings.index');
     Route::get('/crm/events/index', [EventController::class, 'index'])->name('crm.events.index');
     Route::get('/crm/events', [EventController::class, 'load_events'])->name('pages.load.events');
+    Route::post('/products/store', [ProductController::class, 'store'])->name('products.store');
 });
 
 Route::middleware('auth')->group(function () {
@@ -119,6 +125,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
     Route::post('/layout/store', [LayoutController::class, 'store'])->name('api.layout.store');
     Route::post('/blog/store', [BlogController::class, 'store'])->name('api.blogs.store');
+    Route::post('/cms/crm/product/store', [ProductController::class, 'store'])->name('api.product.store');
+    Route::post('/cms/crm/product/variant/store', [ProductController::class, 'store'])->name('api.product.variant.store');
     Route::post('/cms/crm/listing/store', [ListingController::class, 'store'])->name('api.listing.store');
     Route::post('/cms/crm/event/store', [EventController::class, 'store'])->name('api.event.store');
     Route::post('/pages/link/store', [PageController::class, 'store_link'])->name('api.pages.link.store');
@@ -147,5 +155,6 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/event/{slug}', [EventController::class, 'load_page'])->where('slug', '.*')->name('event.load');
 Route::get('/listing/{slug}', [ListingController::class, 'load_page'])->where('slug', '.*')->name('listing.load');
+Route::get('/product/{slug}', [ProductController::class, 'load_page'])->where('slug', '.*')->name('product.load');
 Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

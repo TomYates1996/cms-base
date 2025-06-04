@@ -111,6 +111,12 @@ html {
         --listing-sub-category: 400 .875rem var(--font-body); /* Listing page sub category */
         --listing-tab-heading: 600 1.5rem var(--font-heading); /* Listing tab heading */
 
+        /* Store Item Product */
+        --product-price-font: 600 1.5rem var(--font-body);
+        --product-price-colour: var(--deep-red);
+        --product-vat-font: 400 .875rem var(--font-body);
+        --product-vat-colour: var(--sea-green);
+
 
         /* Widget Specific Fonts and sizes */
         --hero-alt-title: 600 48px var(--font-heading);

@@ -93,6 +93,14 @@
             >
                 Events
             </Link>
+            <Link 
+                v-if="$page.props.auth.user && this.expanded.crm"
+                href="/cms/crm/products"
+                method="get"
+                class="option nav-child"
+            >
+                Products
+            </Link>
         </li>
     </ul>
   </nav>

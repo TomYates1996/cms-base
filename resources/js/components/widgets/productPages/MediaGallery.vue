@@ -2,6 +2,7 @@
   <div class="media-gallery">
     <!-- Main Swiper -->
     <Swiper
+      :key="images.length + '-' + images[0]"
       v-bind="swiperConfig"
       @swiper="onMainSwiper"
       class="my-swiper content"
@@ -24,10 +25,10 @@
     <!-- Thumbnails Row -->
     <div class="thumbnails-wrapper">
       <div
-        v-for="(image, index) in images"
-        :key="'thumb-' + index"
-        :class="['thumbnail', { active: activeIndex === index }]"
-        @click="goToSlide(index)"
+        v-for="image in images"
+        :key="'thumb-' + image"       
+        :class="['thumbnail', { active: activeIndex === images.indexOf(image) }]"
+        @click="goToSlide(images.indexOf(image))"
       >
         <ResponsiveImage :slide="formatImageToFit(image)" :aspectRatios="aspectRatiosThumbs" />
       </div>
@@ -104,10 +105,22 @@ export default {
     },
     goToSlide(index) {
       if (this.swiperInstance) {
-        this.swiperInstance.slideToLoop(index); // works with loop:true
+        this.swiperInstance.slideToLoop(index); 
       }
     },
   },
+  watch: {
+  images: {
+    immediate: true,
+    deep: true,
+    handler(newImages) {
+      if (this.swiperInstance) {
+        this.swiperInstance.update();
+        this.activeIndex = 0;
+      }
+    },
+  },
+},
 };
 </script>
 
