@@ -63,13 +63,12 @@
                     <input class="quantity-input" type="number" v-model="chosenAmount" min="0" aria-label="Quantity"/>
                     <button class="quantity-btn quantity-up" type="button" @click="chosenAmount++"><font-awesome-icon :icon="['fas', 'plus']" /></button>
                 </div>
-                <button class="add-to-cart-btn"><font-awesome-icon :icon="['fas', 'basket-shopping']" />Add To Cart</button>
+                <AddToCartButton :item="selectedSizeItem" :product="data" :quantity="chosenAmount" :variant="useData"/>
             </div>
         </div>
     </div>
     
     <InformationTabs :productDescription="useData.description"/>
-    
 
     <Footer v-if="footer" :footer="footer" :pages="pages" />
 </template>
@@ -81,6 +80,7 @@ import Footer from '@/components/nav/Footer.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import RelatedListings from '../components/product/RelatedListings.vue';
 import InformationTabs from '@/components/product/InformationTabs.vue';
+import AddToCartButton from '@/components/product/basket/AddToCartButton.vue';
 
 
 export default {
@@ -97,6 +97,7 @@ export default {
         HamburgerHeader,
         Head,
         InformationTabs,
+        AddToCartButton,
     },
     data() {
         return {
@@ -237,14 +238,6 @@ export default {
             font-size: 12px;
             height: 100%;
         }
-    }
-    .add-to-cart-btn {
-        background-color: var(--yellow);
-        border-radius: 5px;
-        padding: 4px 10px;
-        display: flex;
-        gap: 5px;
-        align-items: center;
     }
 }
 .variants {

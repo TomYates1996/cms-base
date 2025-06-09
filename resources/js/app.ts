@@ -6,6 +6,8 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
+import { createPinia } from 'pinia';
+import { useCartStore } from '@/utils/cartStore';
 
 // Font awesome
 import { library, dom } from "@fortawesome/fontawesome-svg-core";
@@ -35,10 +37,16 @@ createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(`./pages/${name}.vue`, import.meta.glob<DefineComponent>('./pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
+        const pinia = createPinia(); 
         const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(pinia)
             .component("font-awesome-icon", FontAwesomeIcon) 
+        
+        const cartStore = useCartStore();
+        cartStore.initCart();
+        
         app.config.globalProperties.$appName = appName;  
         app.mount(el);
     },
@@ -47,5 +55,5 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on page load...
+
 initializeTheme();

@@ -22,12 +22,16 @@
         </ul>
       </li>
     </ul>
-    <DropdownNav :pages="header.menu_type === 'dropdown' ? header.pages : header.hamburger_pages"/>
+    <div class="widgets">
+      <BasketIcon v-if="this.$page.url !== '/basket'" />
+      <DropdownNav :pages="header.menu_type === 'dropdown' ? header.pages : header.hamburger_pages"/>
+    </div>
   </nav>
   
 </template>
 
 <script>
+import BasketIcon from '../product/basket/BasketIcon.vue';
 import DropdownNav from './DropdownNav.vue';
 
 export default {
@@ -40,6 +44,7 @@ export default {
     },
     components: {
       DropdownNav,
+      BasketIcon,
     },
     created() {
     },
@@ -83,6 +88,13 @@ export default {
   padding: 4px 10px;
   text-align: center;
   white-space: nowrap;
+}
+
+.widgets {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
 }
 
 .dropdown {

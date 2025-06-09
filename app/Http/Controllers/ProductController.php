@@ -21,7 +21,7 @@ class ProductController extends Controller
         ]);
     }
 
-  public function store(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'label' => 'required|string',
@@ -120,7 +120,13 @@ class ProductController extends Controller
     
         $page = Page::where('slug', 'listing')
             ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
-            ->firstOrFail();
+            ->first();
+
+        if (!$page) {
+            return Inertia::render('MissingPageNotice',  [
+                'message' => 'Please create a page at /product - No page found.',
+            ]);
+        };
 
         $pageWidgets = $page->widgets;
 
@@ -152,6 +158,84 @@ class ProductController extends Controller
 
         return Inertia::render('ShopProductPage', [
             'data' => $data,
+            'header' => $header,
+            'footer' => $footer,
+            'pages' => $formattedPages,
+        ]);
+    }
+
+    public function basket()
+    {
+        $flatPages = Page::orderBy('level')->get();
+        $groupedFlatPages = $flatPages->groupBy('section');
+    
+        $formattedPages = [];
+        foreach ($groupedFlatPages as $section => $pagesInSection) {
+            $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
+        }
+    
+        $page = Page::where('slug', 'basket')
+            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->first();
+
+        if (!$page) {
+            return Inertia::render('MissingPageNotice',  [
+                'message' => 'Please create a page at /basket - No page found.',
+            ]);
+        };
+
+        $pageWidgets = $page->widgets;
+
+        $finalWidgets = collect();
+
+        $header = $page->headers->first();
+        $footer = $page->footers->first();
+    
+        if ($header) {
+            $header->pages = $formattedPages[$header->section] ?? collect();
+            $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
+    
+        return Inertia::render('BasketPage', [
+            'header' => $header,
+            'footer' => $footer,
+            'pages' => $formattedPages,
+        ]);
+    }
+
+    public function checkout()
+    {
+        $flatPages = Page::orderBy('level')->get();
+        $groupedFlatPages = $flatPages->groupBy('section');
+    
+        $formattedPages = [];
+        foreach ($groupedFlatPages as $section => $pagesInSection) {
+            $formattedPages[$section] = $this->buildTree($pagesInSection->toArray());
+        }
+    
+        $page = Page::where('slug', 'checkout')
+            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->first();
+
+        if (!$page) {
+            return Inertia::render('MissingPageNotice',  [
+                'message' => 'Please create a page at /checkout - No page found.',
+            ]);
+        };
+
+        $pageWidgets = $page->widgets;
+
+        $finalWidgets = collect();
+
+        $header = $page->headers->first();
+        $footer = $page->footers->first();
+    
+        if ($header) {
+            $header->pages = $formattedPages[$header->section] ?? collect();
+            $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
+    
+        return Inertia::render('CheckoutPage', [
             'header' => $header,
             'footer' => $footer,
             'pages' => $formattedPages,

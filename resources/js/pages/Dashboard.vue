@@ -45,7 +45,7 @@ export default {
     layout: CMSLayout,
     props: {
         totalViews: Number,
-        topPages: Number,
+        topPages: Array,
     },
 }
 </script>

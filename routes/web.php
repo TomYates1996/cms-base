@@ -6,6 +6,8 @@ use App\Http\Controllers\SlideController;
 use App\Http\Controllers\WidgetController;
 use App\Http\Controllers\SocialMediaController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\FooterController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\BlogController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\HeaderController;
 use Illuminate\Support\Facades\Route;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\JpegEncoder;
+use App\Http\Controllers\PayPalController;
 
 
 Route::get('/test-image', function () {
@@ -152,9 +155,14 @@ Route::middleware('auth')->group(function () {
 });
 
 
-
+Route::post('/paypal/capture-order', [PayPalController::class, 'captureOrder']);
 Route::get('/event/{slug}', [EventController::class, 'load_page'])->where('slug', '.*')->name('event.load');
 Route::get('/listing/{slug}', [ListingController::class, 'load_page'])->where('slug', '.*')->name('listing.load');
 Route::get('/product/{slug}', [ProductController::class, 'load_page'])->where('slug', '.*')->name('product.load');
 Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
+Route::get('/basket', [ProductController::class, 'basket'])->name('product.basket');
+Route::get('/checkout', [ProductController::class, 'checkout'])->name('product.checkout');
+Route::post('/checkout/start', [CheckoutController::class, 'start']);
+Route::get('/checkout/{id}', [CheckoutController::class, 'show']);
+Route::post('/promo/validate', [PromoCodeController::class, 'validatePromo']);
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

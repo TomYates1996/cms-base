@@ -49,10 +49,12 @@ html {
         /* Colours */
         --black: #0d0d0c;
         --white: #ffffff;
+        --grey: #bdbdbd;
         --yellow: #fcba03;
         --purple: #341857;
         --deep-pink: #4f1036;
         --deep-red: #570a0a;
+        --bright-red: #f60000;
         --sea-green: #0a5749;
         --dull-green: #32570a;
         --pale-green: #afd18a;
