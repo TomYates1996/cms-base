@@ -119,6 +119,7 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::get('/crm/products/index', [ProductController::class, 'index'])->name('crm.products.index');
     Route::get('/crm/products/index', [ProductController::class, 'index'])->name('crm.products.variant.index');
     Route::get('/crm/listings', [ListingController::class, 'load_listings'])->name('pages.load.listings');
+    Route::get('/crm/coupons', [PromoCodeController::class, 'load_coupons'])->name('pages.load.coupons');
     Route::get('/crm/categories', [CategoryController::class, 'load_categories'])->name('pages.load.categories');
     Route::get('/crm/listings/index', [ListingController::class, 'index'])->name('crm.listings.index');
     Route::get('/crm/events/index', [EventController::class, 'index'])->name('crm.events.index');
@@ -130,6 +131,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/pages/update/{slug}', [PageController::class, 'update'])->name('api.pages.update');
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
     Route::post('/category/store', [CategoryController::class, 'store'])->name('api.category.store');
+    Route::post('/coupons/store', [PromoCodeController::class, 'store'])->name('api.coupons.store');
     Route::post('/subcategory/store', [CategoryController::class, 'store_subcat'])->name('api.subcategory.store');
     Route::post('/layout/store', [LayoutController::class, 'store'])->name('api.layout.store');
     Route::post('/blog/store', [BlogController::class, 'store'])->name('api.blogs.store');
@@ -159,6 +161,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/store/cta', [WidgetController::class, 'cta_test'])->name('api.create.cta.test');
 });
 
+Route::get('/api/coupons/index', [PromoCodeController::class, 'index'])->name('api.coupons.index');
 Route::get('/api/categories/index', [CategoryController::class, 'index'])->name('api.categories.index');
 Route::get('/api/listings/grid', [ListingController::class, 'grid'])->name('api.listings.grid');
 Route::get('/api/events/grid', [EventController::class, 'grid'])->name('api.events.grid');

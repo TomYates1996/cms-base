@@ -109,6 +109,14 @@
             >
                 Categories
             </Link>
+            <Link 
+                v-if="$page.props.auth.user && this.expanded.crm"
+                href="/cms/crm/coupons"
+                method="get"
+                class="option nav-child"
+            >
+                Coupons
+            </Link>
         </li>
 
     </ul>

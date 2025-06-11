@@ -384,39 +384,39 @@ class PageController extends Controller
     
     // Create a new page
     public function store(Request $request)
-{
-    $user = auth()->user();
-    
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'slug' => 'required|string',
-        'show_in_nav' => 'boolean',
-        'parent' => 'nullable|array',
-        'section' => 'required|in:primary,secondary,footer',
-    ]);
-    
-    $parent = $validated['parent'] ?? null;
-    $validated['parent_id'] = $parent['id'] ?? null;
-    
-    $childSlug = trim($validated['slug'], '/');
-    
-    if ($parent) {
-        $parentSlug = $parent['slug'];
-        $validated['slug'] = $parentSlug . '/' . $childSlug;
-        $validated['level'] = ($parent['level'] ?? 0) + 1;
-        $validated['section'] = $parent['section'];
-    } else {
-        $validated['slug'] = $childSlug;
-        $validated['level'] = 1;
-    }
-    
-    unset($validated['parent']);
-    $validated['created_by'] = $user->id;
+    {
+        $user = auth()->user();
+        
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string',
+            'show_in_nav' => 'boolean',
+            'parent' => 'nullable|array',
+            'section' => 'required|in:primary,secondary,footer',
+        ]);
+        
+        $parent = $validated['parent'] ?? null;
+        $validated['parent_id'] = $parent['id'] ?? null;
+        
+        $childSlug = trim($validated['slug'], '/');
+        
+        if ($parent) {
+            $parentSlug = $parent['slug'];
+            $validated['slug'] = $parentSlug . '/' . $childSlug;
+            $validated['level'] = ($parent['level'] ?? 0) + 1;
+            $validated['section'] = $parent['section'];
+        } else {
+            $validated['slug'] = $childSlug;
+            $validated['level'] = 1;
+        }
+        
+        unset($validated['parent']);
+        $validated['created_by'] = $user->id;
 
-    $page = Page::create($validated);
+        $page = Page::create($validated);
 
-    if ($request->filled('layout')) {
-        $layout = Layout::with('widgets.slides', 'header', 'footer')->find($request->layout);
+        if ($request->filled('layout')) {
+            $layout = Layout::with('widgets.slides', 'header', 'footer')->find($request->layout);
 
         if ($layout) {
             // Clone or attach layout widgets
