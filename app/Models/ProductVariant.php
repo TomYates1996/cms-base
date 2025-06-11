@@ -2,6 +2,7 @@
 
 namespace App\Models;
 use App\Models\ProductVariantItem;
+use App\Models\Product;
 
 
 
@@ -26,6 +27,11 @@ class ProductVariant extends Model
     protected $casts = [
         'media_gallery' => 'array',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 
     public function items() {
         return $this->hasMany(ProductVariantItem::class);

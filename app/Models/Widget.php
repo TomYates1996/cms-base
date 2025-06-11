@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Slide;
+use App\Models\Blog;
+use App\Models\Footer;
+use App\Models\Category;
 use App\Models\Page;
 use App\Models\Layout;
 
@@ -46,5 +49,9 @@ class Widget extends Model
     public function blogs()
     {
         return $this->belongsToMany(Blog::class, 'blog_widget');
+    }
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_widget');
     }
 }

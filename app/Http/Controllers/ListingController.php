@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use App\Models\Page;
+use App\Models\Image;
+use App\Models\Slide;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -27,8 +29,8 @@ class ListingController extends Controller
             'slug' => 'required|string|max:255',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:400',
-            'category' => 'nullable|string|max:255',
-            'sub_category' => 'nullable|string|max:255',
+            'category_id' => 'nullable|string|max:255',
+            'sub_category_id' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
             'address' => 'nullable|string',
             'city' => 'nullable|string',
@@ -141,6 +143,44 @@ class ListingController extends Controller
     {
         return Listing::all();
     }
+
+   public function grid(Request $request)
+    {
+        $perPage = 6;
+        $page = (int) $request->query('page', 1);
+        $offset = ($page - 1) * $perPage;
+
+        $query = Listing::query();
+
+        if ($request->filled('category')) {
+            $categories = explode(',', $request->query('category'));
+            $query->whereIn('category_id', $categories);
+        }
+
+        $totalCount = $query->count();
+
+        $listings = $query->skip($offset)->take($perPage)->get();
+
+        $virtualSlides = $listings->map(function ($listing) {
+            $slide = new Slide();
+            $slide->title = $listing->title;
+            $slide->description = $listing->short_description ?? '';
+            $slide->link = url("/listing/{$listing->slug}");
+            $slide->sub_category_id = $listing->sub_category_id;
+
+            $image = new Image();
+            $image->image_path = $listing->thumbnail_image ?? config('global.placeholder_image.path');
+            $image->image_alt = $listing->title ?? config('global.placeholder_image.alt');
+            $slide->setRelation('image', $image);
+            return $slide;
+        });
+
+        return response()->json([
+            'items' => $virtualSlides,
+            'total_count' => $totalCount,
+        ]);
+    }
+
 
     private function buildTree($pages, $parentId = null) {
         $branch = [];

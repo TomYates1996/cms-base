@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Page;
+use App\Models\Slide;
+use App\Models\Image;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -28,8 +30,8 @@ class EventController extends Controller
             'slug' => 'required|string|max:255',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:400',
-            'category' => 'nullable|string|max:255',
-            'sub_category' => 'nullable|string|max:255',
+            'category_id' => 'nullable|string|max:255',
+            'sub_category_id' => 'nullable|string|max:255',
             'tags' => 'nullable|array',
             'address' => 'nullable|string',
             'city' => 'nullable|string',
@@ -90,6 +92,50 @@ class EventController extends Controller
 
         return;
     }
+
+    public function grid(Request $request)
+    {
+        $perPage = 12;
+        $page = (int) $request->query('page', 1);
+        $offset = ($page - 1) * $perPage;
+
+        $query = Event::query();
+
+        if ($request->filled('category')) {
+            $categoryIds = explode(',', $request->query('category'));
+            $query->whereIn('category_id', $categoryIds);
+        }
+
+        $totalCount = $query->count();
+
+        $events = $query->orderBy('start_datetime', 'desc')
+            ->skip($offset)
+            ->take($perPage)
+            ->get();
+
+        $virtualSlides = $events->map(function ($event) {
+            $slide = new Slide();
+            $slide->title = $event->title;
+            $slide->description = $event->short_description ?? '';
+            $slide->link = url("/event/{$event->slug}");
+            $slide->startDate = $event->start_datetime;
+            $slide->endDate = $event->end_datetime;
+            $slide->sub_category_id = $event->sub_category_id;
+
+            $image = new Image();
+            $image->image_path = $event->thumbnail_image ?? config('global.placeholder_image.path');
+            $image->image_alt = $event->title ?? config('global.placeholder_image.alt');
+            $slide->setRelation('image', $image);
+
+            return $slide;
+        });
+
+        return response()->json([
+            'items' => $virtualSlides,
+            'total_count' => $totalCount,
+        ]);
+    }
+
 
     public function load_page($slug)
     {

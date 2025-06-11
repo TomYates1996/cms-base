@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\Encoders\JpegEncoder;
 use App\Http\Controllers\PayPalController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CategoryController;
 
 
 Route::get('/test-image', function () {
@@ -117,6 +119,7 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::get('/crm/products/index', [ProductController::class, 'index'])->name('crm.products.index');
     Route::get('/crm/products/index', [ProductController::class, 'index'])->name('crm.products.variant.index');
     Route::get('/crm/listings', [ListingController::class, 'load_listings'])->name('pages.load.listings');
+    Route::get('/crm/categories', [CategoryController::class, 'load_categories'])->name('pages.load.categories');
     Route::get('/crm/listings/index', [ListingController::class, 'index'])->name('crm.listings.index');
     Route::get('/crm/events/index', [EventController::class, 'index'])->name('crm.events.index');
     Route::get('/crm/events', [EventController::class, 'load_events'])->name('pages.load.events');
@@ -126,6 +129,8 @@ Route::middleware('auth')->prefix('cms')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::put('/pages/update/{slug}', [PageController::class, 'update'])->name('api.pages.update');
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
+    Route::post('/category/store', [CategoryController::class, 'store'])->name('api.category.store');
+    Route::post('/subcategory/store', [CategoryController::class, 'store_subcat'])->name('api.subcategory.store');
     Route::post('/layout/store', [LayoutController::class, 'store'])->name('api.layout.store');
     Route::post('/blog/store', [BlogController::class, 'store'])->name('api.blogs.store');
     Route::post('/cms/crm/product/store', [ProductController::class, 'store'])->name('api.product.store');
@@ -154,6 +159,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/store/cta', [WidgetController::class, 'cta_test'])->name('api.create.cta.test');
 });
 
+Route::get('/api/categories/index', [CategoryController::class, 'index'])->name('api.categories.index');
+Route::get('/api/listings/grid', [ListingController::class, 'grid'])->name('api.listings.grid');
+Route::get('/api/events/grid', [EventController::class, 'grid'])->name('api.events.grid');
+Route::get('/api/products/grid', [ProductController::class, 'grid'])->name('api.products.grid');
 
 Route::post('/paypal/capture-order', [PayPalController::class, 'captureOrder']);
 Route::get('/event/{slug}', [EventController::class, 'load_page'])->where('slug', '.*')->name('event.load');
@@ -161,6 +170,7 @@ Route::get('/listing/{slug}', [ListingController::class, 'load_page'])->where('s
 Route::get('/product/{slug}', [ProductController::class, 'load_page'])->where('slug', '.*')->name('product.load');
 Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
 Route::get('/basket', [ProductController::class, 'basket'])->name('product.basket');
+Route::get('/order-confirmation/{order_number}', [OrderController::class, 'order_confirmation'])->name('order.confirmation');
 Route::get('/checkout', [ProductController::class, 'checkout'])->name('product.checkout');
 Route::post('/checkout/start', [CheckoutController::class, 'start']);
 Route::get('/checkout/{id}', [CheckoutController::class, 'show']);

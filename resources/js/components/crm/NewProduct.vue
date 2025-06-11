@@ -6,14 +6,33 @@
       <label for="label">Label</label>
       <input id="label" name="label" type="text" required v-model="form.label" autofocus aria-required="true" @input="updateSlug" />
     </div>
-    <div class="form-field">
-      <label>Category</label>
-      <input v-model="form.category" type="text" required />
-    </div>
-    <div class="form-field">
-      <label>Sub Category</label>
-      <input v-model="form.sub_category" type="text" />
-    </div>
+          <div
+                class="form-categories form-field"
+            >
+                <label for="form-categories">Category</label>
+                <select
+                id="form-categories"
+                v-model="form.category_id"
+                aria-required="true"
+                >
+                <option v-for="category in categories.categories" :key="category.id" :value="category.id">
+                    {{ category.name }}
+                </option>
+                </select>
+            </div>
+            
+            <div v-if="form.category_id !== null" class="form-field">
+                <label for="form-subcategories">Sub Category</label>
+                <select v-model="form.subcategory_id">
+                    <option
+                    v-for="subcategory in filteredSubcategories"
+                    :key="subcategory.id"
+                    :value="subcategory.id"
+                    >
+                    {{ subcategory.name }}
+                    </option>
+                </select>
+            </div>
     <div class="form-field">
       <label>Meta Title</label>
       <input v-model="form.meta_title" type="text" />
@@ -111,24 +130,43 @@
 </template>
 
 <script>
-import { useForm } from '@inertiajs/vue3'
+import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 
 export default {
   data() {
     return {
       manualSlugChange: false,
+      categories: [],
       form: useForm({
         label: '',
         slug: '',
-        category: '',
-        sub_category: '',
+        category_id: null,
+        sub_category_id: null,
         meta_title: '',
         meta_description: '',
         variants: [this.createVariant()],
       }),
     }
   },
+  computed: {
+        filteredSubcategories() {
+        const selected = this.categories.categories.find(
+            (cat) => cat.id === this.form.category_id
+        );
+        return selected?.subcategories || [];
+        },
+    },
   methods: {
+       getCategories() {
+        axios.get('/api/categories/index') 
+        .then(res => {
+            this.categories = res.data;
+        })
+        .catch(err => {
+            console.error("Failed to load categories", err);
+        });
+    },
     createItem() {
       return {
         label: '',
@@ -203,6 +241,9 @@ export default {
       })
     },
   },
+      mounted() {
+       this.getCategories();
+    },
 }
 </script>
 

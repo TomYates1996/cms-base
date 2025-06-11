@@ -11,8 +11,8 @@ class Product extends Model
     protected $fillable = [
         'label',  
         'slug',  
-        'category',  
-        'sub_category',  
+        'category_id',  
+        'sub_category_id',  
         'meta_title',  
         'meta_description',  
     ];
@@ -21,5 +21,14 @@ class Product extends Model
     ];
     public function variants() {
         return $this->hasMany(ProductVariant::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(Category::class, 'sub_category_id');
     }
 }

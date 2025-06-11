@@ -11,8 +11,8 @@ class Listing extends Model
         'slug', 
         'description',
         'short_description',
-        'category',
-        'sub_category',
+        'category_id',
+        'sub_category_id',
         'tags',
         'address',
         'city',
@@ -60,5 +60,14 @@ class Listing extends Model
     public function inverselyRelatedListings()
     {
         return $this->belongsToMany(Listing::class, 'listing_related', 'related_listing_id', 'listing_id');
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(Category::class, 'sub_category_id');
     }
 }

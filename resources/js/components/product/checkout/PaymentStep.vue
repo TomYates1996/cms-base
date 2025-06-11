@@ -45,6 +45,7 @@
 export default {
   props: {
     cart: Object,
+    customerDetails: Object,
   },
   data() {
     return {
@@ -92,17 +93,27 @@ export default {
         },
         onApprove: (data, actions) => {
           return actions.order.capture().then(details => {
-            const payload = {
-              orderID: data.orderID,
-              items: this.cart.items.map(item => ({
-                id: item.item_id,
-                quantity: item.quantity,
-              })),
-              promoCode: this.cart.promoCode || null,
-              shipping: this.cart.total > 50 ? 0 : 3.5,
-            };
+                const payload = {
+                    orderID: data.orderID,
+                    items: this.cart.items.map(item => ({
+                        id: item.item_id,
+                        quantity: item.quantity,
+                    })),
+                    promoCode: this.cart.promoCode || null,
+                    shipping: this.cart.total > 50 ? 0 : 3.5,
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    first_name: this.customerDetails.firstName,
+                    surname: this.customerDetails.surname,
+                    email: this.customerDetails.email,
+                    phone: this.customerDetails.phone,
+                    address1: this.customerDetails.address1,
+                    address2: this.customerDetails.address2,
+                    city: this.customerDetails.city,
+                    postcode: this.customerDetails.postcode,
+                    country: 'England',
+                };
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
             fetch('/paypal/capture-order', {
               method: 'POST',
@@ -122,8 +133,7 @@ export default {
               }
 
               if (res.ok && data.status === 'success') {
-                this.$inertia.visit(`/order-successful`);  
-                alert('Payment successful!');
+                this.$inertia.visit(`/order-confirmation/${data.order_number}`);  
               } else {
                 alert('Payment failed: ' + (data.error || 'Unknown error'));
               }

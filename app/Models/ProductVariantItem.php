@@ -13,4 +13,9 @@ class ProductVariantItem extends Model
         'price',
         'stock_quantity',
     ];
+
+    public function productVariant()
+    {
+        return $this->belongsTo(ProductVariant::class);
+    }
 }

@@ -6,6 +6,7 @@
         <h3 v-if="!slide.link" class="slide-title">
             {{ slide.title }}
         </h3>
+        <p v-if="slide.price_range">{{ slide.price_range }}</p>
         <p class="slide-desc">{{ slide.description }}</p>
         <button v-if="slide.link && widget.slide_link_text" class="btn-alt btn-read-more">
             {{ widget.slide_link_text }}

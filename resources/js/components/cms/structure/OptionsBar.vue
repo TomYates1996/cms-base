@@ -101,7 +101,16 @@
             >
                 Products
             </Link>
+            <Link 
+                v-if="$page.props.auth.user && this.expanded.crm"
+                href="/cms/crm/categories"
+                method="get"
+                class="option nav-child"
+            >
+                Categories
+            </Link>
         </li>
+
     </ul>
   </nav>
 </template>

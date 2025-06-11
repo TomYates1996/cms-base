@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantItem;
 use App\Models\Page;
+use App\Models\Slide;
+use App\Models\Image;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
@@ -26,10 +30,10 @@ class ProductController extends Controller
         $validated = $request->validate([
             'label' => 'required|string',
             'slug' => 'required|string|max:255|unique:products,slug',
-            'category' => 'required|string',
+            'category_id' => 'required|string',
             'meta_title' => 'nullable|string',
             'meta_description' => 'nullable|string',
-            'sub_category' => 'nullable|string',
+            'sub_category_id' => 'nullable|string',
             'variants' => 'required|array',
             'variants.*.label' => 'required|string|max:255',
             'variants.*.description' => 'nullable|string',
@@ -60,8 +64,8 @@ class ProductController extends Controller
             // Create Product
             $product = Product::create([
                 'label' => $validated['label'],
-                'category' => $validated['category'],
-                'sub_category' => $validated['sub_category'] ?? null,
+                'category_id' => $validated['category_id'],
+                'sub_category_id' => $validated['sub_category_id'] ?? null,
                 'slug' => $validated['slug'],
                 'meta_title' => $validated['meta_title'] ?? null,
                 'meta_description' => $validated['meta_description'] ?? null,
@@ -105,6 +109,60 @@ class ProductController extends Controller
         return;
     }
 
+public function grid(Request $request)
+{
+    $perPage = 6;
+    $page = (int) $request->query('page', 1);
+    $offset = ($page - 1) * $perPage;
+
+    $query = Product::with(['variants.items']);
+
+    if ($request->filled('category')) {
+        $categoryIds = explode(',', $request->query('category'));
+        $query->whereIn('category_id', $categoryIds);
+    }
+
+    // Get total count for pagination
+    $totalCount = $query->count();
+
+    // Fetch paginated products
+    $products = $query
+        ->skip($offset)
+        ->take($perPage)
+        ->get();
+
+    // Build slides from each product's variants
+    $virtualSlides = collect();
+
+    foreach ($products as $product) {
+        foreach ($product->variants as $variant) {
+            $slide = new Slide();
+            $slide->title = $variant->name;
+            $slide->description = $variant->short_description ?? '';
+
+            // Calculate price range
+            $prices = $variant->items->pluck('price');
+            $minPrice = $prices->min();
+            $maxPrice = $prices->max();
+            $slide->price_range = $minPrice == $maxPrice ? "£$minPrice" : "£$minPrice - £$maxPrice";
+
+            $slide->link = url("/product/{$variant->product->slug}");
+            $slide->sub_category_id = $product->sub_category_id;
+
+            $image = new Image();
+            $image->image_path = $variant->thumbnail_image ?? config('global.placeholder_image.path');
+            $image->image_alt = $variant->name ?? config('global.placeholder_image.alt');
+            $slide->setRelation('image', $image);
+
+            $virtualSlides->push($slide);
+        }
+    }
+
+    return response()->json([
+        'items' => $virtualSlides,
+        'total_count' => $totalCount,
+    ]);
+}
 
     public function load_page($slug)
     {

@@ -12,6 +12,8 @@ use App\Models\Event;
 use App\Models\Image;
 use App\Models\Footer;
 use App\Models\Layout;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantItem;
 use App\Models\Blog;
 use Inertia\Inertia;
 
@@ -201,7 +203,7 @@ class PageController extends Controller
         }
     
         $page = Page::where('slug', $slug)
-            ->with('widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
+            ->with('widgets.categories.subcategories', 'widgets.slides.image', 'headers.logo', 'footers.logo', 'footers.socialMedia', 'footers.widgets')
             ->firstOrFail();
 
         foreach ($page->widgets as $widget) {
@@ -255,23 +257,32 @@ class PageController extends Controller
                 });
 
                 $widget->setRelation('slides', $virtualSlides);
-            } else if ($widget->feed_type === 'product') {
-                $products = Product::inRandomOrder()->take($widget->to_show ?? 4)->get();
+            } else if ($widget->feed_type === 'products') {
+                // Load variant items with their parent product variant
 
-                $virtualSlides = $products->map(function ($product) {
+                $productVariants = ProductVariant::with('items')->inRandomOrder()->take($widget->to_show ?? 4)->get();
+
+                $virtualSlides = $productVariants->map(function ($variant) {
                     $slide = new Slide();
-                    $slide->title = $product->title;
-                    $slide->description = $product->short_description ?? '';
-                    $slide->link = url("/product/{$product->slug}");
-                    $slide->startDate = $product->start_datetime;
-                    $slide->endDate = $product->end_datetime;
+                    $slide->title = $variant->name;
+                    $slide->description = $variant->short_description ?? '';
+
+                    // Price range
+                    $prices = $variant->items->pluck('price');
+                    $minPrice = $prices->min();
+                    $maxPrice = $prices->max();
+                    $slide->price_range = $minPrice == $maxPrice ? "£$minPrice" : "£$minPrice - £$maxPrice";
+
+                    $slide->link = url("/product/{$variant->id}");
 
                     $image = new Image();
-                    $image->image_path = $product->thumbnail_image ?? config('global.placeholder_image.path');
-                    $image->image_alt = $product->title ?? config('global.placeholder_image.alt');
-                    $slide->setRelation('image', $image); 
+                    $image->image_path = $variant->thumbnail_image ?? config('global.placeholder_image.path');
+                    $image->image_alt = $variant->name ?? config('global.placeholder_image.alt');
+                    $slide->setRelation('image', $image);
+
                     return $slide;
                 });
+
 
                 $widget->setRelation('slides', $virtualSlides);
             }
@@ -546,6 +557,7 @@ class PageController extends Controller
             'widgets.*.title' => 'nullable|string',
             'widgets.*.subtitle' => 'nullable|string',
             'widgets.*.description' => 'nullable|string',
+            'widgets.*.selected_categories' => 'nullable|array',
             'widgets.*.type' => 'required|string',
             'widgets.*.variant' => 'required|string',
             'widgets.*.slides' => 'nullable|array', 
@@ -563,13 +575,12 @@ class PageController extends Controller
             'footer.social_media.*.id' => 'integer|exists:social_media_links,id',
         ]);
 
-        
         $widgets = $request->input('widgets');
         $headerInput = $request->input('header');
         $headerData = Header::find($headerInput['id']);
         $page_id = $request->input('page_id');
         $page = Page::with('headers', 'footers')->find($page_id);
-        
+
         $incomingWidgetIds = collect($widgets)->pluck('id')->filter()->toArray(); 
         $currentWidgetIds = $page->widgets()->pluck('widgets.id')->toArray();
         $widgetsToDetach = array_diff($currentWidgetIds, $incomingWidgetIds);
@@ -577,7 +588,7 @@ class PageController extends Controller
         if (!empty($widgetsToDetach)) {
             $page->widgets()->detach($widgetsToDetach);
         }
-        
+
         Widget::whereIn('id', $widgetsToDetach)
             ->where('is_saved', false)
             ->get()
@@ -586,9 +597,8 @@ class PageController extends Controller
                     $widget->delete();
                 }
             });
-        
+
         foreach ($widgets as $index => $widgetData) {
-            
             if (isset($widgetData['id'])) {
                 $existingWidget = Widget::find($widgetData['id']);
                 $existingWidget->update([
@@ -606,71 +616,72 @@ class PageController extends Controller
             } else {
                 $widget = Widget::create($widgetData);
             }
-    
+
             $widget->pages()->syncWithoutDetaching([$page_id => ['position' => $index + 1]]);
-    
+
             if (isset($widgetData['slides']) && is_array($widgetData['slides'])) {
                 $slideIds = array_column($widgetData['slides'], 'id');
-    
+
                 if ($widget->wasRecentlyCreated) {
                     $widget->slides()->attach($slideIds); 
                 } else {
                     $widget->slides()->sync($slideIds); 
                 }
             }
+
+            // Sync selected categories
+            if (isset($widgetData['selected_categories']) && is_array($widgetData['selected_categories'])) {
+                $widget->categories()->sync($widgetData['selected_categories']);
+            }
         }
-        
+
+        // HEADER update logic (unchanged)
         $existingHeader = $page->headers()->where('header_id', $headerData->id)->first();
         if ($existingHeader) {
             $headerData->update([
                 'logo_image_id' => $headerInput['logo']['id'] ?? null,
                 'link' => $headerInput['link'] ?? null,
-                'section' =>$headerInput['section'],
+                'section' => $headerInput['section'],
                 'menu_type' => $headerInput['menu_type'],
                 'section_hamburger' => $headerInput['section_hamburger'],
             ]);
         } else {
             $currentHeader = $page->headers()->first();
-            
             if ($currentHeader) {
                 $page->headers()->detach($currentHeader->id);
-                
                 if ($currentHeader->is_saved === false) {
                     $currentHeader->delete();
                 }
             }
-            
             $page->headers()->attach($headerData->id);
             $headerData->update([
                 'logo_image_id' => $headerInput['logo']['id'] ?? null,
                 'link' => $headerInput['link'] ?? null,
-                'section' =>$headerInput['section'],
+                'section' => $headerInput['section'],
                 'menu_type' => $headerInput['menu_type'],
                 'section_hamburger' => $headerInput['section_hamburger'],
             ]);
         }
-        
+
+        // FOOTER logic
         $footerInput = $request->input('footer');
         $footerData = Footer::find($footerInput['id']);
-        
         $currentFooter = $page->footers()->first();
-        
+
         if (!$page->footers->contains($footerInput['id'])) {
             if ($currentFooter) {
                 $page->footers()->detach($currentFooter->id);
-                
                 if (!$currentFooter->is_saved) {
                     $currentFooter->delete();
                 }
             }
-    
             $page->footers()->attach($footerInput['id']);
         }
-    
+
         $footerData->update([
             'section' => $footerInput['section'] ?? $footerData->section,
         ]);
-    
+
         if (isset($footerInput['social_media']) && is_array($footerInput['social_media'])) {
             $socialMediaIds = collect($footerInput['social_media'])->pluck('id')->toArray();
             $footerData->socialMedia()->sync($socialMediaIds);
@@ -684,16 +695,21 @@ class PageController extends Controller
         foreach ($footerInput['widgets'] as $widget) {
             if (isset($widget['id'])) {
                 $existingWidget = Widget::find($widget['id']);
-        
+
                 if ($existingWidget && !$footerData->widgets->contains($existingWidget->id)) {
                     $footerData->widgets()->attach($existingWidget->id);
                 }
+
+                if (isset($widget['selected_categories']) && is_array($widget['selected_categories'])) {
+                    $existingWidget->categories()->sync($widget['selected_categories']);
+                }
+
             } else {
                 $newWidget = Widget::create([
-                    'title'       => $widget['title'] ?? null,
-                    'type'        => $widget['type'] ?? null,
-                    'variant'        => $widget['variant'] ?? null,
-                    'is_saved'    => false,
+                    'title' => $widget['title'] ?? null,
+                    'type' => $widget['type'] ?? null,
+                    'variant' => $widget['variant'] ?? null,
+                    'is_saved' => false,
                     'description' => $widget['description'] ?? null,
                     'link' => $widget['link'] ?? null,
                     'link_text' => $widget['link_text'] ?? null,
@@ -702,26 +718,28 @@ class PageController extends Controller
                     'feed_type' => $widget['feed_type'] ?? null,
                     'to_show' => $widget['to_show'] ?? null,
                 ]);
-        
+
                 $footerData->widgets()->attach($newWidget->id);
+
+                if (isset($widget['selected_categories']) && is_array($widget['selected_categories'])) {
+                    $newWidget->categories()->sync($widget['selected_categories']);
+                }
 
                 if (isset($widget['slides']) && is_array($widget['slides'])) {
                     foreach ($widget['slides'] as $slideData) {
                         $slide = Slide::find($slideData['id']);
-                        
-                        if (!$slide) {
-                            continue; 
-                        }
-            
-                        if (!$widget->slides->contains($slide->id)) {
-                            $widget->slides()->attach($slide->id);
+                        if (!$slide) continue;
+                        if (!$newWidget->slides->contains($slide->id)) {
+                            $newWidget->slides()->attach($slide->id);
                         }
                     }
                 }
             }
-        }        
+        }
+
         return;
     }
+
 
     private function detachAndDeleteItems($page)
     {

@@ -68,6 +68,10 @@
               <input type="radio" value="events" v-model="newWidget.feed_type" />
               Events
             </label>
+            <label>
+              <input type="radio" value="products" v-model="newWidget.feed_type" />
+              Products
+            </label>
           </div>
         </div>
         <section class="form-field" aria-labelledby="selected-slides-heading" v-if="newWidget.feed_type === 'slides' && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">
@@ -92,6 +96,25 @@
         <div class="form-field" v-if="newWidget.feed_type === 'slides' && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasSettings">
           <button @click.prevent="showSlideListF()" class="btn-default" aria-label="Open slide selector">Select Slides</button>
         </div>
+
+        <!-- Category Selector for Grid Variants -->
+      <div
+        v-if="['listings_grid', 'events_grid', 'product_grid'].includes(newWidget.type?.variant)"
+        class="widget-categories form-field"
+      >
+        <label for="widget-categories">Specific Categories</label>
+        <select
+          id="widget-categories"
+          multiple
+          v-model="newWidget.selected_categories"
+          aria-required="false"
+          style="min-width: 200px; min-height: 100px; background-color: 'red';"
+        >
+         <option v-for="category in categories.categories" :key="category.id" :value="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
 
         <div v-if="newWidget.feed_type !== 'slides' && newWidget.type && widgetOptions.find(option => option.variant === newWidget.type.variant)?.hasHeader" class="widget-slide-count form-field">
           <label for="widget-slide-count">Amount to show</label>
@@ -171,10 +194,12 @@ export default {
           newWidget: {
             feed_type : 'slides',
             to_show : 2,
+            selected_categories: [],
           },
           showModal: {
               newSlide: false,
           },
+          categories: [],
           newTab: true,
           showSlideList: false,
           chosenSlides: [],
@@ -188,6 +213,9 @@ export default {
         'getImages',    
         'deleteSaved'   
     ],
+    mounted() {
+      this.getCategories();
+    },
     methods: {
       // getImages() {
       //       axios.get('/api/images/all')
@@ -195,6 +223,15 @@ export default {
       //           this.images = response.data.images; 
       //       })
       //   },
+      getCategories() {
+          axios.get('/api/categories/index') 
+            .then(res => {
+              this.categories = res.data;
+            })
+            .catch(err => {
+              console.error("Failed to load categories", err);
+            });
+        },
         isChosen(slide) {
           return this.chosenSlides.some(c => c.id === slide.id);
         },

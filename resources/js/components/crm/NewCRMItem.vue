@@ -9,15 +9,32 @@
               <label for="title">Title</label>
               <input id="title" name="title" type="text" required v-model="form.title" autofocus aria-required="true" @input="updateSlug" />
             </div>
-            
-            <div class="form-field">
-                <label for="category">Category</label>
-                <input id="category" name="category" type="text" v-model="form.category" required aria-required="true" />
+            <div
+                class="form-categories form-field"
+            >
+                <label for="form-categories">Category</label>
+                <select
+                id="form-categories"
+                v-model="form.category_id"
+                aria-required="true"
+                >
+                <option v-for="category in categories.categories" :key="category.id" :value="category.id">
+                    {{ category.name }}
+                </option>
+                </select>
             </div>
             
-            <div class="form-field">
-                <label for="sub_category">Sub Category</label>
-                <input id="sub_category" name="sub_category" type="text" v-model="form.sub_category" required aria-required="true" />
+            <div v-if="form.category_id !== null" class="form-field">
+                <label for="form-subcategories">Sub Category</label>
+                <select v-model="form.subcategory_id">
+                    <option
+                    v-for="subcategory in filteredSubcategories"
+                    :key="subcategory.id"
+                    :value="subcategory.id"
+                    >
+                    {{ subcategory.name }}
+                    </option>
+                </select>
             </div>
             
             <div class="form-field">
@@ -424,8 +441,8 @@ export default {
     const form = useForm({
         title: '',
         slug: '',
-        category: '',
-        sub_category: '',
+        category_id: null,
+        sub_category_id: null,
         short_description: '',
         description: '',
         tags: '',              
@@ -548,29 +565,30 @@ export default {
             type: Boolean,
         },
     },
-  data () {
-    return {
-        manualSlugChange: false, 
-        imagePreview: null,
-        showImageGrid: false,
-        regEvents: null,
-        regListings: null,
-        selectedListings: [],
-        oneDay: false,
-        calculatedDaysList: [],
-        useListingOrganiser: false,
-        selectedListingId: null,
-        daysList: [
-            { name : 'monday', label : 'Mon', selected : false, all_day: false, times: [{from: '',to: ''}] },
-            { name : 'tuesday', label : 'Tue', selected : false, all_day: false, times: [{from: '',to: ''}] },
-            { name : 'wednesday', label : 'Wed', selected : false, all_day: false, times: [{from: '',to: ''}] },
-            { name : 'thursday', label : 'Thu', selected : false, all_day: false, times: [{from: '',to: ''}] },
-            { name : 'friday', label : 'Fri', selected : false, all_day: false, times: [{from: '',to: ''}] },
-            { name : 'saturday', label : 'Sat', selected : false, all_day: false, times: [{from: '',to: ''}] },
-            { name : 'sunday', label : 'Sun', selected : false, all_day: false, times: [{from: '',to: ''}] },
-        ]
-    }
-  },
+    data () {
+        return {
+            manualSlugChange: false, 
+            imagePreview: null,
+            showImageGrid: false,
+            regEvents: null,
+            regListings: null,
+            selectedListings: [],
+            oneDay: false,
+            calculatedDaysList: [],
+            useListingOrganiser: false,
+            selectedListingId: null,
+            categories: [],
+            daysList: [
+                { name : 'monday', label : 'Mon', selected : false, all_day: false, times: [{from: '',to: ''}] },
+                { name : 'tuesday', label : 'Tue', selected : false, all_day: false, times: [{from: '',to: ''}] },
+                { name : 'wednesday', label : 'Wed', selected : false, all_day: false, times: [{from: '',to: ''}] },
+                { name : 'thursday', label : 'Thu', selected : false, all_day: false, times: [{from: '',to: ''}] },
+                { name : 'friday', label : 'Fri', selected : false, all_day: false, times: [{from: '',to: ''}] },
+                { name : 'saturday', label : 'Sat', selected : false, all_day: false, times: [{from: '',to: ''}] },
+                { name : 'sunday', label : 'Sun', selected : false, all_day: false, times: [{from: '',to: ''}] },
+            ]
+        }
+    },
     created() {
         console.log(this.listings);
         if ((this.events === null || this.events.length === 0) && !this.isEvent) {
@@ -584,10 +602,27 @@ export default {
             
         }
     },
+    computed: {
+        filteredSubcategories() {
+        const selected = this.categories.categories.find(
+            (cat) => cat.id === this.form.category_id
+        );
+        return selected?.subcategories || [];
+        },
+    },
   components: {
       LoaderCircle,
   },
 methods: {
+    getCategories() {
+        axios.get('/api/categories/index') 
+        .then(res => {
+            this.categories = res.data;
+        })
+        .catch(err => {
+            console.error("Failed to load categories", err);
+        });
+    },
     onMediaGalleryChange(event) {
         const files = Array.from(event.target.files);
         this.form.media_gallery.push(...files);
@@ -897,13 +932,15 @@ generateOpenings() {
             this.form.longitude = listing.longitude;
             this.form.latitude = listing.latitude;
         },
-  },
-  watch: {
-    'form.title'() {
-      this.resetSlugOnTitleChange();
-    }
-  }
-
+    },
+    watch: {
+        'form.title'() {
+            this.resetSlugOnTitleChange();
+        }
+    },
+    mounted() {
+       this.getCategories();
+    },
 }
 </script>
 

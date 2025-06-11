@@ -19,4 +19,7 @@ export const widgetOptions = [
     { id: 17, name: 'text', variant: 'text_box', description: 'A text box', label: 'Text Box' , path: 'text/TextBox' , hasHeader: false, hasSettings: false, showWidget: true},
     { id: 18, name: 'blog', variant: 'blog_post', description: 'An individual blog post', label: 'Blog Post' , path: 'blog/PostWidget' , hasHeader: false, hasSettings: false, showWidget: true},
     { id: 19, name: 'blog', variant: 'blog_post_header', description: 'Header for blog post (Title and image section)', label: 'Blog Post Title' , path: 'blog/Header' , hasHeader: false, hasSettings: false, showWidget: false},
+    { id: 20, name: 'listings', variant: 'listings_grid', description: 'Display Listings as a grid', label: 'Listings Grid' , path: 'products/Grid' , hasHeader: true, hasSettings: false, showWidget: true},
+    { id: 21, name: 'events', variant: 'events_grid', description: 'Display Events as a grid', label: 'Events Grid' , path: 'products/Grid' , hasHeader: true, hasSettings: false, showWidget: true},
+    { id: 22, name: 'products', variant: 'products_grid', description: 'Display Products as a grid', label: 'Products Grid' , path: 'products/Grid' , hasHeader: true, hasSettings: false, showWidget: true},
 ];
