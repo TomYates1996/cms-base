@@ -1,27 +1,35 @@
 <template>
-    <div class="page-wrap">
-      <div class="page-left">
-        <NewCRMItem :isListing="true" :listings="listings" :item="'listing'" v-if="showNewListing" @cancelNew="showNewListing = false"/>
-        <div v-if="!showNewListing" class="listing-list-wrap">
-          <h1>Listings</h1>
-          <ul class="listing-list">
-            <li v-for="listing in listings" :key="listing.id" class="listing-list-item">
-              <a :href="`/listing/${listing.slug}`">{{ listing.title }}</a>
-                <button v-if="$page.props.auth.user" class="option" @click="deleteListing(listing.id)" title="Delete listing" aria-label="Delete listing: {{ listing.title }}">
+    <div class="page-wrap crm-page">
+        <main class="page-left">
+            <NewCRMItem v-if="showNewListing" :isListing="true" :listings="listings" :item="'listing'" @cancelNew="showNewListing = false" id="newListingForm" />
+            <EditCRMItem v-if="showEditItem" :existingItem="listingToEdit" :isListing="true" :listings="listings" @cancelNew="showEditItem = false"/>
+            <section v-if="!showNewListing && !showEditItem" class="list-wrap listing-list-wrap">
+                <h1 class="crm-header">Listings</h1>
+                <ul class="list listing-list">
+                <li v-for="listing in listings" :key="listing.id" class="list-item listing-list-item">
+                    <a :href="`/listing/${listing.slug}`">{{ listing.title }}</a>
+                    <button class="edit-item" @click="editListing(listing.id)">
+                        Edit Listing
+                    </button>
+                    <button v-if="$page.props.auth.user" class="btn-option" @click="deleteListing(listing.id)" :aria-label="`Delete listing: ${listing.title}`" title="Delete listing">
                     <font-awesome-icon :icon="['fas', 'trash-can']" />
-                </button>
+                    </button>
                 </li>
-            </ul>
-        </div>
-        </div>
-        <div class="page-right">
-            <button class="new-layout" @click="showNewListing = !showNewListing" aria-expanded="showNewListing" aria-controls="newwListingModal">{{ showNewListing ? 'Cancel' : 'New Listing' }}</button>
-        </div>
+                </ul>
+            </section>
+        </main>
+        <aside class="page-right">
+        <button class="btn-toggle new-layout" @click="showNewListing = !showNewListing" :aria-expanded="showNewListing.toString()" aria-controls="newListingForm">
+            {{ showNewListing ? 'Cancel' : 'New Listing' }}
+        </button>
+        </aside>
     </div>
 </template>
+
   
 
 <script>
+import EditCRMItem from '@/components/crm/EditCRMItem.vue';
 import NewCRMItem from '@/components/crm/NewCRMItem.vue';
 import CMSLayout from '@/layouts/CMSLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
@@ -31,6 +39,7 @@ export default {
     components: {
         Link,
         NewCRMItem,
+        EditCRMItem,
     },
     props: {
         listings: Array,
@@ -39,18 +48,24 @@ export default {
         return {
             showNewListing: false,
             localListings: [],
+            listingToEdit: {},
+            showEditItem: false,
         }
     },
     created() {
         this.localListings = this.listings;
     },
     methods: {
+        editListing(id) {
+            this.showEditItem = true;
+            this.listingToEdit = this.listings.find(listing => listing.id === id);
+        },
         newListing() {
             this.showNewListing = true;
         },
         deleteListing(listing_id) {
             if (confirm("Are you sure you want to delete this listing?")) {
-                router.delete(`/crm/listing/delete/${listing_id}`, {
+                router.delete(`/cms/crm/listing/delete/${listing_id}`, {
                 onSuccess: () => {
                     this.localListings = this.localListings.filter(item => item.id !== listing_id);
                 },

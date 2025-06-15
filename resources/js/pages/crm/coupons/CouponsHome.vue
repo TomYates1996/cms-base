@@ -1,24 +1,29 @@
 <template>
-    <div class="page-wrap">
-      <div class="page-left">
-        <NewCoupon v-if="showNewCoupon"/>
-        <div v-if="!showNewCoupon" class="coupon-list-wrap">
-          <h1>Coupons</h1>
-          <ul class="coupon-list">
-            <li v-for="coupon in useCoupons" :key="coupon.id" class="coupon-list-item">
-                <p>{{ coupon.code }} {{ coupon.discount_percentage }}</p>
-                <p>{{ coupon.active ? 'Active' : 'Disabled' }}</p>
-                <button v-if="$page.props.auth.user" class="option" @click="deleteCoupon(coupon.id)" title="Delete coupon" aria-label="Delete coupon: {{ coupon.name }}">
-                    <font-awesome-icon :icon="['fas', 'trash-can']" />
+    <section class="crm-page page-wrap">
+        <main class="page-left" role="main" aria-label="Coupons management">
+        <NewCoupon v-if="showNewCoupon" id="newCouponForm" />
+
+        <section v-else class="list-wrap coupon-list-wrap" aria-labelledby="couponsHeading">
+            <h1 id="couponsHeading" class="crm-header section-title">Coupons</h1>
+            <ul class="list coupon-list" role="list">
+            <li v-for="coupon in useCoupons" :key="coupon.id" class="list-item coupon-list-item" role="listitem">
+                <p class="coupon-code">{{ coupon.code }}</p>
+                <p class="coupon-discount">{{ coupon.discount_percentage }}%</p>
+                <p class="coupon-status">{{ coupon.active ? 'Active' : 'Disabled' }}</p>
+                <button v-if="$page.props.auth.user" class="btn-option option" @click="deleteCoupon(coupon.id)" :aria-label="`Delete coupon: ${coupon.code}`" title="Delete coupon">
+                <font-awesome-icon :icon="['fas', 'trash-can']" />
                 </button>
-                </li>
+            </li>
             </ul>
-        </div>
-        </div>
-        <div class="page-right">
-            <button class="new-layout" @click="showNewCoupon = !showNewCoupon" aria-expanded="showNewCoupon" aria-controls="newwListingModal">{{ showNewCoupon ? 'Cancel' : 'New Coupon' }}</button>
-        </div>
-    </div>
+        </section>
+        </main>
+
+        <aside class="page-right sidebar" role="complementary" aria-label="Coupon actions">
+        <button class="btn-primary new-layout" @click="showNewCoupon = !showNewCoupon" :aria-expanded="showNewCoupon.toString()" aria-controls="newCouponForm">
+            {{ showNewCoupon ? 'Cancel' : 'New Coupon' }}
+        </button>
+        </aside>
+    </section>
 </template>
   
 
@@ -64,7 +69,8 @@ export default {
             if (confirm("Are you sure you want to delete this coupon?")) {
                 router.delete(`/cms/crm/coupon/delete/${coupon_id}`, {
                 onSuccess: () => {
-                    this.localCoupons = this.localProducts.filter(item => item.id !== coupon_id);
+                    this.localCoupons = this.localCoupons.filter(item => item.id !== coupon_id);
+                    this.useCoupons = this.localCoupons;
                 },
                 onError: (errors) => {
                     console.log('Error deleting coupon:', errors);
@@ -113,7 +119,7 @@ export default {
         .coupon-list-item {
             width: 100%;;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
         }
     }
 </style>

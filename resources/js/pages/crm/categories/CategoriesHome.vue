@@ -1,33 +1,39 @@
 <template>
-    <div class="page-wrap">
-      <div class="page-left">
-        <NewCategory v-if="showNewCategory"/>
-        <!-- <div class="sub-cats" v-if="this.showSubCategories">
-            <p v-for="subcat in currentCategory.subcategories" :key="subcat.id">{{ subcat.name }}</p>
-        </div> -->
-        <NewSubcategory :forText="currentCategory.name" :parentId="currentCategory.id" v-if="showNewSubCategory" @subcategory-created="addNewSubcategory"/>
-        <div v-if="!showNewCategory" class="category-list-wrap">
-          <h1>{{ showSubCategories ? `Sub Categories - ${currentCategory.name}` : 'Categories'}}</h1>
-          <ul class="category-list">
-            <li v-for="category in useCategories" :key="category.id" class="category-list-item">
-                <a :href="`/category/${category.slug}`">{{ category.name }}</a>
-                <button v-if="$page.props.auth.user && !showSubCategories" class="option" @click="toggleShowSubCategories(category.id)" title="Show Subcategories" aria-label="Show subcategories of: {{ category.name }}">
-                    <font-awesome-icon :icon="['fas', 'children']" />
-                </button>
-                <button v-if="$page.props.auth.user" class="option" @click="showSubCategories ? deleteSubcat(category.id) : deleteCategory(category.id)" title="Delete category" aria-label="Delete category: {{ category.name }}">
-                    <font-awesome-icon :icon="['fas', 'trash-can']" />
-                </button>
-                </li>
-            </ul>
-        </div>
-        </div>
-        <div class="page-right">
-            <button v-if="!showSubCategories" class="new-layout" @click="showNewCategory = !showNewCategory" aria-expanded="showNewCategory" aria-controls="newwListingModal">{{ showNewCategory ? 'Cancel' : 'New Category' }}</button>
-            <button v-if="showSubCategories" class="new-layout" @click="showNewSubCategory = !showNewSubCategory" aria-expanded="showNewSubCategory" aria-controls="newwListingModal">{{ showNewSubCategory ? 'Cancel' : 'New Sub Category' }}</button>
-            <button v-if="showSubCategories" class="new-layout" @click="closeSubcatList()" aria-expanded="close subcategory list" >Back</button>
-        </div>
+    <div class="page-wrap crm-page">
+        <section class="page-left">
+            <NewCategory v-if="showNewCategory" id="newCategoryForm" />
+            <NewSubcategory :forText="currentCategory.name" :parentId="currentCategory.id" v-if="showNewSubCategory" @subcategory-created="addNewSubcategory" id="newSubCategoryForm" />
+            
+            <div v-if="!showNewCategory" class="category-list-wrap crm-list-wrap">
+                <h1 class="crm-header">{{ showSubCategories ? `Sub Categories - ${currentCategory.name}` : 'Categories' }}</h1>
+                <ul class="category-list crm-list">
+                    <li v-for="category in useCategories" :key="category.id" class="category-list-item crm-list-item">
+                        <a :href="`/category/${category.slug}`">{{ category.name }}</a>
+                        <button v-if="$page.props.auth.user && !showSubCategories" class="option" @click="toggleShowSubCategories(category.id)" :aria-label="`Show subcategories of: ${category.name}`" title="Show Subcategories">
+                        <font-awesome-icon :icon="['fas', 'children']" />
+                        </button>
+                        <button v-if="$page.props.auth.user" class="option" @click="showSubCategories ? deleteSubcat(category.id) : deleteCategory(category.id)" :aria-label="`Delete category: ${category.name}`" title="Delete category">
+                        <font-awesome-icon :icon="['fas', 'trash-can']" />
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <aside class="page-right">
+            <button v-if="!showSubCategories" class="new-layout" @click="showNewCategory = !showNewCategory" :aria-expanded="showNewCategory.toString()" aria-controls="newCategoryForm">
+                {{ showNewCategory ? 'Cancel' : 'New Category' }}
+            </button>
+            <button v-if="showSubCategories" class="new-layout" @click="showNewSubCategory = !showNewSubCategory" :aria-expanded="showNewSubCategory.toString()" aria-controls="newSubCategoryForm">
+                {{ showNewSubCategory ? 'Cancel' : 'New Sub Category' }}
+            </button>
+            <button v-if="showSubCategories" class="new-layout" @click="closeSubcatList()" aria-label="Back to Categories">
+                Back
+            </button>
+        </aside>
     </div>
 </template>
+
   
 
 <script>
@@ -87,7 +93,10 @@ export default {
             if (confirm("Are you sure you want to delete this category?")) {
                 router.delete(`/cms/crm/category/delete/${category_id}`, {
                 onSuccess: () => {
-                    this.localCategories = this.localProducts.filter(item => item.id !== category_id);
+                    this.localCategories = this.localCategories.filter(item => item.id !== category_id);
+                    if (!this.showSubCategories) {
+                        this.useCategories = this.localCategories;
+                    }
                 },
                 onError: (errors) => {
                     console.log('Error deleting category:', errors);
@@ -95,11 +104,14 @@ export default {
                 });
             }
         },
-        deleteSubCategory(category_id) {
-            if (confirm("Are you sure you want to delete this category?")) {
+        deleteSubcat(category_id) {
+            if (confirm("Are you sure you want to delete this subcategory?")) {
                 router.delete(`/cms/crm/subcategory/delete/${category_id}`, {
                 onSuccess: () => {
                     this.localSubcategories = this.localSubcategories.filter(item => item.id !== category_id);
+                    if (this.showSubCategories) {
+                        this.useCategories = this.localSubcategories;
+                    }
                 },
                 onError: (errors) => {
                     console.log('Error deleting subcategory:', errors);

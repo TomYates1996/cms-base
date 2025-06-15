@@ -89,6 +89,8 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::delete('/layouts/delete/{layout_id}', [LayoutController::class, 'destroy'])->name('layouts.delete');
     Route::delete('/blog/delete/{blog_id}', [BlogController::class, 'destroy'])->name('blog.delete');
     Route::delete('/crm/product/delete/{product_id}', [ProductController::class, 'destroy'])->name('product.delete');
+    Route::delete('/crm/event/delete/{event_id}', [EventController::class, 'destroy'])->name('event.delete');
+    Route::delete('/crm/listing/delete/{listing_id}', [ListingController::class, 'destroy'])->name('listing.delete');
     Route::get('/pages/children/{page_slug}', [PageController::class, 'children'])->where('page_slug', '.*')->name('pages.children');
     Route::get('/pages/edit/{page_slug}', [PageController::class, 'load_edit'])->name('pages.load.edit');
     Route::get('/pages/edit-content/{page_slug}', [PageController::class, 'load_edit_content'])
@@ -111,6 +113,9 @@ Route::middleware('auth')->prefix('cms')->group(function () {
     Route::post('/images/update', [ImageController::class, 'update'])->name('images.update');
     Route::get('/slides/new', [SlideController::class, 'load_create'])->name('slides.load.create');
     Route::delete('/slides/delete/{id}', [SlideController::class, 'delete'])->name('slides.delete');
+    Route::delete('/crm/coupon/delete/{id}', [PromoCodeController::class, 'delete'])->name('coupon.delete');
+    Route::delete('/crm/category/delete/{id}', [CategoryController::class, 'delete_cat'])->name('category.delete');
+    Route::delete('/crm/subcategory/delete/{id}', [CategoryController::class, 'delete_subcat'])->name('subcategory.delete');
     Route::get('/pages/{pageId}/widgets', [WidgetController::class, 'index'])->name('widgets.index');
     Route::get('/pages/{pageId}/widgets/create', [WidgetController::class, 'create'])->name('widgets.create');
     Route::post('/pages/{pageId}/widgets', [WidgetController::class, 'store'])->name('widgets.store');
@@ -128,6 +133,8 @@ Route::middleware('auth')->prefix('cms')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('/crm/event/{id}', [EventController::class, 'update'])->name('api.event.update');
+    Route::post('/crm/listing/{id}', [ListingController::class, 'update'])->name('api.listing.update');
     Route::put('/pages/update/{slug}', [PageController::class, 'update'])->name('api.pages.update');
     Route::post('/pages/store', [PageController::class, 'store'])->name('api.pages.store');
     Route::post('/category/store', [CategoryController::class, 'store'])->name('api.category.store');

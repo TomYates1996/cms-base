@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Cal+Sans&family=Telex&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap'); /* Inter */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -46,7 +47,24 @@ html {
         --sidebar-ring: 217.2 91.2% 59.8%;
 
         /* Custom */
-        /* Colours */
+        /* ###################### */
+        /* ######## CMS ######### */
+        /* ###################### */
+        
+        /* CMS COLOURS */
+        --cms-primary: #afd18a; /* Pale Green */
+        --cms-secondary: #8cb88e; /* Blue Green */
+        --cms-tertiary: #0a5749; /* Sea Green */
+        --cms-light-grey: #ECF0F1; /* Light Grey */
+        --cms-black: #000000; /* Black */
+        --cms-white: #FFFFFF; /* White */
+ 
+        /* CMS Font */
+        --cms-font-main: "Inter", sans-serif;
+
+/* --------------------------------------------------- */
+
+        /* Site Specific Colours */
         --black: #0d0d0c;
         --white: #ffffff;
         --grey: #bdbdbd;
@@ -245,4 +263,25 @@ body #app {
         color: var(--sea-green);
         text-decoration: underline;
     }
+}
+
+/* CRM STYLING */
+.crm-page {
+    .crm-header {
+        /* font-size: 2rem; */
+        /* width: 100%; */
+        border-bottom: 1px solid var(--black);
+    }
+}
+
+/* CMS STYLES */
+.cms {
+    font-family: var(--cms-font-main);
+}
+.cms h1 {
+    font-weight: 600;
+    font-size: 2.25rem;
+}
+.cms h2 {
+    font-size: 1.75rem;
 }

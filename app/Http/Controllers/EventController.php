@@ -202,6 +202,101 @@ class EventController extends Controller
         return Event::all();
     }
 
+    public function destroy(Request $request, $id) 
+    {
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        $event = Event::findOrFail($id);
+    
+        $event->delete();
+    
+        return;
+    }
+
+    public function update(Request $request, $id) 
+    {
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'short_description' => 'nullable|string|max:400',
+            'category_id' => 'nullable|numeric|max:255',
+            'sub_category_id' => 'nullable|numeric|max:255',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string',
+            'region' => 'nullable|string',
+            'country' => 'nullable|string',
+            'postcode' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'phone_number' => 'nullable|string',
+            'email' => 'nullable|email',
+            'website' => 'nullable|url',
+            'media_gallery' => 'nullable|array',
+            'thumbnail_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            'prices' => 'nullable|array',
+            'booking_url' => 'nullable|url',
+            'reservation_email' => 'nullable|email',
+            'featured' => 'boolean',
+            'owner_id' => 'nullable|integer|exists:users,id',
+            'published_at' => 'nullable|date',
+            'social_links' => 'nullable|array',
+            'amenities' => 'nullable|array',
+            'accessibility_info' => 'nullable|array',
+            'listing_ids' => 'nullable|array',
+            'listing_ids.*' => 'integer|exists:listings,id',
+            'openings' => 'nullable|array',
+            'start_datetime' => 'required|string',
+            'end_datetime' => 'required|string',
+            'recurrence' => 'nullable|string|in:none,daily,weekly,monthly,yearly,2weeks',
+            'all_day' => 'nullable|boolean',
+            'organiser_name' => 'nullable|string|max:255',
+            'organiser_email' => 'nullable|email',
+            'organiser_phone' => 'nullable|string|max:255',
+            'venue_name' => 'nullable|string|max:255',
+            'organiser_id' => 'nullable|exists:listings,id',
+        ]);
+        
+        $event = Event::findOrFail($id);
+
+        if ($request->hasFile('thumbnail_image') && $request->file('thumbnail_image')->isValid()) {
+            $imagePath = $request->file('thumbnail_image')->store('crm/event/thumbnails', 'public');
+            $validated['thumbnail_image'] = $imagePath;
+        }
+        
+        $mediaGallery = [];
+
+        foreach ($validated['media_gallery'] ?? [] as $index => $item) {
+            $uploadedFile = $request->file("media_gallery.$index");
+
+            if ($uploadedFile instanceof \Illuminate\Http\UploadedFile) {
+                $path = $uploadedFile->store('crm/event/media_gallery', 'public');
+                $mediaGallery[] = 'crm/event/media_gallery/' . basename($path); 
+            } elseif (is_string($item) && $item !== '[object File]') {
+                $mediaGallery[] = $item;
+            }
+        }
+
+        $validated['media_gallery'] = $mediaGallery;
+
+        $event->update($validated);
+
+        return;
+    }
+
+
     private function buildTree($pages, $parentId = null) {
         $branch = [];
     

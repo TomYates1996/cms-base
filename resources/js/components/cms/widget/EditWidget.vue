@@ -49,7 +49,7 @@
           <input id="widget-slide-link-text" name="widget-slide-link-text" type="text" v-model="widget.slide_link_text" aria-required="false" />
         </div>
         
-         <div v-if="widget.type">
+           <div v-if="widget.type &&  widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings">
           <label><strong>Feed Type:</strong></label>
           <div style="margin-top: 8px;">
             <label style="margin-right: 15px;">
@@ -67,6 +67,10 @@
             <label>
               <input type="radio" value="events" v-model="widget.feed_type" />
               Events
+            </label>
+            <label>
+              <input type="radio" value="products" v-model="widget.feed_type" />
+              Products
             </label>
           </div>
         </div>
@@ -95,6 +99,25 @@
         <div class="form-field" v-if="widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasSettings">
           <button @click.prevent="showSlideListF()" class="btn-default" aria-label="Open slide selector">Select Slides</button>
         </div>
+
+  <!-- Category Selector for Grid Variants -->
+      <div
+        v-if="['listings_grid', 'events_grid', 'product_grid'].includes(widget.type?.variant)"
+        class="widget-categories form-field"
+      >
+        <label for="widget-categories">Specific Categories</label>
+        <select
+          id="widget-categories"
+          multiple
+          v-model="widget.selected_categories"
+          aria-required="false"
+          style="min-width: 200px; min-height: 100px; background-color: 'red';"
+        >
+         <option v-for="category in categories.categories" :key="category.id" :value="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
 
         <div v-if="widget.feed_type !== 'slides' && widget.type && widgetOptions.find(option => option.variant === widget.type.variant)?.hasHeader" class="widget-slide-count form-field">
           <label for="widget-slide-count">Amount to show</label>
@@ -138,6 +161,8 @@
 <script>
 import { widgetOptions } from '@/utils/widgetOptions.js';
 import QuillEditor from '../reusable/QuillEditor.vue';
+import axios from 'axios';
+
 
 export default {
     components: {
@@ -154,6 +179,7 @@ export default {
             initialSlides: [],
             chosenSlides: [],
             widgetOptions,
+            categories: [],
         }
     },
     created() {
@@ -168,7 +194,19 @@ export default {
             });
         }
     },
+    mounted() {
+      this.getCategories();
+    },
     methods: {
+      getCategories() {
+          axios.get('/api/categories/index') 
+            .then(res => {
+              this.categories = res.data;
+            })
+            .catch(err => {
+              console.error("Failed to load categories", err);
+            });
+        },
         saveEdit() {
             this.widget.variant = this.widget.type.variant;
             this.widget.type = this.widget.type.name;

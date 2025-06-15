@@ -63,4 +63,17 @@ class PromoCodeController extends Controller
             'message' => 'Promo code applied successfully.',
         ]);
     }
+
+    public function delete($id)
+    {
+        $promo = PromoCode::find($id);
+
+        if (!$promo) {
+            return response()->json(['message' => 'Promo code not found.'], 404);
+        }
+
+        $promo->delete();
+
+        return;
+    }
 }

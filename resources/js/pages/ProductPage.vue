@@ -47,7 +47,7 @@
                 <ul class="opening-list ul-list">
                     <li class="opening-item list-item" v-for="opening in data.opening_hours" :key="opening.name">
                         <p>{{ opening.name }}</p>
-                        <p v-if="opening.closed === '0' && opening.from">{{ opening.from }} - {{ opening.to }}</p>
+                        <p v-if="(opening.closed === '0' || opening.closed === false) && opening.from">{{ opening.from }} - {{ opening.to }}</p>
                         <p v-else>Closed</p>
                     </li>
                 </ul>

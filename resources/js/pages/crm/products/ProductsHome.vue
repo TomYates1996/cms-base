@@ -1,25 +1,28 @@
 <template>
-    <div class="page-wrap">
-      <div class="page-left">
-        <NewProduct :products="products" :variantTypes="variantTypes" v-if="showNewListing" @cancelNew="showNewListing = false"/>
-        <div v-if="!showNewListing" class="product-list-wrap">
-          <h1>Products</h1>
-          <ul class="product-list">
-            <li v-for="product in products" :key="product.id" class="product-list-item">
-              <a :href="`/product/${product.slug}`">{{ product.label }}</a>
-                <button v-if="$page.props.auth.user" class="option" @click="deleteListing(product.id)" title="Delete product" aria-label="Delete product: {{ product.title }}">
-                    <font-awesome-icon :icon="['fas', 'trash-can']" />
+    <section class="crm-page page-wrap">
+        <main class="page-left" role="main" aria-label="Products management">
+        <NewProduct :products="products" :variantTypes="variantTypes" v-if="showNewListing" @cancelNew="showNewListing = false" id="newProductForm" />
+        
+        <section v-else class="list-wrap product-list-wrap" aria-labelledby="productsHeading">
+            <h1 id="productsHeading" class="crm-header section-title">Products</h1>
+            <ul class="list product-list" role="list">
+            <li v-for="product in products" :key="product.id" class="list-item product-list-item" role="listitem">
+                <a :href="`/product/${product.slug}`" class="list-link product-link">{{ product.label }}</a>
+                <button v-if="$page.props.auth.user" class="btn-option option" @click="deleteListing(product.id)" :aria-label="`Delete product: ${product.label}`" title="Delete product">
+                <font-awesome-icon :icon="['fas', 'trash-can']" />
                 </button>
-                </li>
+            </li>
             </ul>
-        </div>
-        </div>
-        <div class="page-right">
-            <button class="new-layout" @click="showNewListing = !showNewListing" aria-expanded="showNewListing" aria-controls="newwListingModal">{{ showNewListing ? 'Cancel' : 'New Event' }}</button>
-        </div>
-    </div>
+        </section>
+        </main>
+
+        <aside class="page-right sidebar" role="complementary" aria-label="Product actions">
+            <button class="btn-primary new-layout" @click="showNewListing = !showNewListing" :aria-expanded="showNewListing.toString()" aria-controls="newProductForm">
+                {{ showNewListing ? 'Cancel' : 'Add Product' }}
+            </button>
+        </aside>
+    </section>
 </template>
-  
 
 <script>
 import NewProduct from '@/components/crm/NewProduct.vue';

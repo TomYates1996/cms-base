@@ -149,7 +149,7 @@ export default {
 
 <style scoped>
     nav {
-        background-color: var(--pale-green);
+        background-color: var(--cms-primary);
         height: 100%;
         .app-name {
             padding: 10px 20px;
@@ -162,7 +162,7 @@ export default {
                 flex-direction: column;
                 justify-content: flex-start;
                 align-items: flex-start;
-                border-top: 2px solid var(--white);
+                border-top: 2px solid var(--cms-white);
                 .option {
                     padding: 10px 20px;
                     width: 100%;
@@ -171,16 +171,16 @@ export default {
                     justify-content: flex-start;
                 }
                 .option.nav-child {
-                    border-top: 1px solid var(--white);
+                    border-top: 1px solid var(--cms-white);
                     padding-left: 30px;
-                    background-color: #8cb88e;
+                    background-color: var(--cms-secondary);
                 }
                 .accordion-toggle {
                     justify-content: space-between;
                 }
             }
             li:first-of-type {
-                border-top: 4px solid var(--black);
+                border-top: 4px solid var(--cms-black);
             }
         }
     }

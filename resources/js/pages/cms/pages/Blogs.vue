@@ -1,27 +1,34 @@
 <template>
-    <div class="page-wrap">
-      <div class="page-left">
-        <NewBlog v-if="showNewBlogPost" @cancelNew="showNewBlogPost = false" />
-        <div v-if="!showNewBlogPost" class="blog-list-wrap">
-          <h1>Blogs</h1>
-          <ul class="blog-list">
-            <li v-for="blog in blogPosts" :key="blog.id" class="blog-list-item">
-              <a :href="`/blog/post/${blog.slug}`">{{ blog.title }}</a>
-                <button v-if="$page.props.auth.user" class="option" @click="deleteBlog(blog.id)" title="Delete blog" aria-label="Delete blog: {{ blog.title }}">
+    <div class="page-wrap crm-page">
+        <section class="page-left">
+            <NewBlog v-if="showNewBlogPost" id="newBlogPostModal" @cancelNew="showNewBlogPost = false" />
+            
+            <div v-else class="blog-list-wrap crm-list-wrap">
+                <h1 class="crm-header">Blogs</h1>
+                <ul class="blog-list crm-list">
+                <li v-for="blog in blogPosts" :key="blog.id" class="blog-list-item crm-list-item">
+                    <a :href="`/blog/post/${blog.slug}`">{{ blog.title }}</a>
+                    
+                    <button v-if="$page.props.auth.user" class="option" @click="deleteBlog(blog.id)" :aria-label="`Delete blog: ${blog.title}`" title="Delete blog">
                     <font-awesome-icon :icon="['fas', 'trash-can']" />
-                </button>
-                <Link v-if="$page.props.auth.user" :href="`/cms/blog/edit-content/${blog.id}`" title="Edit content" method="get" class="option" role="button" aria-label="Edit content for {{ layout.title }}">
+                    </button>
+                    
+                    <Link v-if="$page.props.auth.user" :href="`/cms/blog/edit-content/${blog.id}`" method="get" class="option" role="button" :aria-label="`Edit content for ${blog.title}`" title="Edit content">
                     <font-awesome-icon :icon="['fas', 'pen-to-square']" />
                     </Link>
                 </li>
-            </ul>
-        </div>
-        </div>
-        <div class="page-right">
-            <button class="new-layout" @click="showNewBlogPost = !showNewBlogPost" aria-expanded="showNewBlogPost" aria-controls="newBlogPostModal">{{ showNewBlogPost ? 'Cancel' : 'New Blog' }}</button>
-        </div>
+                </ul>
+            </div>
+        </section>
+
+        <aside class="page-right">
+            <button class="new-layout" @click="showNewBlogPost = !showNewBlogPost" :aria-expanded="showNewBlogPost.toString()" aria-controls="newBlogPostModal">
+                {{ showNewBlogPost ? 'Cancel' : 'New Blog' }}
+            </button>
+        </aside>
     </div>
 </template>
+
   
 
 <script>

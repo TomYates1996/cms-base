@@ -29,8 +29,8 @@ class ListingController extends Controller
             'slug' => 'required|string|max:255',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:400',
-            'category_id' => 'nullable|string|max:255',
-            'sub_category_id' => 'nullable|string|max:255',
+            'category_id' => 'nullable|numeric|max:255',
+            'sub_category_id' => 'nullable|numeric|max:255',
             'tags' => 'nullable|array',
             'address' => 'nullable|string',
             'city' => 'nullable|string',
@@ -79,6 +79,82 @@ class ListingController extends Controller
         if (!empty($request->listing_ids)) {
             $listing->relatedListings()->attach($request->listing_ids);
         }
+
+        return;
+    }
+
+    public function update(Request $request, $id) 
+    {
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'short_description' => 'nullable|string|max:400',
+            'category_id' => 'nullable|numeric|max:255',
+            'sub_category_id' => 'nullable|numeric|max:255',
+            'address' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'city' => 'nullable|string',
+            'region' => 'nullable|string',
+            'country' => 'nullable|string',
+            'postcode' => 'nullable|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'phone_number' => 'nullable|string',
+            'email' => 'nullable|email',
+            'website' => 'nullable|url',
+            'media_gallery' => 'nullable|array',
+            'thumbnail_image' => 'nullable',
+            'prices' => 'nullable|array',
+            'opening_hours' => 'nullable|array',
+            'booking_url' => 'nullable|url',
+            'reservation_email' => 'nullable|email',
+            'featured' => 'boolean',
+            'owner_id' => 'nullable|integer|exists:users,id',
+            'published_at' => 'nullable|date',
+            'social_links' => 'nullable|array',
+            'amenities' => 'nullable|array',
+            'accessibility_info' => 'nullable|array',
+            'listing_ids' => 'nullable|array',
+            'listing_ids.*' => 'integer|exists:listings,id',
+        ]);
+        
+        $listing = Listing::findOrFail($id);
+
+        if (
+            isset($validated['thumbnail_image']) &&
+            $validated['thumbnail_image'] instanceof \Illuminate\Http\UploadedFile &&
+            $validated['thumbnail_image']->isValid()
+        ) {
+            $imagePath = $validated['thumbnail_image']->store('crm/listing/thumbnails', 'public');
+            $validated['thumbnail_image'] = $imagePath;
+        } elseif (isset($validated['thumbnail_image']) && is_string($validated['thumbnail_image'])) {
+        } else {
+            unset($validated['thumbnail_image']);
+        }
+        
+        $mediaGallery = [];
+
+        foreach ($validated['media_gallery'] ?? [] as $index => $item) {
+            $uploadedFile = $request->file("media_gallery.$index");
+
+            if ($uploadedFile instanceof \Illuminate\Http\UploadedFile) {
+                $path = $uploadedFile->store('crm/listing/media_gallery', 'public');
+                $mediaGallery[] = 'crm/listing/media_gallery/' . basename($path); 
+            } elseif (is_string($item) && $item !== '[object File]') {
+                $mediaGallery[] = $item;
+            }
+        }
+
+        $validated['media_gallery'] = $mediaGallery;
+
+        $listing->update($validated);
 
         return;
     }
@@ -179,6 +255,21 @@ class ListingController extends Controller
             'items' => $virtualSlides,
             'total_count' => $totalCount,
         ]);
+    }
+
+    public function destroy(Request $request, $id) 
+    {
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        $listing = Listing::findOrFail($id);
+    
+        $listing->delete();
+    
+        return;
     }
 
 

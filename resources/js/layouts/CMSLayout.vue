@@ -1,5 +1,5 @@
 <template>
-    <div class="layout">
+    <div class="layout cms">
     <aside class="sidebar">
         <OptionsBar />
       </aside>

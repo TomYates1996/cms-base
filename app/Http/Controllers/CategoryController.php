@@ -56,4 +56,32 @@ class CategoryController extends Controller
 
     return;
     }
+
+    public function delete_cat($id)
+    {
+        $category = Category::with('subcategories')->find($id);
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found.'], 404);
+        }
+
+        $category->subcategories()->delete();
+
+        $category->delete();
+
+        return;
+    }
+
+    public function delete_subcat($id)
+    {
+        $subcategory = SubCategory::find($id);
+
+        if (!$subcategory) {
+            return response()->json(['message' => 'Subcategory not found.'], 404);
+        }
+
+        $subcategory->delete();
+
+        return;
+    }
 }
