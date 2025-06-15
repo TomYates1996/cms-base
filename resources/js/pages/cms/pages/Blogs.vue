@@ -7,7 +7,7 @@
                 <h1 class="crm-header">Blogs</h1>
                 <ul class="blog-list crm-list">
                 <li v-for="blog in blogPosts" :key="blog.id" class="blog-list-item crm-list-item">
-                    <a :href="`/blog/post/${blog.slug}`">{{ blog.title }}</a>
+                    <a :href="`/${$page.props.cms.blog_page}/post/${blog.slug}`">{{ blog.title }}</a>
                     
                     <button v-if="$page.props.auth.user" class="option" @click="deleteBlog(blog.id)" :aria-label="`Delete blog: ${blog.title}`" title="Delete blog">
                     <font-awesome-icon :icon="['fas', 'trash-can']" />

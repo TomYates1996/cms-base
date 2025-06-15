@@ -1,6 +1,6 @@
 <template>
     <button class="view-all-btn">
-        {{ widget.link_text }}
+        <a :href="widget.link">{{ widget.link_text }}</a>
     </button>
 </template>
 

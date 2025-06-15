@@ -178,7 +178,13 @@ Route::post('/paypal/capture-order', [PayPalController::class, 'captureOrder']);
 Route::get('/event/{slug}', [EventController::class, 'load_page'])->where('slug', '.*')->name('event.load');
 Route::get('/listing/{slug}', [ListingController::class, 'load_page'])->where('slug', '.*')->name('listing.load');
 Route::get('/product/{slug}', [ProductController::class, 'load_page'])->where('slug', '.*')->name('product.load');
-Route::get('/blog/post/{slug}', [PageController::class, 'blog_post'])->where('slug', '.*')->name('page.blog.post');
+
+$blogPrefix = config('cms.blog_page', 'blog');
+
+Route::get("/{$blogPrefix}/post/{slug}", [PageController::class, 'blog_post'])
+    ->where('slug', '.*')
+    ->name('page.blog.post');
+
 Route::get('/basket', [ProductController::class, 'basket'])->name('product.basket');
 Route::get('/order-confirmation/{order_number}', [OrderController::class, 'order_confirmation'])->name('order.confirmation');
 Route::get('/checkout', [ProductController::class, 'checkout'])->name('product.checkout');

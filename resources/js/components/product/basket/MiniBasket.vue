@@ -14,6 +14,7 @@
                 </div>
             </li>
         </ul>
+        <p v-if="cart.itemCount === 0">Your basket is empty</p>
         <Link 
             href="/basket"
             method="get"

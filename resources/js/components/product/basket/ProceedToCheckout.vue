@@ -1,31 +1,35 @@
 <template>
-  <button class="checkout-btn" @click="proceedToCheckout">Checkout</button>
+    <button class="checkout-btn" :class="cart.itemCount === 0 ? 'disabled' : ''" @click="proceedToCheckout" :disabled="cart.itemCount === 0">
+        Checkout
+    </button>
 </template>
 
 <script>
 import { useCartStore } from '@/utils/cartStore';
 import axios from 'axios';
-import { router } from '@inertiajs/vue3'; // if using Inertia
 
 export default {
-  methods: {
-    async proceedToCheckout() {
-      const cart = useCartStore();
-
-      try {
-        const response = await axios.post('/checkout/start', {
-          items: cart.items,
-          promo: cart.promoCode,
-        });
-
-        // Redirect to checkout with a token or cart ID
-        router.visit(`/checkout/${response.data.checkout_id}`);
-      } catch (err) {
-        alert('Something went wrong. Please try again.');
+    data() {
+      return {
+        cart: useCartStore()
       }
     },
-  },
-};
+    methods: {
+      async proceedToCheckout() {
+        try {
+          const response = await axios.post('/checkout/start', {
+            items: this.cart.items,
+            promo: this.cart.promoCode,
+          });
+
+          // Use Inertia from this.$inertia to redirect
+          this.$inertia.visit(`/checkout/${response.data.checkout_id}`);
+        } catch (err) {
+          alert('Something went wrong. Please try again.');
+        }
+      },
+    },
+  };
 </script>
 
 <style>
@@ -41,5 +45,8 @@ export default {
     font-size: 1rem;
     text-transform: uppercase;
     border-radius: 4px;
+}
+.checkout-btn.disabled {
+    opacity: 0.4;
 }
 </style>

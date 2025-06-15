@@ -209,12 +209,13 @@ class PageController extends Controller
         foreach ($page->widgets as $widget) {
             if ($widget->feed_type === 'blog') {
                 $blogs = Blog::latest()->take($widget->to_show ?? 4)->get();
-
+                
                 $virtualSlides = $blogs->map(function ($blog) {
                     $slide = new Slide();
                     $slide->title = $blog->title;
                     $slide->description = $blog->excerpt ?? '';
-                    $slide->link = url("/blog/post/{$blog->slug}");
+                    $basePath = config('cms.blog_page', 'blog');
+                    $slide->link = url("/{$basePath}/post/{$blog->slug}");
                     $slide->image_id = $blog->image_id;
                     $slide->setRelation('image', $blog->image); 
                     return $slide;

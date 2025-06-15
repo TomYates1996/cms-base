@@ -23,7 +23,7 @@
       </li>
     </ul>
     <div class="widgets">
-      <BasketIcon v-if="this.$page.url !== '/basket'" />
+      <BasketIcon v-if="this.$page.url !== '/basket' && $page.props.cms.products" />
       <DropdownNav :pages="header.menu_type === 'dropdown' ? header.pages : header.hamburger_pages"/>
     </div>
   </nav>

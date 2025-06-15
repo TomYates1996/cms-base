@@ -56,20 +56,20 @@
               <input type="radio" value="slides" v-model="newWidget.feed_type" />
               Slides
             </label>
-            <label style="margin-right: 15px;">
-              <input type="radio" value="blog" v-model="newWidget.feed_type" />
-              Blog
+            <label style="margin-right: 15px;" v-if="$page.props.cms.blog">
+                <input type="radio" value="blog" v-model="widget.feed_type" />
+                  Blog
             </label>
-            <label style="margin-right: 15px;">
-              <input type="radio" value="listings" v-model="newWidget.feed_type" />
+            <label style="margin-right: 15px;" v-if="$page.props.cms.listings">
+              <input type="radio" value="listings" v-model="widget.feed_type" />
               Listings
             </label>
-            <label>
-              <input type="radio" value="events" v-model="newWidget.feed_type" />
+            <label v-if="$page.props.cms.events"> 
+              <input type="radio" value="events" v-model="widget.feed_type" />
               Events
             </label>
-            <label>
-              <input type="radio" value="products" v-model="newWidget.feed_type" />
+            <label v-if="$page.props.cms.products">
+              <input type="radio" value="products" v-model="widget.feed_type" />
               Products
             </label>
           </div>

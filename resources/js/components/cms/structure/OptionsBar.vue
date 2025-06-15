@@ -1,6 +1,6 @@
 <template>
   <nav>
-    <a href="/cms/dashboard" class="app-name" aria-label="Go to CMS dashboard">{{ this.$appName }}</a>
+    <a href="/cms/dashboard" class="app-name" aria-label="Go to CMS dashboard">{{ $page.props.cms.site_name }}</a>
     <ul>
         <li>
             <button @click="toggle('pages')" :aria-expanded="this.expanded.pages" :aria-controls="'section-pages'" class="option accordion-toggle">
@@ -64,7 +64,7 @@
         </li>
         <li>
             <Link 
-                v-if="$page.props.auth.user"
+                v-if="$page.props.cms.blog && $page.props.auth.user"
                 href="/cms/blog"
                 method="get"
                 class="option"
@@ -78,7 +78,7 @@
                 <span aria-hidden="hidden"><font-awesome-icon :icon="this.expanded.crm ? ['fas', 'sort-up'] : ['fas', 'sort-down']" /></span>
             </button>
             <Link 
-                v-if="$page.props.auth.user && this.expanded.crm"
+                v-if="$page.props.cms.listings && $page.props.auth.user && this.expanded.crm"
                 href="/cms/crm/listings"
                 method="get"
                 class="option nav-child"
@@ -86,7 +86,7 @@
                 Listings
             </Link>
             <Link 
-                v-if="$page.props.auth.user && this.expanded.crm"
+                v-if="$page.props.cms.events && $page.props.auth.user && this.expanded.crm"
                 href="/cms/crm/events"
                 method="get"
                 class="option nav-child"
@@ -94,7 +94,7 @@
                 Events
             </Link>
             <Link 
-                v-if="$page.props.auth.user && this.expanded.crm"
+                v-if="$page.props.cms.products && $page.props.auth.user && this.expanded.crm"
                 href="/cms/crm/products"
                 method="get"
                 class="option nav-child"
@@ -102,7 +102,7 @@
                 Products
             </Link>
             <Link 
-                v-if="$page.props.auth.user && this.expanded.crm"
+                v-if="$page.props.cms.categories && $page.props.auth.user && this.expanded.crm"
                 href="/cms/crm/categories"
                 method="get"
                 class="option nav-child"
@@ -110,7 +110,7 @@
                 Categories
             </Link>
             <Link 
-                v-if="$page.props.auth.user && this.expanded.crm"
+                v-if="$page.props.cms.coupons && $page.props.auth.user && this.expanded.crm"
                 href="/cms/crm/coupons"
                 method="get"
                 class="option nav-child"
