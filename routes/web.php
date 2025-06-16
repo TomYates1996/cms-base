@@ -190,5 +190,6 @@ Route::get('/order-confirmation/{order_number}', [OrderController::class, 'order
 Route::get('/checkout', [ProductController::class, 'checkout'])->name('product.checkout');
 Route::post('/checkout/start', [CheckoutController::class, 'start']);
 Route::get('/checkout/{id}', [CheckoutController::class, 'show']);
+// Route::get('/test-mail', [OrderController::class, 'testMail']);
 Route::post('/promo/validate', [PromoCodeController::class, 'validatePromo']);
 Route::get('/{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('page.show');

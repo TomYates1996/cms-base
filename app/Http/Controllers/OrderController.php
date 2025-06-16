@@ -6,10 +6,20 @@ use App\Models\Order;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
+
+    // public function testMail()
+    // {
+    //     $order = Order::first();
+        
+    //     Mail::to('tomwozere2k5@gmail.com')->send(new OrderConfirmationMail($order));
+
+    //     return 'Email attempted.';
+    // }
     public function order_confirmation(Request $request, $order_number)
     {
         $order = Order::where('order_number', $order_number)->first();
@@ -52,6 +62,10 @@ class OrderController extends Controller
         if ($header) {
             $header->pages = $formattedPages[$header->section] ?? collect();
             $header->hamburger_pages = $formattedPages[$header->section_hamburger] ?? collect();
+        }
+
+        if ($order->email) {
+            Mail::to($order->email)->send(new OrderConfirmationMail($order));
         }
     
         return Inertia::render('OrderConfirmationPage', [
