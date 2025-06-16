@@ -109,8 +109,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => config('cms.email') ?? env('MAIL_FROM_ADDRESS', 'default@example.com'),
+        'name' => env('MAIL_FROM_NAME', 'YourAppName'),
     ],
 
 ];
