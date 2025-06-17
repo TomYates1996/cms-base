@@ -15,12 +15,9 @@
 
 
 /* CRM STYLING */
-.crm-page {
-    .crm-header {
-        /* font-size: 2rem; */
-        /* width: 100%; */
-        border-bottom: 1px solid var(--black);
-    }
+.crm-header {
+    text-transform: capitalize;
+    border-bottom: 1px solid var(--black);
 }
 
 /* CMS STYLES */

@@ -185,6 +185,8 @@ Route::get("/{$blogPrefix}/post/{slug}", [PageController::class, 'blog_post'])
     ->where('slug', '.*')
     ->name('page.blog.post');
 
+Route::get('/api/addresses', [CheckoutController::class, 'getAddresses']);
+Route::get('/api/top-selling-products', [ProductController::class, 'getTopSellingProducts']);
 Route::get('/basket', [ProductController::class, 'basket'])->name('product.basket');
 Route::get('/order-confirmation/{order_number}', [OrderController::class, 'order_confirmation'])->name('order.confirmation');
 Route::get('/checkout', [ProductController::class, 'checkout'])->name('product.checkout');

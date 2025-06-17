@@ -110,7 +110,7 @@ export default {
         width: 100%;
         height: 100vw;
         background-color: var(--primary-colour);
-        z-index: 99;
+        z-index: 101;
         .hamburger-inner {
             display: grid;
             grid-template-columns: repeat(3, 1fr);

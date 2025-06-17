@@ -47,6 +47,7 @@ html {
 
 /* --------------------------------------------------- */
         /* Site Specific Colours */
+        --faint-border-colour: #00000000;
         --black: #0d0d0c;
         --white: #ffffff;
         --grey: #bdbdbd;
@@ -146,6 +147,7 @@ html {
             
             /* Widget Specific Fonts and sizes */
             --hero-alt-title: 600 70px var(--font-heading);
+            --radius-mid: 6px;
         }
 
         @media screen and (min-width: 1024px) {
@@ -247,3 +249,15 @@ body #app {
     }
 }
 
+#app h1 {
+    font-size: 2.5rem;
+}
+
+#app h2 {
+    font-size: 1.875rem;
+}
+
+#app h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}

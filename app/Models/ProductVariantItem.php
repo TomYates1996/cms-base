@@ -12,6 +12,7 @@ class ProductVariantItem extends Model
         'sku',
         'price',
         'stock_quantity',
+        'quantity_sold',
     ];
 
     public function productVariant()

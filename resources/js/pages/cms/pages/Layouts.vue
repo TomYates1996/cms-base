@@ -3,7 +3,7 @@
       <div class="page-left">
         <NewLayout v-if="showNewLayout" @cancelNew="showNewLayout = false" />
         <div v-if="!showNewLayout" class="layout-list-wrap">
-          <h1>Layouts</h1>
+          <h1 class="crm-header">Layouts</h1>
           <ul class="layout-list">
             <li v-for="layout in localLayouts" :key="layout.id" class="layout-list-item">
               <p>{{ layout.title }}</p>

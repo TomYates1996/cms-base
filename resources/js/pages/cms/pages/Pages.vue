@@ -1,6 +1,7 @@
 <template>
     <div class="page-wrap">
         <div class="page-left">
+            <h1 class="crm-header">Pages - {{ section }}</h1>
             <table v-if="!showModal.edit.details && !showModal.new && !showModal.newLink" class="page-list" role="table" aria-label="Page List">
                 <thead>
                     <tr class="table-head">
@@ -131,7 +132,7 @@ export default {
 }
 </script>  
   
-<style scoped>
+<style>
 .page-list {
     width: 100%;
     tr, td {

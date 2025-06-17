@@ -122,10 +122,10 @@ export default {
     this.form.image_path = this.image.image_path;
     this.form.image_alt = this.image.image_alt;
   },
-  emits: ['refreshImages'],
+  emits: ['refreshImages', 'close-edit'],
   methods: {
     closeEditImage() {
-      this.$inertia.visit('/cms/images');
+      this.$emit('close-edit');
     },
     async uploadImage(event) {
       const file = event.target.files[0];

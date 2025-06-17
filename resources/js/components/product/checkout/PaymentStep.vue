@@ -1,8 +1,6 @@
 <template>
   <div>
-    <h3>2. Payment Method</h3>
-
-    <div>
+    <div class="payment-method">
       <label>
         <input
           type="radio"
@@ -24,20 +22,30 @@
 
     <!-- CARD PAYMENT -->
     <div v-if="selectedPayment === 'card'">
-      <form @submit.prevent="submitCardPayment">
-        <input v-model="payment.cardNumber" placeholder="Card Number" required />
-        <input v-model="payment.expiry" placeholder="MM/YY" required />
-        <input v-model="payment.cvc" placeholder="CVC" required />
-        <button type="submit">Pay £{{ cart.total.toFixed(2) }}</button>
-      </form>
+        <form @submit.prevent="submitCardPayment" class="accordion-content payment-form">
+            <div class="form-input">
+                <input id="cardNumber" v-model="payment.cardNumber" required />
+                <label v-if="payment.cardNumber === ''" for="cardNumber">Card Number</label>
+            </div>
+            <div class="form-input">
+                <input id="expiry" v-model="payment.expiry" required />
+                <label v-if="payment.expiry === ''" for="expiry">Expiry</label>
+            </div>
+            <div class="form-input">
+                <input id="cvc" v-model="payment.cvc" required />
+                <label v-if="payment.cvc === ''" for="cvc">CVC</label>
+            </div>
+            <button type="submit" class="pay-btn">Pay</button>
+        </form>
     </div>
+
 
     <!-- PAYPAL PAYMENT -->
     <div v-else-if="selectedPayment === 'paypal'">
       <div id="paypal-button-container"></div>
     </div>
 
-    <button @click="goToStep(1)">Back</button>
+    <!-- <button @click="goToStep(1)">Back</button> -->
   </div>
 </template>
 
@@ -175,3 +183,45 @@ export default {
   },
 };
 </script>
+
+<style>
+.payment-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+}
+.form-input {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-bottom: 1px solid var(--black);
+    position: relative;
+    input {
+
+    }
+    label {
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        position: absolute;
+        pointer-events: none;
+    }
+    input:focus ~ label {
+        font-size: .75rem;
+    }
+}
+.payment-method {
+    padding-bottom: 20px;
+    display: flex;
+    gap: 20px;
+}
+.pay-btn {
+    background-color: var(--primary-colour);
+    max-width: 250px;
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: var(--radius-mid);
+    grid-column: 1;
+}
+</style>

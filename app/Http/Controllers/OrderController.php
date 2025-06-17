@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Page;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,6 +24,25 @@ class OrderController extends Controller
     public function order_confirmation(Request $request, $order_number)
     {
         $order = Order::where('order_number', $order_number)->first();
+
+        if (!$order) {
+            return Inertia::render('OrderNotFound');
+        }
+
+        $orderItems = $order->products;  
+
+        foreach ($orderItems as $orderItem) {
+            $orderedQuantity = $orderItem->pivot->quantity;
+
+            $productVariantItem = $orderItem;
+
+            if ($productVariantItem) {
+                $productVariantItem->stock_quantity -= $orderedQuantity;
+                $productVariantItem->quantity_sold += $orderedQuantity;
+
+                $productVariantItem->save();
+            }
+        }
 
         $flatPages = Page::orderBy('level')->get();
         $groupedFlatPages = $flatPages->groupBy('section');

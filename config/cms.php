@@ -6,7 +6,7 @@ return [
     'address' => '1 CMS Street',
     'city' => 'Hull',
     'phone' => '01999999999',
-    'email' => 'email@email.com',
+    'email' => 'email@email.com', 
     'blog' => true,
     'blog_page' => 'blog',
     'events' => true,

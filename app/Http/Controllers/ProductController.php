@@ -332,4 +332,14 @@ public function grid(Request $request)
         return;
     }
 
+    public function getTopSellingProducts()
+    {
+        $topProducts = ProductVariantItem::with('productVariant') 
+            ->orderByDesc('quantity_sold')
+            ->limit(5)
+            ->get();
+
+        return response()->json($topProducts);
+    }
+
 }
