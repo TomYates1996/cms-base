@@ -23,3 +23,4 @@ Setup Instructions
 8) Fill out the .env with the settings you want to use.
 9) php artisan migrate
 10) npm install
+11) for Herd, navigate to C:\Windows\System32\drivers\etc\ and open hosts in notepad and add: 127.0.0.1 [address-given-on-herd].test near the bottom
