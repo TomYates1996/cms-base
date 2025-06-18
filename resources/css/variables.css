@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Cal+Sans&family=Telex&display=swap');
+
+:root {
+        /* Site Specific Colours */
+        --faint-border-colour: #00000000;
+        --black: #0d0d0c;
+        --white: #ffffff;
+        --grey: #bdbdbd;
+        --yellow: #fcba03;
+        --purple: #341857;
+        --deep-pink: #4f1036;
+        --deep-red: #570a0a;
+        --bright-red: #f60000;
+        --sea-green: #0a5749;
+        --dull-green: #32570a;
+        --pale-green: #afd18a;
+        /* Site main colours */
+        --primary-colour: var(--sea-green);
+        --text-primary: var(--white);
+        --secondary-colour: var(--pale-green);
+        --text-secondary: var(--black);
+        --tertiary-colour: var(--dull-green);
+        --text-tertiary: var(--white);
+        /* Text Colours */
+        --in-stock: green;
+        --out-stock: red;
+        --low-stock: yellow;
+        --hero-text-alt-colour: var(--white);
+        /* Widths */
+        --width-max: 1300px;
+        --width-base: 1300px;
+        /* Margins */
+        --widget-bottom: 20px;
+ 
+        /* Image hover */
+        --transition-image-hover: all 0.2s ease;
+        --transform-image-hover: scale(1.05);
+
+        /* Border radii */
+        --border-radius-default: 10px;
+        --border-radius-cards: var(--border-radius-default);
+        --border-radius-hero: 0px;
+        --border-radius-hero-alt: 100px 0px 100px 0px;
+        --border-radius-slider-arrows: 100%;
+
+        /* Fonts */
+        --font-bungee: "Bungee", sans-serif;
+        --font-telex: "Telex", sans-serif;
+        --font-cal-sans: "Cal Sans", sans-serif;
+
+        --font-heading: var(--font-cal-sans);
+        --font-body: var(--font-telex);
+
+        /* Font Sizes */
+        --text-2xl: 1.25rem; 
+
+        /* Font Styling Collections */
+        --widget-heading: 600 26px var(--font-heading);
+        --widget-subheading: 400 14px var(--font-body);
+
+        --slide-title-default: 400 16px var(--font-heading);
+        --slide-title-small: 400 14px var(--font-heading);
+        --body-font: 400 14px var(--font-body);
+        --slide-desc-default: var(--body-font);
+
+        --blog-header-h1: 600 30px var(--font-heading);
+        --blog-header-author: var(--body-font);
+
+        /* Listings */
+        --listing-title: 600 1.625rem var(--font-heading); /* Listing page title */
+        --listing-category: 400 1rem var(--font-body); /* Listing page category */
+        --listing-sub-category: 400 .875rem var(--font-body); /* Listing page sub category */
+        --listing-tab-heading: 600 1.5rem var(--font-heading); /* Listing tab heading */
+
+        /* Store Item Product */
+        --product-price-font: 600 1.5rem var(--font-body);
+        --product-price-colour: var(--deep-red);
+        --product-vat-font: 400 .875rem var(--font-body);
+        --product-vat-colour: var(--sea-green);
+
+
+        /* Widget Specific Fonts and sizes */
+        --hero-alt-title: 600 48px var(--font-heading);
+        
+        @media screen and (min-width: 640px) {
+            /* Text sizes */
+            --widget-heading: 600 40px var(--font-heading);
+            --widget-subheading: 400 20px var(--font-body);
+
+            --slide-title-default: 400 20px var(--font-heading);
+            --slide-title-small: 400 16px var(--font-heading);
+            --body-font: 400 16px var(--font-body);
+            --slide-desc-default: var(--body-font);
+
+            /* Blog */
+            --blog-header-h1: 600 50px var(--font-heading);
+            --blog-header-author: var(--body-font);
+
+            /* Listings */
+            --listing-title: 600 2.25rem var(--font-heading); /* Listing page title */
+            --listing-category: 400 1.125rem var(--font-body); /* Listing page category */
+            --listing-sub-category: 400 1rem var(--font-body); /* Listing page sub category */
+            --listing-tab-heading: 600 1.75rem var(--font-heading); /* Listing tab heading */
+
+            
+            /* Widget Specific Fonts and sizes */
+            --hero-alt-title: 600 70px var(--font-heading);
+            --radius-mid: 6px;
+        }
+
+        @media screen and (min-width: 1024px) {
+            /* Text sizes */
+            --widget-heading: 600 40px var(--font-heading);
+            --widget-subheading: 400 20px var(--font-body);
+            --slide-title-default: 600 22px var(--font-heading);
+    
+            --body-font: 400 16px var(--font-body);
+        }
+}
