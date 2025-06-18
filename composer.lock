@@ -1352,16 +1352,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v12.19.2",
+            "version": "v12.19.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "97c581cb23bdc3147aab0d5087b19167d329991e"
+                "reference": "4e6ec689ef704bb4bd282f29d9dd658dfb4fb262"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/97c581cb23bdc3147aab0d5087b19167d329991e",
-                "reference": "97c581cb23bdc3147aab0d5087b19167d329991e",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/4e6ec689ef704bb4bd282f29d9dd658dfb4fb262",
+                "reference": "4e6ec689ef704bb4bd282f29d9dd658dfb4fb262",
                 "shasum": ""
             },
             "require": {
@@ -1563,7 +1563,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-06-17T23:44:27+00:00"
+            "time": "2025-06-18T12:56:23+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -5987,12 +5987,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/TomYates1996/cms-core.git",
-                "reference": "4b703f3db20fd6ab0f0f5128f0413830e6eaa8f6"
+                "reference": "500ee258e875f5b48ffbe1d0ba2ab13151c00929"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TomYates1996/cms-core/zipball/4b703f3db20fd6ab0f0f5128f0413830e6eaa8f6",
-                "reference": "4b703f3db20fd6ab0f0f5128f0413830e6eaa8f6",
+                "url": "https://api.github.com/repos/TomYates1996/cms-core/zipball/500ee258e875f5b48ffbe1d0ba2ab13151c00929",
+                "reference": "500ee258e875f5b48ffbe1d0ba2ab13151c00929",
                 "shasum": ""
             },
             "require": {
@@ -6027,7 +6027,7 @@
                 "source": "https://github.com/TomYates1996/cms-core/tree/main",
                 "issues": "https://github.com/TomYates1996/cms-core/issues"
             },
-            "time": "2025-06-18T11:33:57+00:00"
+            "time": "2025-06-18T14:24:43+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
