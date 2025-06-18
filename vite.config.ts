@@ -32,7 +32,11 @@ export default defineConfig({
     },
     css: {
         postcss: {
-            plugins: [tailwindcss, autoprefixer],
+            plugins: [
+                tailwindcss('vendor/tomyates1996/cms-core/tailwind.config.js'),
+                autoprefixer
+
+            ],
         },
     },
 });
